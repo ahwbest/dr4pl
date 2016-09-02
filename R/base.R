@@ -4,12 +4,29 @@
 ### Last updated: 09/02/2016
 #
 DoseResponseCurve <- function(x, theta) {
+  # Compute predicted responses.
+  #
+  # Args:
+  #   x: Dose
+  #   theta: Parameters
+  #
+  # Returns:
+  #   Predicted response values.
   f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
 
   return(f)
 }
 
 Residual <- function(theta, x, y) {
+  # Compute residuals.
+  #
+  # Args:
+  #   x: Dose
+  #   y: Response
+  #   theta: Parameters
+  #
+  # Returns:
+  #   Residuals.
   f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
 
   return(y - f)
@@ -24,13 +41,22 @@ ErrorFunction <- function(theta, dose, response) {
   #   y: Response
   #
   # Returns:
-  #   The value of the sum of squared residuals
+  #   Value of the sum of squared residuals
   f <- theta[1] + (theta[4] - theta[1])/(1 + (dose/theta[2])^theta[3])
 
   return(sum((response - f)^2)/length(response))
 }
 
 GradientFunction <- function(theta, dose, response) {
+  # Compute gradient values.
+  #
+  # Args:
+  #   theta: Parameters
+  #   dose: Dose
+  #   response: Response
+  #
+  # Returns:
+  #   Gradient values.
   x <- dose
   y <- response
 
