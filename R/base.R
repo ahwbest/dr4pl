@@ -3,7 +3,7 @@
 ### Hyowon An, UNC Lineberger Comprehensive Cancer Center
 ### Last updated: 09/02/2016
 #
-DoseResponseCurve <- function(x, theta) {
+MeanResponseCurve <- function(x, theta) {
   # Compute predicted responses.
   #
   # Args:

@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
 ### Dose response relation analysis (drra)
 ### Hyowon An, UNC Lineberger Comprehensive Cancer Center
-### Last updated: 09/02/2016
+### Last updated: 09/07/2016
 #
 
 # -----------------------------------------------------------------------------
@@ -9,7 +9,7 @@
 #
 library(ggplot2)
 library(tensor)
-source("base.R")
+source(".\\R\\base.R")
 
 # -----------------------------------------------------------------------------
 ### Methods
@@ -264,7 +264,7 @@ plot.drra <- function(object, ...) {
   #   object: A `drra' object
   a <- ggplot(aes(x = Dose, y = Response), data = object$data)
 
-  a <- a + stat_function(fun = DoseResponseCurve,
+  a <- a + stat_function(fun = MeanResponseCurve,
                          args = list(theta = object$parameters),
                          size = 1.2)
 
