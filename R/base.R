@@ -32,8 +32,8 @@ Residual <- function(theta, x, y) {
   return(y - f)
 }
 
-ErrorFunction <- function(theta, dose, response) {
-  # Sum of squared residuals
+ErrFcn <- function(method.robust) {
+  # Returns an error function for given robust fitting method
   #
   # Args:
   #   theta: Parameters
@@ -42,9 +42,38 @@ ErrorFunction <- function(theta, dose, response) {
   #
   # Returns:
   #   Value of the sum of squared residuals
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (dose/theta[2])^theta[3])
+  fcn <- c()
 
-  return(sum((response - f)^2)/length(response))
+  if(is.null(method.robust)) {
+    fcn <- function(x, y, theta) {
+      n <- length(y)
+      f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+
+      return(sum((y - f)^2)/n)
+    }
+  } else if(method.robust == "L1") {
+    fcn <- function(x, y, theta) {
+      n <- length(y)
+      f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+
+      return(sum(abs(y - f))/n)
+    }
+  } else if(method.robust == "trimmed") {
+    fcn <- function(x, y, theta) {
+      n <- length(y)
+      f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+
+      c.val <- 1.345
+      res <- y - f
+      ret.val <- res^2
+
+      ret.val[abs(res) > c.val] <- c.val^2
+
+      return(ret.val/n)
+    }
+  }
+
+  return(fcn)
 }
 
 GradientFunction <- function(theta, dose, response) {
