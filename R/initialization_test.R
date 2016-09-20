@@ -1,4 +1,9 @@
 # -----------------------------------------------------------------------------
+### Load libraries and source code
+#
+source("initialization.R")
+
+# -----------------------------------------------------------------------------
 ### Test functions for initialization
 #
 ComparisonPlot <- function(dose, response,

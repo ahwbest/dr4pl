@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
 ### Dose response relation analysis (drra)
 ### main.R: Main functions related to fitting
-### Hyowon An, UNC Lineberger Comprehensive Cancer Center
-### Last updated: 09/07/2016
+### Hyowon An, Lineberger Comprehensive Cancer Center
+### Last updated: 09/19/2016
 #
 
 # -----------------------------------------------------------------------------

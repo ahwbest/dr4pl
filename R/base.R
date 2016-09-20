@@ -115,7 +115,7 @@ DerivativeF <- function(theta, x) {
   #   theta: Parameters
   #
   # Returns:
-  #   A Jacobian matrix
+  #   Jacobian matrix
   eta <- (x/theta[2])^theta[3]
   f <- theta[1] + (theta[4] - theta[1])/(1 + eta)
 
