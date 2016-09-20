@@ -1,7 +1,10 @@
 # -----------------------------------------------------------------------------
 ### Load libraries and source code
 #
-source("initialization.R")
+library(drc)
+
+source(".\\R\\initialization.R")
+source(".\\R\\main.R")
 
 # -----------------------------------------------------------------------------
 ### Test functions for initialization
@@ -18,7 +21,7 @@ ComparisonPlot <- function(dose, response,
   #   legend.names: The names of legends. If NULL, no legend is displayed.
   #
   # Returns:
-  #   Display a plot. No value is returned.
+  #   Display a plot. No return value.
   data.drm <- data.frame(Dose = dose, Response = response)
 
   a <- ggplot(aes(x = Dose, y = Response), data = data.drm)
@@ -132,9 +135,9 @@ CompareInitializationMethods <- function(data.to.comp,
       parm.mat <- rbind(parm.mat, parm.drra)
 
       row.names(parm.mat) <- c()
-      colnames(parm.mat) <- c()
+      colnames(parm.mat) <- c("Left limit", "IC50", "Slope", "Right limit")
 
-      ComparisonPlot(data.new, parm.mat)
+      ComparisonPlot(dose = data.new$Dose, response = data.new$Response, parm.mat)
     }
 
   } else {
@@ -191,18 +194,6 @@ CompareInitializationMethods <- function(data.to.comp,
       print(result)
       cat("\n")
 
-      if(ind.plot) {
-        # Make a plot of fitted curves
-        parm.mat <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-        parm.mat <- parm.mat[, c(3, 4, 1, 2)]
-        parm.mat[, 3] <- -parm.mat[, 3]
-        parm.mat <- rbind(parm.mat, parm.drra)
-
-        row.names(parm.mat) <- c()
-        colnames(parm.mat) <- c()
-
-        ComparisonPlot(dose = x, response = y, parm.mat = parm.mat)
-      }
     }
   }
 }
@@ -223,7 +214,9 @@ CompareInitializationMethods(data.to.comp = acidiq,
 ### algae
 cat("algae\n")
 
+# Plot fitted curves
 CompareInitializationMethods(data.to.comp = algae,
+                             ind.plot = TRUE,
                              var.dose = "conc",
                              var.response = "vol")
 
