@@ -63,11 +63,11 @@ ComparisonPlot <- function(dose, response,
   plot(a)
 }
 
-CompareInitializationMethods <- function(data.to.comp,
-                                         ind.plot = FALSE,
-                                         var.dose,
-                                         var.response,
-                                         var.ref = NULL) {
+CompareRobustMethods <- function(data.to.comp,
+                                 ind.plot = FALSE,
+                                 var.dose,
+                                 var.response,
+                                 var.ref = NULL) {
   # Compare different initialization methods.
   #
   # Args:
@@ -80,127 +80,32 @@ CompareInitializationMethods <- function(data.to.comp,
   #   Print the estimated parameters to standard output
   data.to.comp <- na.omit(data.to.comp)
 
-  result <- c()
-
   if(length(var.ref) == 0) {
 
     data.new <- subset(x = data.to.comp, select = c(var.dose, var.response))
     colnames(data.new) <- c("Dose", "Response")
     n <- nrow(data.new)  # Number of observations
 
-    # drc
-    obj.drc.1 <- drm(Response ~ Dose,
-                     data = data.new,
-                     fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                method = "1"),
-                     control = drmc(method = "Nelder-Mead"),
-                     start = c(theta.3.init, theta.4.init, theta.1.init, theta.2.init))
+    # Four different robust methods
+    obj.drra.1 <- drra(Response ~ Dose, data = data.new)
+    obj.drra.2 <- drra(Response ~ Dose, data = data.new,
+                       method.robust = "absolute")
+    obj.drra.3 <- drra(Response ~ Dose, data = data.new,
+                       method.robust = "Huber")
+    obj.drra.4 <- drra(Response ~ Dose, data = data.new,
+                       method.robust = "Tukey")
 
-    obj.drc.1 <- drm(Response ~ Dose,
-                     data = data.new,
-                     fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                method = "1"),
-                     control = drmc(method = "Nelder-Mead"),
-                     start = c(theta.3.init, theta.1.init, theta.4.init, theta.2.init))
-
-    obj.drc.2 <- drm(Response ~ Dose,
-                     data = data.new,
-                     fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                method = "2"),
-                     control = drmc(method = "Nelder-Mead"))
-
-    obj.drc.3 <- drm(Response ~ Dose,
-                     data = data.new,
-                     fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                method = "3"),
-                     control = drmc(method = "Nelder-Mead"))
-
-    result <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-    result <- result[, c(3, 4, 1, 2)]
-    result[, 3] <- -result[, 3]
-    result <- cbind(result, c(obj.drc.1$fit$value, obj.drc.2$fit$value, obj.drc.3$fit$value)/n)
-
-    # drra
-    obj.drra <- drra(Response ~ Dose,
-                     data = data.new)
-
-    parm.drra <- coef(obj.drra)
-
-    result <- rbind(result, c(parm.drra, obj.drra$error.value))
-
-    row.names(result) <- c("drc 1", "drc 2", "drc 3", "drra")
-    colnames(result) <- c("Lower limit", "IC50", "Slope", "Upper limit", "Loss value")
-
-    print(result)
-    cat("\n")
+    parm.drra.1 <- coef(obj.drra.1)
+    parm.drra.2 <- coef(obj.drra.2)
+    parm.drra.3 <- coef(obj.drra.3)
+    parm.drra.4 <- coef(obj.drra.4)
 
     if(ind.plot) {
-      # Make a plot of fitted curves
-      parm.mat <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-      parm.mat <- parm.mat[, c(3, 4, 1, 2)]
-      parm.mat[, 3] <- -parm.mat[, 3]
-      parm.mat <- rbind(parm.mat, parm.drra)
+      x <- data.new$Dose
+      y <- data.new$Response
 
-      row.names(parm.mat) <- c()
-      colnames(parm.mat) <- c("Left limit", "IC50", "Slope", "Right limit")
-
-      ComparisonPlot(dose = data.new$Dose, response = data.new$Response, parm.mat)
-    }
-
-  } else {
-
-    data.new <- subset(x = data.to.comp, select = c(var.ref, var.dose, var.response))
-    colnames(data.new) <- c("Ref", "Dose", "Response")
-    data.new$Ref <- as.factor(data.new$Ref)
-    data.new <- subset(x = data.new, subset = Ref != "999")
-    data.new <- droplevels(data.new)
-
-    level.ref <- levels(data.new$Ref)
-
-    for(i in 1:length(level.ref)) {
-      data.each <- subset(x = data.new, subset = Ref == level.ref[i])
-      n <- nrow(data.each)  # Number of observations
-
-      cat(var.ref, "=", level.ref[i], "\n")
-
-      # drc
-      obj.drc.1 <- drm(Response ~ Dose,
-                       data = data.each,
-                       fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                  method = "1"),
-                       control = drmc(method = "Nelder-Mead"))
-
-      obj.drc.2 <- drm(Response ~ Dose,
-                       data = data.each,
-                       fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                  method = "2"),
-                       control = drmc(method = "Nelder-Mead"))
-
-      obj.drc.3 <- drm(Response ~ Dose,
-                       data = data.each,
-                       fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                  method = "3"),
-                       control = drmc(method = "Nelder-Mead"))
-
-      result <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-      result <- result[, c(3, 4, 1, 2)]
-      result[, 3] <- -result[, 3]
-      result <- cbind(result, c(obj.drc.1$fit$value, obj.drc.2$fit$value, obj.drc.3$fit$value)/n)
-
-      # drra
-      obj.drra <- drra(Response ~ Dose,
-                       data = data.each)
-
-      parm.drra <- coef(obj.drra)
-
-      result <- rbind(result, c(parm.drra, obj.drra$error.value))
-
-      row.names(result) <- c("drc 1", "drc 2", "drc 3", "drra")
-      colnames(result) <- c("Left limit", "IC50", "Slope", "Right limit", "Loss value")
-
-      print(result)
-      cat("\n")
-
+      plot(x = x, y = y
+           pch = 16)
     }
   }
 }
@@ -208,24 +113,14 @@ CompareInitializationMethods <- function(data.to.comp,
 # -------------------------------------------------------------------------------
 ### Compare the parameter estimates
 #
-sink(file = "parameter_comparison.txt")
-
-### acidiq
-cat("acidiq\n")
-
-CompareInitializationMethods(data.to.comp = acidiq,
-                             var.ref = "pct",
-                             var.dose = "dose",
-                             var.response = "rgr")
-
 ### algae
 cat("algae\n")
 
 # Plot fitted curves
-CompareInitializationMethods(data.to.comp = algae,
-                             ind.plot = TRUE,
-                             var.dose = "conc",
-                             var.response = "vol")
+CompareRobustMethods(data.to.comp = algae,
+                     ind.plot = TRUE,
+                     var.dose = "conc",
+                     var.response = "vol")
 
 ### etmotc
 cat("etmotc\n")

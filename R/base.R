@@ -17,19 +17,63 @@ MeanResponseCurve <- function(x, theta) {
   return(f)
 }
 
-Residual <- function(theta, x, y) {
-  # Compute residuals.
+SquaredLoss <- function(r) {
+  # Squares of residuals
   #
   # Args:
-  #   x: Dose
-  #   y: Response
-  #   theta: Parameters
+  #   r: Residuals
   #
   # Returns:
-  #   Residuals.
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+  #   Squared residuals
+  return(r^2)
+}
 
-  return(y - f)
+AbsoluteLoss <- function(r) {
+  # Absolute values of residuals
+  #
+  # Args:
+  #   r: Residuals
+  #
+  # Returns:
+  #   Absolute valued residuals
+  return(abs(r))
+}
+
+HuberLoss <- function(r) {
+  # Values of Huber's loss function evaluated at residuals r.
+  #
+  # Args:
+  #   r: Residuals
+  #
+  # Returns:
+  #   result: Huber's loss function values evaluated at residuals r.
+  const <- 1.345  # This value should be chosen in an adaptive fashion.
+
+  ret.val <- r^2  # Vector of results
+  outer.term <- 2*const*abs(r) - const^2
+
+  outer.idx <- (abs(r) > const)
+
+  ret.val[outer.idx] <- outer.term[outer.idx]
+
+  return(ret.val)
+}
+
+TukeyBiweightLoss <- function(r) {
+  # Values of Tukey's biweight loss function evaluated at residuals r.
+  #
+  # Args:
+  #   r: Residuals
+  #
+  # Returns:
+  #   result: Tukey's biweight loss function values evaluated at residuals r.
+  const <- 1.345
+
+  ret.val <- (r^6)/(const^4) - 3*(r^4)/(const^2) + 3*r^2
+
+  ret.val[abs(r) > const] <- const^2
+
+  return(ret.val)
 }
 
 ErrFcn <- function(method.robust) {
@@ -42,38 +86,30 @@ ErrFcn <- function(method.robust) {
   #
   # Returns:
   #   Value of the sum of squared residuals
-  fcn <- c()
+  loss.fcn <- c()
 
   if(is.null(method.robust)) {
-    fcn <- function(x, y, theta) {
-      n <- length(y)
-      f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-
-      return(sum((y - f)^2)/n)
-    }
-  } else if(method.robust == "L1") {
-    fcn <- function(x, y, theta) {
-      n <- length(y)
-      f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-
-      return(sum(abs(y - f))/n)
-    }
-  } else if(method.robust == "trimmed") {
-    fcn <- function(x, y, theta) {
-      n <- length(y)
-      f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-
-      c.val <- 1.345
-      res <- y - f
-      ret.val <- res^2
-
-      ret.val[abs(res) > c.val] <- c.val^2
-
-      return(ret.val/n)
-    }
+    loss.fcn <- SquaredLoss
+  } else if(method.robust == "absolute") {
+    loss.fcn <- AbsoluteLoss
+  } else if(method.robust == "Huber") {
+    loss.fcn <- HuberLoss
+  } else if(method.robust == "Tukey") {
+    loss.fcn <- TukeyBiweightLoss
   }
 
-  return(fcn)
+  err.fcn <- function(theta, x, y) {
+    if(length(theta) != 4) {
+      stop("The number of parameters is not 4.")
+    }
+
+    n <- length(y)
+    f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+
+    return(sum(loss.fcn(y - f))/n)
+  }
+
+  return(err.fcn)
 }
 
 GradientFunction <- function(theta, dose, response) {

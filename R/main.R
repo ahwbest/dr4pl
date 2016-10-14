@@ -21,7 +21,7 @@ drraEst <- function(dose, response,
                     init.parm,
                     method.init,
                     method.optim,
-                    robust) {
+                    method.robust) {
   # Fit the 4 parameter logistic model to data
   #
   # Args:
@@ -31,7 +31,12 @@ drraEst <- function(dose, response,
   #   grad: Gradient function
   #   init.parm: Vector of initial parameters
   #   method.init: Initialization method
-  #   method.robust: Robust fitting method
+  #   method.optim: Optimization method
+  #   method.robust: Robust estimation method
+  #      - NULL: Sum of squares loss
+  #      - absolute: Absolute deviation loss
+  #      - Huber: Huber's loss
+  #      - Tukey: Tukey's biweight loss
   #
   # Returns:
   #   The `drra' object containing parameter estimates
@@ -40,7 +45,7 @@ drraEst <- function(dose, response,
 
   data.drra <- data.frame(Dose = x, Response = y)
 
-  ### Fit a 4PL model using `constrOptim' function
+  ### Fit a 4PL model using `optim' function
   if(!is.null(init.parm)) {  # When initial parameter estimates are given
     theta.init <- init.parm
     constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
@@ -71,14 +76,15 @@ drraEst <- function(dose, response,
     theta.init <- c(theta.1.init, theta.2.3.init, theta.4.init)
     names(theta.init) <- c("Left limit", "IC50", "Slope", "Right limit")
 
-    err.fcn <- ErrFcn(robust)
+    err.fcn <- ErrFcn(method.robust)
 
     drm.cO <- optim(par = theta.init,
                     fn = err.fcn,
                     gr = grad,
                     method = method.optim,
                     x = x,
-                    y = y)
+                    y = y,
+                    control = list(trace = 2))
 
     theta <- drm.cO$par
     error <- drm.cO$value
@@ -87,95 +93,95 @@ drraEst <- function(dose, response,
   data.drra <- data.frame(Dose = dose, Response = response)
 
   list(data = data.drra,
-       dose = dose,
-       response = response,
+       dose = x,
+       response = y,
        parameters = theta,
        error.value = error)
 }
 
-drraEst.cO <- function(dose, response,
-                       grad,
-                       init.parm,
-                       method,
-                       robust) {
-  # Fit the 4 parameter logistic model to data
-  #
-  # Args:
-  #   dose: Dose values
-  #   response: Response values
-  #
-  # Returns:
-  #   The `drra' object containing parameter estimates
-  x <- dose
-  y <- response
-
-  data.drra <- data.frame(Dose = dose, Response = response)
-
-  ### Fit a 4PL model using `constrOptim' function
-  if(!is.null(init.parm)) {  # When initial parameter estimates are given
-    theta.init <- init.parm
-    constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
-
-    # Fit a 4PL model using the package constrOptim
-    drm.cO <- constrOptim(theta = theta.init,
-                          f = Error,
-                          ui = constraint.matr,
-                          ci = 0,
-                          grad = grad,
-                          method = method,
-                          dose = dose,
-                          response = response)
-
-    theta <- drm.cO$par
-    error <- drm.cO$value
-
-  } else {
-
-    # Set initial values of parameters
-    scale.inc <- 0.001
-    y.range <- range(y)
-    len.y.range <- scale.inc * diff(y.range)
-
-    theta.1.init <- max(response) + len.y.range
-    theta.4.init <- min(response) - len.y.range
-
-    y.transf <- log10((response - theta.4.init)/(theta.1.init - response))
-    x.log10 <- log10(dose)
-
-    data.lm <- data.frame(x = x.log10, y = y.transf)
-    data.lm <- data.lm[data.lm$x != -Inf, ]
-
-    lm.init <- lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
-    beta.hat <- lm.init$coefficients
-
-    theta.3.init <- beta.hat[2]
-    theta.2.init <- 10^(-beta.hat[1]/theta.3.init)
-
-    theta.init <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
-    constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
-
-    # Fit the 4PL model using the package constrOptim
-    drm.cO <- constrOptim(theta = theta.init,
-                          f = Error,
-                          ui = constraint.matr,
-                          ci = 0,
-                          grad = grad,
-                          method = method,
-                          dose = dose,
-                          response = response)
-
-    theta <- drm.cO$par
-    error <- drm.cO$value
-  }
-
-  data.drra <- data.frame(Dose = dose, Response = response)
-
-  list(data = data.drra,
-       dose = dose,
-       response = response,
-       parameters = theta,
-       error.value = error)
-}
+# drraEst.cO <- function(dose, response,
+#                        grad,
+#                        init.parm,
+#                        method,
+#                        method.robust) {
+#   # Fit the 4 parameter logistic model to data
+#   #
+#   # Args:
+#   #   dose: Dose values
+#   #   response: Response values
+#   #
+#   # Returns:
+#   #   The `drra' object containing parameter estimates
+#   x <- dose
+#   y <- response
+#
+#   data.drra <- data.frame(Dose = dose, Response = response)
+#
+#   ### Fit a 4PL model using `constrOptim' function
+#   if(!is.null(init.parm)) {  # When initial parameter estimates are given
+#     theta.init <- init.parm
+#     constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
+#
+#     # Fit a 4PL model using the package constrOptim
+#     drm.cO <- constrOptim(theta = theta.init,
+#                           f = Error,
+#                           ui = constraint.matr,
+#                           ci = 0,
+#                           grad = grad,
+#                           method = method,
+#                           dose = dose,
+#                           response = response)
+#
+#     theta <- drm.cO$par
+#     error <- drm.cO$value
+#
+#   } else {
+#
+#     # Set initial values of parameters
+#     scale.inc <- 0.001
+#     y.range <- range(y)
+#     len.y.range <- scale.inc * diff(y.range)
+#
+#     theta.1.init <- max(response) + len.y.range
+#     theta.4.init <- min(response) - len.y.range
+#
+#     y.transf <- log10((response - theta.4.init)/(theta.1.init - response))
+#     x.log10 <- log10(dose)
+#
+#     data.lm <- data.frame(x = x.log10, y = y.transf)
+#     data.lm <- data.lm[data.lm$x != -Inf, ]
+#
+#     lm.init <- lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
+#     beta.hat <- lm.init$coefficients
+#
+#     theta.3.init <- beta.hat[2]
+#     theta.2.init <- 10^(-beta.hat[1]/theta.3.init)
+#
+#     theta.init <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
+#     constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
+#
+#     # Fit the 4PL model using the package constrOptim
+#     drm.cO <- constrOptim(theta = theta.init,
+#                           f = Error,
+#                           ui = constraint.matr,
+#                           ci = 0,
+#                           grad = grad,
+#                           method = method,
+#                           dose = dose,
+#                           response = response)
+#
+#     theta <- drm.cO$par
+#     error <- drm.cO$value
+#   }
+#
+#   data.drra <- data.frame(Dose = dose, Response = response)
+#
+#   list(data = data.drra,
+#        dose = dose,
+#        response = response,
+#        parameters = theta,
+#        error.value = error)
+# }
 
 drra <- function(x, ...) UseMethod("drra")
 
@@ -184,7 +190,7 @@ drra.default <- function(dose, response,
                          init.parm = NULL,
                          method.init = "logistic",
                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
-                         robust = NULL,
+                         method.robust = NULL,
                          ...) {
   # Fit the 4PL model using the function `drraEst'
   #
@@ -194,7 +200,12 @@ drra.default <- function(dose, response,
   #   grad: Gradient function
   #   init.parm: Vector of initial parameters
   #   method.init: Initialization method
-  #   method.robust: Robust fitting method
+  #   method.optim: Optimization method
+  #   method.robust: Robust estimation method
+  #      - NULL: Sum of squares loss
+  #      - absolute: Absolute deviation loss
+  #      - Huber: Huber's loss
+  #      - Tukey: Tukey's biweight loss
   #
   # Returns:
   #   drra.obj: The object of class `drra'
@@ -206,7 +217,7 @@ drra.default <- function(dose, response,
                       init.parm = init.parm,
                       method.init = method.init,
                       method.optim = method.optim,
-                      robust = robust)
+                      method.robust = method.robust)
 
   drra.obj$call <- match.call()
 
@@ -220,7 +231,7 @@ drra.formula <- function(formula,
                          init.parm = NULL,
                          method.init = "logistic",
                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
-                         robust = NULL,
+                         method.robust = NULL,
                          ...) {
   # Fit the 4PL model using the function `drraEst' and a formula
   #
@@ -230,7 +241,12 @@ drra.formula <- function(formula,
   #   grad: Gradient function
   #   init.parm: Vector of initial parameters
   #   method.init: Initialization method
-  #   method.robust: Robust fitting method
+  #   method.optim: Optimization method
+  #   method.robust: Robust estimation method
+  #      - NULL: Sum of squares loss
+  #      - absolute: Absolute deviation loss
+  #      - Huber: Huber's loss
+  #      - Tukey: Tukey's biweight loss
   #
   # Returns:
   #   drra.obj: The object of class `drra'
@@ -243,8 +259,9 @@ drra.formula <- function(formula,
                       init.parm = init.parm,
                       method.init = method.init,
                       method.optim = method.optim,
-                      robust = robust,
+                      method.robust = method.robust,
                       ...)
+
   est$call <- match.call()
   est$formula <- formula
   names(est$parameters) <- c("Upper limit", "IC50", "Slope", "Lower limit")

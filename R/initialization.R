@@ -36,6 +36,7 @@ FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
   theta.4.init <- theta.1.4.init[2]
 
   if(method.init == "logistic") {
+
     y.transf <- log10((y - theta.4.init)/(theta.1.init - y))
     x.log10 <- log10(x)
 
@@ -47,7 +48,9 @@ FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
 
     theta.3.init <- beta.hat[2]
     theta.2.init <- 10^(-beta.hat[1]/theta.3.init)
+
   } else if(method.init == "Mead") {
+
     log.x <- log(x)
     y.zero.low <- y - theta.4.init
 
