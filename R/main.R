@@ -1,41 +1,24 @@
-# -----------------------------------------------------------------------------
-### Dose response relation analysis (drra)
-### main.R: Main functions related to fitting
-### Hyowon An, Lineberger Comprehensive Cancer Center
-### Last updated: 09/19/2016
-#
+#' @name drra
+#' @docType package
+#' @title  Dose response relation analysis (drra)
+#' @description Main functions related to fitting
+#' @author Hyowon An, Lineberger Comprehensive Cancer Center
+#' @details Last updated: 09/19/2016
+#' @import stats
+#' @import graphics
+#' @import ggplot2
 
-# -----------------------------------------------------------------------------
-### Load libraries and source codes
-#
-#library(ggplot2)
-#library(tensor)
-#source(".\\R\\base.R")
-#source(".\\R\\initialization.R")
 
-# -----------------------------------------------------------------------------
-### Methods
 
-#
-# Fit the 4 parameter logistic model to data
-#
-# Args:
-#   dose: Dose,
-#   response: Response,
-#   data: Data
-#   grad: Gradient function
-#   init.parm: Vector of initial parameters
-#   method.init: Initialization method
-#   method.optim: Optimization method
-#   method.robust: Robust estimation method
-#      - NULL: Sum of squares loss
-#      - absolute: Absolute deviation loss
-#      - Huber: Huber's loss
-#      - Tukey: Tukey's biweight loss
-#
-# @export
-# Returns:
-#   The `drra' object containing parameter estimates
+#' @param grad Gradient function
+#' @param init.parm Vector of initial parameters
+#' @param method.init Initialization method
+#' @param method.optim Optimization method
+#' @param method.robust Robust estimation method
+#'      - NULL: Sum of squares loss
+#'      - absolute: Absolute deviation loss
+#'      - Huber: Huber's loss
+#'      - Tukey: Tukey's biweight loss
 drraEst <- function(dose, response,
                     grad,
                     init.parm,
@@ -55,14 +38,14 @@ drraEst <- function(dose, response,
 
     err.fcn <- ErrFcn(method.robust)
     # Fit a 4PL model using the package constrOptim
-    drm.cO <- stats::constrOptim(theta = theta.init,
-                          f = err.fcn,
-                          ui = constraint.matr,
-                          ci = 0,
-                          grad = grad,
-                          method = method.optim,
-                          dose = dose,
-                          response = response)
+    drm.cO <- constrOptim(theta = theta.init,
+                                 f = err.fcn,
+                                 ui = constraint.matr,
+                                 ci = 0,
+                                 grad = grad,
+                                 method = method.optim,
+                                 dose = dose,
+                                 response = response)
 
     theta <- drm.cO$par
     error <- drm.cO$value
@@ -82,13 +65,13 @@ drraEst <- function(dose, response,
 
     err.fcn <- ErrFcn(method.robust)
 
-    drm.cO <- stats::optim(par = theta.init,
-                    fn = err.fcn,
-                    gr = grad,
-                    method = method.optim,
-                    x = x,
-                    y = y,
-                    control = list(trace = 2))
+    drm.cO <- optim(par = theta.init,
+                           fn = err.fcn,
+                           gr = grad,
+                           method = method.optim,
+                           x = x,
+                           y = y,
+                           control = list(trace = 2))
 
     theta <- drm.cO$par
     error <- drm.cO$value
@@ -103,92 +86,17 @@ drraEst <- function(dose, response,
        error.value = error)
 }
 
-# drraEst.cO <- function(dose, response,
-#                        grad,
-#                        init.parm,
-#                        method,
-#                        method.robust) {
-#   # Fit the 4 parameter logistic model to data
-#   #
-#   # Args:
-#   #   dose: Dose values
-#   #   response: Response values
-#   #
-#   # Returns:
-#   #   The `drra' object containing parameter estimates
-#   x <- dose
-#   y <- response
-#
-#   data.drra <- data.frame(Dose = dose, Response = response)
-#
-#   ### Fit a 4PL model using `constrOptim' function
-#   if(!is.null(init.parm)) {  # When initial parameter estimates are given
-#     theta.init <- init.parm
-#     constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
-#
-#     # Fit a 4PL model using the package constrOptim
-#     drm.cO <- constrOptim(theta = theta.init,
-#                           f = Error,
-#                           ui = constraint.matr,
-#                           ci = 0,
-#                           grad = grad,
-#                           method = method,
-#                           dose = dose,
-#                           response = response)
-#
-#     theta <- drm.cO$par
-#     error <- drm.cO$value
-#
-#   } else {
-#
-#     # Set initial values of parameters
-#     scale.inc <- 0.001
-#     y.range <- range(y)
-#     len.y.range <- scale.inc * diff(y.range)
-#
-#     theta.1.init <- max(response) + len.y.range
-#     theta.4.init <- min(response) - len.y.range
-#
-#     y.transf <- log10((response - theta.4.init)/(theta.1.init - response))
-#     x.log10 <- log10(dose)
-#
-#     data.lm <- data.frame(x = x.log10, y = y.transf)
-#     data.lm <- data.lm[data.lm$x != -Inf, ]
-#
-#     lm.init <- lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
-#     beta.hat <- lm.init$coefficients
-#
-#     theta.3.init <- beta.hat[2]
-#     theta.2.init <- 10^(-beta.hat[1]/theta.3.init)
-#
-#     theta.init <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
-#     constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
-#
-#     # Fit the 4PL model using the package constrOptim
-#     drm.cO <- constrOptim(theta = theta.init,
-#                           f = Error,
-#                           ui = constraint.matr,
-#                           ci = 0,
-#                           grad = grad,
-#                           method = method,
-#                           dose = dose,
-#                           response = response)
-#
-#     theta <- drm.cO$par
-#     error <- drm.cO$value
-#   }
-#
-#   data.drra <- data.frame(Dose = dose, Response = response)
-#
-#   list(data = data.drra,
-#        dose = dose,
-#        response = response,
-#        parameters = theta,
-#        error.value = error)
-# }
 
+#' @description Fit the 4 parameter logistic model to the data using the function `drraEst'
+#' @param x Object to drra.
+#' @param ... arguments passed to coef
+#' @export
 drra <- function(x, ...) UseMethod("drra")
 
+
+#' @describeIn drra Used in the default case, supplying a single dose and response variable
+#' @param dose Dose
+#' @param response Response
 drra.default <- function(dose, response,
                          grad = NULL,
                          init.parm = NULL,
@@ -196,23 +104,7 @@ drra.default <- function(dose, response,
                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
                          method.robust = NULL,
                          ...) {
-  # Fit the 4PL model using the function `drraEst'
-  #
-  # Args:
-  #   formula: Formula
-  #   data: Data
-  #   grad: Gradient function
-  #   init.parm: Vector of initial parameters
-  #   method.init: Initialization method
-  #   method.optim: Optimization method
-  #   method.robust: Robust estimation method
-  #      - NULL: Sum of squares loss
-  #      - absolute: Absolute deviation loss
-  #      - Huber: Huber's loss
-  #      - Tukey: Tukey's biweight loss
-  #
-  # Returns:
-  #   drra.obj: The object of class `drra'
+
   dose <- as.numeric(dose)
   response <- as.numeric(response)
 
@@ -227,26 +119,13 @@ drra.default <- function(dose, response,
 
   class(drra.obj) <- "drra"
   drra.obj
+
 }
 
-# Fit the 4PL model using the function `drraEst' and a formula
-#
-# Args:
-#   formula: Formula
-#   data: Data
-#   grad: Gradient function
-#   init.parm: Vector of initial parameters
-#   method.init: Initialization method
-#   method.optim: Optimization method
-#   method.robust: Robust estimation method
-#      - NULL: Sum of squares loss
-#      - absolute: Absolute deviation loss
-#      - Huber: Huber's loss
-#      - Tukey: Tukey's biweight loss
-#
-# Returns:
-#   drra.obj: The object of class `drra'
-# @export
+
+#' @describeIn drra Used as a formula call for a list of multiple data.
+#' @param data list of dose and response vectors
+#' @param formula Formula
 drra.formula <- function(formula,
                          data = list(),
                          grad = NULL,
@@ -256,9 +135,9 @@ drra.formula <- function(formula,
                          method.robust = NULL,
                          ...) {
 
-  mf <- stats::model.frame(formula = formula, data = data)
-  x <- stats::model.matrix(attr(mf, "terms"), data = mf)[, 2]
-  y <- stats::model.response(mf)
+  mf <- model.frame(formula = formula, data = data)
+  x <- model.matrix(attr(mf, "terms"), data = mf)[, 2]
+  y <- model.response(mf)
 
   est <- drra.default(dose = x, response = y,
                       grad = grad,
@@ -274,75 +153,47 @@ drra.formula <- function(formula,
   est
 }
 
-# Coefficient of a `drra' object
+#' @description Coefficient of a `drra' object
+#' @title coef
+#' @name coef.drra
+#' @param object A 'drra' object
+#' @param ... arguments passed to coef
 #
-# Args:
-#   object: A `drra' object
-#
-# Returns:
-#   A vector of parameters
+#' @return A vector of parameters
+#' @export
 coef.drra <- function(object, ...) {
   object$parameters
 }
 
-# confint.drra <- function(object, ...) {
-#   x <- object$data$Dose
-#   y <- object$data$Response
-#   theta <- object$parameters
-#
-#   n <- length(y)  # Number of observations in data
-#   f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-#   jacobian <- DerivativeF(theta, x)  # Jacobian matrix
-#
-#   C.hat.inv <- solve(Hessian(theta, x, y)/2)
-#   s <- sqrt(sum((y - f)^2)/(n - 4))
-#
-#   q.t <- stats::qt(0.975, df = n - 4)
-#   std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-#   ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
-#
-#   return(ci)
-# }
-
-# Make a scatter plot of a `drra' object
-#
-# Args:
-#   object: A `drra' object
-# @export
 plot.drra <- function(object, ...) {
 
-  a <- ggplot2::ggplot(ggplot2::aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
+  a <- ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
 
-  a <- a + ggplot2::stat_function(fun = MeanResponseCurve,
-                         args = list(theta = object$parameters),
-                         size = 1.2)
+  a <- a + stat_function(fun = MeanResponseCurve,
+                                  args = list(theta = object$parameters),
+                                  size = 1.2)
 
-  a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = "blue")
+  a <- a + geom_point(size = I(5), alpha = I(0.8), color = "blue")
 
-  a <- a + ggplot2::labs(title = "Dose response curve")
+  a <- a + labs(title = "Dose response curve")
 
   # Set parameters for the grids
-  a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
-  a <- a + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
-  a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
-  a <- a + ggplot2::scale_x_log10()
-  a <- a + ggplot2::theme_bw()
+  a <- a + theme(strip.text.x = element_text(size = 16))
+  a <- a + theme(panel.grid.minor = element_blank())
+  a <- a + theme(panel.grid.major = element_blank())
+  a <- a + scale_x_log10()
+  a <- a + theme_bw()
 
   # Set parameters for the titles and text / margin(top, right, bottom, left)
-  a <- a + ggplot2::theme(plot.title = ggplot2::element_text(size = 20, margin = ggplot2::margin(0, 0, 10, 0)))
-  a <- a + ggplot2::theme(axis.title.x = ggplot2::element_text(size = 16, margin = ggplot2::margin(15, 0, 0, 0)))
-  a <- a + ggplot2::theme(axis.title.y = ggplot2::element_text(size = 16, margin = ggplot2::margin(0, 15, 0, 0)))
-  a <- a + ggplot2::theme(axis.text.x = ggplot2::element_text(size = 16))
-  a <- a + ggplot2::theme(axis.text.y = ggplot2::element_text(size = 16))
+  a <- a + theme(plot.title = element_text(size = 20, margin = margin(0, 0, 10, 0)))
+  a <- a + theme(axis.title.x = element_text(size = 16, margin = margin(15, 0, 0, 0)))
+  a <- a + theme(axis.title.y = element_text(size = 16, margin = margin(0, 15, 0, 0)))
+  a <- a + theme(axis.text.x = element_text(size = 16))
+  a <- a + theme(axis.text.y = element_text(size = 16))
 
-  graphics::plot(a)
+  plot(a)
 }
 
-# Print a `drra' object to screen
-#
-# Args:
-#   x: A `drra' object
-# @export
 print.drra <- function(x, ...) {
   cat("Call:\n")
   print(x$call)
@@ -351,27 +202,16 @@ print.drra <- function(x, ...) {
   print(x$parameters)
 }
 
-# Print a `drra' summary to screen
-#
-# Args:
-#   x: A `drra' object
-# @export
+
 print.summary.drra <- function(x, ...) {
   cat("Call:\n")
   print(x$call)
   cat("\n")
 
-  stats::printCoefmat(x$coefficients, P.value = TRUE, has.Pvalue = TRUE)
+  printCoefmat(x$coefficients, P.value = TRUE, has.Pvalue = TRUE)
 }
 
-# Summary of a `drra' object
-#
-# Args:
-#   object: A `drra' object
-#
-# Returns:
-#   res: A `summary.drra' object
-# @export
+
 summary.drra <- function(object, ...) {
 
   TAB <- cbind(Estimate = object$parameters,

@@ -4,15 +4,13 @@
 ### Last updated: 09/02/2016
 #
 
-# Compute predicted responses.
+#' Compute predicted responses.
 #
-# Args:
-#   x: Dose
-#   theta: Parameters
+#' @param x Dose
+#' @param theta Parameters
 #
-# Returns:
-#   Predicted response values.
-# @export
+#' @return Predicted response values.
+#' @export
 MeanResponseCurve <- function(x, theta) {
 
   f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
@@ -20,38 +18,31 @@ MeanResponseCurve <- function(x, theta) {
   return(f)
 }
 
-# Squares of residuals
+#' Squares of residuals
+#'
+#' @param r Residuals
 #
-# Args:
-#   r: Residuals
-#
-# Returns:
-#   Squared residuals
-# @export
+#' @return Squared residuals
+#' @export
 SquaredLoss <- function(r) {
   return(r^2)
 }
 
-# Absolute values of residuals
+#' Absolute values of residuals
 #
-# Args:
-#   r: Residuals
+#' @param r Residuals
 #
-# Returns:
-#   Absolute valued residuals
-# @export
+#' @return Absolute valued residuals
+#' @export
 AbsoluteLoss <- function(r) {
   return(abs(r))
 }
 
-# Values of Huber's loss function evaluated at residuals r.
+#' Values of Huber's loss function evaluated at residuals r.
 #
-# Args:
-#   r: Residuals
-#
-# Returns:
-#   result: Huber's loss function values evaluated at residuals r.
-# @export
+#' @param r Residuals
+#' @return result: Huber's loss function values evaluated at residuals r.
+#' @export
 HuberLoss <- function(r) {
   # This value should be chosen in an adaptive fashion.
   const <- 1.345
@@ -66,14 +57,12 @@ HuberLoss <- function(r) {
   return(ret.val)
 }
 
-# Values of Tukey's biweight loss function evaluated at residuals r.
+#' Values of Tukey's biweight loss function evaluated at residuals r.
 #
-# Args:
-#   r: Residuals
+#' @param r Residuals
 #
-# Returns:
-#   result: Tukey's biweight loss function values evaluated at residuals r.
-# @export
+#' @return result: Tukey's biweight loss function values evaluated at residuals r.
+#' @export
 TukeyBiweightLoss <- function(r) {
 
   const <- 1.345
@@ -85,16 +74,16 @@ TukeyBiweightLoss <- function(r) {
   return(ret.val)
 }
 
-# Returns an error function for given robust fitting method
+#' Returns an error function for given robust fitting method
 #
-# Args:
-#   theta: Parameters
-#   x: Dose
-#   y: Response
+#' @param method.robust NULL, absolute, Huber, or Tukey
+#'      - NULL: Sum of squares loss
+#'      - absolute: Absolute deviation loss
+#'      - Huber: Huber's loss
+#'      - Tukey: Tukey's biweight loss
 #
-# Returns:
-#   Value of the sum of squared residuals
-# @export
+#' @return Value of the sum of squared residuals
+#' @export
 ErrFcn <- function(method.robust) {
 
   loss.fcn <- c()
@@ -123,16 +112,14 @@ ErrFcn <- function(method.robust) {
   return(err.fcn)
 }
 
-# Compute gradient values.
+#' Compute gradient values.
 #
-# Args:
-#   theta: Parameters
-#   dose: Dose
-#   response: Response
+#' @param theta Parameters
+#' @param dose Dose
+#' @param response Response
 #
-# Returns:
-#   Gradient values.
-# @export
+#' @return Gradient values.
+#' @export
 GradientFunction <- function(theta, dose, response) {
   x <- dose
   y <- response
@@ -156,14 +143,13 @@ GradientFunction <- function(theta, dose, response) {
   return(-2*(y - f)%*%cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
 }
 
-# Compute the Jacobian matrix
+#' Compute the Jacobian matrix
 #
-# Args:
-#   theta: Parameters
-#
-# Returns:
-#   Jacobian matrix
-# @export
+#' @param theta Parameters
+#' @param x FILL ME OUT!
+#'
+#' @return Jacobian matrix
+#' @export
 DerivativeF <- function(theta, x) {
 
   eta <- (x/theta[2])^theta[3]
@@ -180,72 +166,3 @@ DerivativeF <- function(theta, x) {
   return(cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
 }
 
-# Compute the Hessian matrix
-#
-# Args:
-#    theta: Parameters
-#    x: Dose
-#
-# Returns:
-#    A Hessian matrix
-#
-# Hessian <- function(theta, x, y) {
-#
-#   n <- length(x)  # Number of observations
-#   p <- length(theta)  # Number of parameters
-#
-#   # Second order derivatives of f
-#   second.deriv.f <- array(dim = c(p, p, n))
-#
-#   # eta: terms needed in the Hessian matrix computation
-#   eta <- (x/theta[2])^theta[3]
-#   eta[x == 0] <- 0
-#
-#   deriv.eta.2 <- -theta[3]/theta[2]*eta
-#   deriv.eta.3 <- eta*log(x/theta[2])
-#   if(theta[3] < 0) {
-#     deriv.eta.3[x == 0] <- -Inf
-#   }else {
-#     deriv.eta.3[x == 0] <- Inf
-#   }
-#
-#   second.deriv.f[1, 1, ] <- 0
-#   second.deriv.f[1, 2, ] <- deriv.eta.2/(1+eta)^2
-#   second.deriv.f[1, 3, ] <- deriv.eta.3/(1+eta)^2
-#   second.deriv.f[1, 4, ] <- 0
-#
-#   second.deriv.f[2, 1, ] <- -theta[3]/theta[2]*eta/(1 + eta)^2
-#   second.deriv.f[2, 2, ] <- (theta[4] - theta[1])*theta[3]/theta[2]/(1 + eta)^2*
-#     (-eta/theta[2] + (1 - eta)/(1 + eta)*deriv.eta.2)
-#   second.deriv.f[2, 3, ] <- (theta[4] - theta[1])/theta[2]/(1 + eta)^2*
-#     (eta + theta[3]*(1 - eta)/(1 + eta)*deriv.eta.3)
-#   second.deriv.f[2, 4, ] <- theta[3]/theta[2]*eta/(1 + eta)^2
-#
-#   second.deriv.f[3, 1, ] <- log(x/theta[2])*eta/(1 + eta)^2
-#   second.deriv.f[3, 1, x == 0] <- -Inf
-#   second.deriv.f[3, 2, ] <- (theta[4] - theta[1])/(1 + eta)^2*
-#     (eta/theta[2] - (log(x/theta[2]))*(1 - eta)/(1 + eta)*deriv.eta.2)
-#   if(theta[4] > theta[1]) {
-#     second.deriv.f[3, 2, x == 0] <- Inf
-#   }else {
-#     second.deriv.f[3, 2, x == 0] <- -Inf
-#   }
-#
-#   second.deriv.f[3, 3, ] <- -(theta[4] - theta[1])*(log(x/theta[2]))*
-#     (1 - eta)/(1 + eta)^3*deriv.eta.3
-#   second.deriv.f[3, 3, x == 0] <- Inf
-#   second.deriv.f[3, 4, ] <- -log(x/theta[2])*eta/(1 + eta)^2
-#   second.deriv.f[3, 4, x == 0] <- Inf
-#
-#   second.deriv.f[4, 1, ] <- 0
-#   second.deriv.f[4, 2, ] <- -deriv.eta.2/(1+eta)^2
-#   second.deriv.f[4, 3, ] <- -deriv.eta.3/(1+eta)^2
-#   second.deriv.f[4, 4, ] <- 0
-#
-#   deriv.f <- DerivativeF(theta, x)
-#   residual <- Residual(theta, x, y)
-#
-#   hessian <- 2*t(deriv.f)%*%deriv.f - 2*tensor::tensor(second.deriv.f, residual, 3, 1)
-#
-#   return(hessian)
-# }

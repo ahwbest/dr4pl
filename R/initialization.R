@@ -1,17 +1,12 @@
-# --------------------------------------------------------------------------------
-### User-defined functions
-#
 
-# Find initial parameter estimates for the left and right asymptotes in the
-# 4PL model.
-#
-# Args:
-#   x: x values
-#   y: y values
-#
-# Returns:
-#   theta.left.right: Parameter estimates of the left and right asymptotes.
-# @export
+#' Find initial parameter estimates for the left and right asymptotes in the
+#' 4PL model.
+#'
+#' @param x x values
+#' @param y y values
+#'
+#' @return theta.left.right: Parameter estimates of the left and right asymptotes.
+#' @export
 FindLeftRightAsymptotes <- function(x, y) {
 
   scale.inc <- 0.001
@@ -25,17 +20,14 @@ FindLeftRightAsymptotes <- function(x, y) {
 }
 
 
-# Find initial values for the IC50 and slope parameters.
-#
-# Args:
-#   x: x values
-#   y: y values
-#   theta.1.4.init: Estimates of the left and right asymptotes
-#   method.init: Initialization method
-#
-# Returns:
-#   theta.IC50.slope: Parameter estimates of the IC50 and slope
-# @export
+#' Find initial values for the IC50 and slope parameters.
+#' @param x x values
+#' @param y y values
+#' @param theta.1.4.init Estimates of the left and right asymptotes
+#' @param method.init Initialization method
+#'
+#' @return theta.IC50.slope: Parameter estimates of the IC50 and slope
+#' @export
 FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
 
   theta.1.init <- theta.1.4.init[1]

@@ -5,7 +5,12 @@ Version: 0.1.0
 Author: Hyowon An
 Maintainer: Hyowon An <ahwbest@gmail.com>
 Description: This package models the relation between dose and response in chemical experiments.
-License: 
+License: GPL
 LazyData: TRUE
 URL: https://github.com/ahwbest/drra
 BugReports: https://github.com/ahwbest/drra/issues
+RoxygenNote: 5.0.1
+Imports:
+    drc,
+    ggplot2,
+    tensor
