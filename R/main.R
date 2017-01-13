@@ -126,6 +126,7 @@ drra.default <- function(dose, response,
 #' @describeIn drra Used as a formula call for a list of multiple data.
 #' @param data list of dose and response vectors
 #' @param formula Formula
+#' @export
 drra.formula <- function(formula,
                          data = list(),
                          grad = NULL,
