@@ -148,58 +148,58 @@ FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
 # -----------------------------------------------------------------------------
 ### Main part
 #
-data.orgn = glymet
-var.ref = "pct"
-var.dose = "dose"
-var.response = "rgr"
-
-data.target <- subset(x = data.orgn, select = c(var.ref, var.dose, var.response))
-colnames(data.target) <- c("Ref", "Dose", "Response")
-data.target$Ref <- as.factor(data.target$Ref)
-data.target <- subset(x = data.target, subset = Ref != "999")
-data.target <- droplevels(data.target)
-
-levels.ref <- levels(data.target$Ref)
-ref <- "67"
-
-data.drm <- subset(x = data.target, select = c(Dose, Response), subset = Ref == ref)
-n <- nrow(data.drm)  # Number of observations
-x <- data.drm$Dose
-y <- data.drm$Response
-
-# Obtain the starting initial values of drc
-ssf.drc <- llogistic.ssf(method = "1", fixed = c(NA, NA, NA, NA, NA), useFixed = FALSE)
-parm.init.drc <- ssf.drc(data.drm)
-parm.init.drc <- parm.init.drc[-5]
-
-# Obtain the starting initial values of drra
-theta.1.4.init <- FindLeftRightAsymptotes(x, y)
-theta.2.3.init <- FindIC50Slope(x, y, theta.1.4.init, method.init = "logistic")
-parm.init.drra <- c(theta.2.3.init[2], theta.1.4.init[1], theta.1.4.init[2], theta.2.3.init[1])
-
-obj.drc.1 <- drm(Response ~ Dose,
-                 data = data.drm,
-                 fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                            method = "1"),
-                 control = drmc(method = "Nelder-Mead"),
-                 start = parm.init.drc)
-
-obj.drc.2 <- drm(Response ~ Dose,
-                 data = data.drm,
-                 fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                            method = "1"),
-                 control = drmc(method = "Nelder-Mead"),
-                 start = parm.init.drra)
-
-obj.drc.3 <- drm(Response ~ Dose,
-                 data = data.drm,
-                 fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                            method = "1"),
-                 control = drmc(method = "Nelder-Mead"))
-
-parm.drc <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-
-obj.drra <- drra(Response ~ Dose,
-                 data = data.each)
-
-parm.drra <- coef(obj.drra)
+# data.orgn = glymet
+# var.ref = "pct"
+# var.dose = "dose"
+# var.response = "rgr"
+#
+# data.target <- subset(x = data.orgn, select = c(var.ref, var.dose, var.response))
+# colnames(data.target) <- c("Ref", "Dose", "Response")
+# data.target$Ref <- as.factor(data.target$Ref)
+# data.target <- subset(x = data.target, subset = Ref != "999")
+# data.target <- droplevels(data.target)
+#
+# levels.ref <- levels(data.target$Ref)
+# ref <- "67"
+#
+# data.drm <- subset(x = data.target, select = c(Dose, Response), subset = Ref == ref)
+# n <- nrow(data.drm)  # Number of observations
+# x <- data.drm$Dose
+# y <- data.drm$Response
+#
+# # Obtain the starting initial values of drc
+# ssf.drc <- llogistic.ssf(method = "1", fixed = c(NA, NA, NA, NA, NA), useFixed = FALSE)
+# parm.init.drc <- ssf.drc(data.drm)
+# parm.init.drc <- parm.init.drc[-5]
+#
+# # Obtain the starting initial values of drra
+# theta.1.4.init <- FindLeftRightAsymptotes(x, y)
+# theta.2.3.init <- FindIC50Slope(x, y, theta.1.4.init, method.init = "logistic")
+# parm.init.drra <- c(theta.2.3.init[2], theta.1.4.init[1], theta.1.4.init[2], theta.2.3.init[1])
+#
+# obj.drc.1 <- drm(Response ~ Dose,
+#                  data = data.drm,
+#                  fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
+#                             method = "1"),
+#                  control = drmc(method = "Nelder-Mead"),
+#                  start = parm.init.drc)
+#
+# obj.drc.2 <- drm(Response ~ Dose,
+#                  data = data.drm,
+#                  fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
+#                             method = "1"),
+#                  control = drmc(method = "Nelder-Mead"),
+#                  start = parm.init.drra)
+#
+# obj.drc.3 <- drm(Response ~ Dose,
+#                  data = data.drm,
+#                  fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
+#                             method = "1"),
+#                  control = drmc(method = "Nelder-Mead"))
+#
+# parm.drc <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
+#
+# obj.drra <- drra(Response ~ Dose,
+#                  data = data.each)
+#
+# parm.drra <- coef(obj.drra)

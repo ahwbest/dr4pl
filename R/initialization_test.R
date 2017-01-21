@@ -208,162 +208,162 @@ CompareInitializationMethods <- function(data.to.comp,
 # -------------------------------------------------------------------------------
 ### Compare the parameter estimates
 #
-sink(file = "parameter_comparison.txt")
-
-### acidiq
-cat("acidiq\n")
-
-CompareInitializationMethods(data.to.comp = acidiq,
-                             var.ref = "pct",
-                             var.dose = "dose",
-                             var.response = "rgr")
-
-### algae
-cat("algae\n")
-
-# Plot fitted curves
-CompareInitializationMethods(data.to.comp = algae,
-                             ind.plot = TRUE,
-                             var.dose = "conc",
-                             var.response = "vol")
-
-### etmotc
-cat("etmotc\n")
-
-CompareInitializationMethods(data.to.comp = etmotc,
-                             var.ref = "pct1",
-                             var.dose = "dose1",
-                             var.response = "rgr1")
-
-### G.aparine
-cat("G.aparine\n")
-
-CompareInitializationMethods(data.to.comp = G.aparine,
-                             var.dose = "dose",
-                             var.response = "drymatter")
-
-### glymet
-cat("glylmet\n")
-
-CompareInitializationMethods(data.to.comp = glymet,
-                             var.ref = "pct",
-                             var.dose = "dose",
-                             var.response = "rgr")
-
-### heartrate
-cat("heartrate\n")
-
-CompareInitializationMethods(data.to.comp = heartrate,
-                             var.dose = "pressure",
-                             var.response = "rate")
-
-### leaflength
-cat("leaflength\n")
-
-CompareInitializationMethods(data.to.comp = leaflength,
-                             var.dose = "Dose",
-                             var.response = "DW")
-
-### lepidium
-cat("lepidium\n")
-
-CompareInitializationMethods(data.to.comp = lepidium,
-                             var.dose = "conc",
-                             var.response = "weight")
-
-### lettuce
-cat("lettuce\n")
-
-CompareInitializationMethods(data.to.comp = lettuce,
-                             var.dose = "conc",
-                             var.response = "weight")
-
-### mecter
-cat("mecter\n")
-
-CompareInitializationMethods(data.to.comp = mecter,
-                             var.ref = "pct",
-                             var.dose = "dose",
-                             var.response = "rgr")
-
-### M.bahia
-cat("M.bahia\n")
-
-CompareInitializationMethods(data.to.comp = M.bahia,
-                             var.dose = "conc",
-                             var.response = "dryweight")
-
-### nasturtium
-cat("nasturtium\n")
-
-CompareInitializationMethods(data.to.comp = nasturtium,
-                             var.dose = "conc",
-                             var.response = "weight")
-
-### O.mykiss
-cat("O.mykiss\n")
-
-CompareInitializationMethods(data.to.comp = O.mykiss,
-                             var.dose = "conc",
-                             var.response = "weight")
-
-### P.promelas
-cat("P.promelas\n")
-
-CompareInitializationMethods(data.to.comp = P.promelas,
-                             var.dose = "conc",
-                             var.response = "dryweight")
-
-### ryegrass
-cat("ryegrass\n")
-
-CompareInitializationMethods(data.to.comp = ryegrass,
-                             var.dose = "conc",
-                             var.response = "rootl")
-
-### S.alba
-cat("S.alba\n")
-
-CompareInitializationMethods(data.to.comp = S.alba,
-                             var.ref = "Herbicide",
-                             var.dose = "Dose",
-                             var.response = "DryMatter")
-
-### S.capricornutum
-cat("S.capricornutum\n")
-
-CompareInitializationMethods(data.to.comp = S.capricornutum,
-                             var.dose = "conc",
-                             var.response = "count")
-
-### secalonic
-cat("secalonic\n")
-
-CompareInitializationMethods(data.to.comp = secalonic,
-                             var.dose = "dose",
-                             var.response = "rootl")
-
-### spinach
-cat("spinach\n")
-
-CompareInitializationMethods(data.to.comp = spinach,
-                             var.ref = "CURVE",
-                             var.dose = "DOSE",
-                             var.response = "SLOPE")
-
-### terbuthylazin
-cat("terbuthylazin\n")
-
-CompareInitializationMethods(data.to.comp = terbuthylazin,
-                             var.dose = "dose",
-                             var.response = "rgr")
-
-### vinclozolin
-cat("vinclozolin\n")
-
-CompareInitializationMethods(data.to.comp = vinclozolin,
-                             var.ref = "exper",
-                             var.dose = "conc",
-                             var.response = "effect")
-
-sink()
+# sink(file = "parameter_comparison.txt")
+#
+# ### acidiq
+# cat("acidiq\n")
+#
+# CompareInitializationMethods(data.to.comp = acidiq,
+#                              var.ref = "pct",
+#                              var.dose = "dose",
+#                              var.response = "rgr")
+#
+# ### algae
+# cat("algae\n")
+#
+# # Plot fitted curves
+# CompareInitializationMethods(data.to.comp = algae,
+#                              ind.plot = TRUE,
+#                              var.dose = "conc",
+#                              var.response = "vol")
+#
+# ### etmotc
+# cat("etmotc\n")
+#
+# CompareInitializationMethods(data.to.comp = etmotc,
+#                              var.ref = "pct1",
+#                              var.dose = "dose1",
+#                              var.response = "rgr1")
+#
+# ### G.aparine
+# cat("G.aparine\n")
+#
+# CompareInitializationMethods(data.to.comp = G.aparine,
+#                              var.dose = "dose",
+#                              var.response = "drymatter")
+#
+# ### glymet
+# cat("glylmet\n")
+#
+# CompareInitializationMethods(data.to.comp = glymet,
+#                              var.ref = "pct",
+#                              var.dose = "dose",
+#                              var.response = "rgr")
+#
+# ### heartrate
+# cat("heartrate\n")
+#
+# CompareInitializationMethods(data.to.comp = heartrate,
+#                              var.dose = "pressure",
+#                              var.response = "rate")
+#
+# ### leaflength
+# cat("leaflength\n")
+#
+# CompareInitializationMethods(data.to.comp = leaflength,
+#                              var.dose = "Dose",
+#                              var.response = "DW")
+#
+# ### lepidium
+# cat("lepidium\n")
+#
+# CompareInitializationMethods(data.to.comp = lepidium,
+#                              var.dose = "conc",
+#                              var.response = "weight")
+#
+# ### lettuce
+# cat("lettuce\n")
+#
+# CompareInitializationMethods(data.to.comp = lettuce,
+#                              var.dose = "conc",
+#                              var.response = "weight")
+#
+# ### mecter
+# cat("mecter\n")
+#
+# CompareInitializationMethods(data.to.comp = mecter,
+#                              var.ref = "pct",
+#                              var.dose = "dose",
+#                              var.response = "rgr")
+#
+# ### M.bahia
+# cat("M.bahia\n")
+#
+# CompareInitializationMethods(data.to.comp = M.bahia,
+#                              var.dose = "conc",
+#                              var.response = "dryweight")
+#
+# ### nasturtium
+# cat("nasturtium\n")
+#
+# CompareInitializationMethods(data.to.comp = nasturtium,
+#                              var.dose = "conc",
+#                              var.response = "weight")
+#
+# ### O.mykiss
+# cat("O.mykiss\n")
+#
+# CompareInitializationMethods(data.to.comp = O.mykiss,
+#                              var.dose = "conc",
+#                              var.response = "weight")
+#
+# ### P.promelas
+# cat("P.promelas\n")
+#
+# CompareInitializationMethods(data.to.comp = P.promelas,
+#                              var.dose = "conc",
+#                              var.response = "dryweight")
+#
+# ### ryegrass
+# cat("ryegrass\n")
+#
+# CompareInitializationMethods(data.to.comp = ryegrass,
+#                              var.dose = "conc",
+#                              var.response = "rootl")
+#
+# ### S.alba
+# cat("S.alba\n")
+#
+# CompareInitializationMethods(data.to.comp = S.alba,
+#                              var.ref = "Herbicide",
+#                              var.dose = "Dose",
+#                              var.response = "DryMatter")
+#
+# ### S.capricornutum
+# cat("S.capricornutum\n")
+#
+# CompareInitializationMethods(data.to.comp = S.capricornutum,
+#                              var.dose = "conc",
+#                              var.response = "count")
+#
+# ### secalonic
+# cat("secalonic\n")
+#
+# CompareInitializationMethods(data.to.comp = secalonic,
+#                              var.dose = "dose",
+#                              var.response = "rootl")
+#
+# ### spinach
+# cat("spinach\n")
+#
+# CompareInitializationMethods(data.to.comp = spinach,
+#                              var.ref = "CURVE",
+#                              var.dose = "DOSE",
+#                              var.response = "SLOPE")
+#
+# ### terbuthylazin
+# cat("terbuthylazin\n")
+#
+# CompareInitializationMethods(data.to.comp = terbuthylazin,
+#                              var.dose = "dose",
+#                              var.response = "rgr")
+#
+# ### vinclozolin
+# cat("vinclozolin\n")
+#
+# CompareInitializationMethods(data.to.comp = vinclozolin,
+#                              var.ref = "exper",
+#                              var.dose = "conc",
+#                              var.response = "effect")
+#
+# sink()

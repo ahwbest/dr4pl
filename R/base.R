@@ -1,52 +1,72 @@
-# -----------------------------------------------------------------------------
-### Dose response relation analysis (drra)
 ### Hyowon An, UNC Lineberger Comprehensive Cancer Center
 ### Last updated: 09/02/2016
+
+# Compute predicted responses.
 #
+# Args:
+#   x: Dose
+#   theta: Parameters
+#
+# Returns:
+#   Predicted response values.
 MeanResponseCurve <- function(x, theta) {
-  # Compute predicted responses.
-  #
-  # Args:
-  #   x: Dose
-  #   theta: Parameters
-  #
-  # Returns:
-  #   Predicted response values.
+
   f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
 
   return(f)
 }
 
+# Squares of residuals
+#
+# Args:
+#   r: Residuals
+#
+# Returns:
+#   Squared residuals
 SquaredLoss <- function(r) {
-  # Squares of residuals
-  #
-  # Args:
-  #   r: Residuals
-  #
-  # Returns:
-  #   Squared residuals
+
   return(r^2)
 }
 
+# Absolute values of residuals.
+#
+# Args:
+#   r: Residuals
+#
+# Returns:
+#   Absolute valued residuals
 AbsoluteLoss <- function(r) {
-  # Absolute values of residuals
-  #
-  # Args:
-  #   r: Residuals
-  #
-  # Returns:
-  #   Absolute valued residuals
+
   return(abs(r))
 }
 
+# Divide each element of the first vector by the corresponding element of the
+# second vector.
+#
+# Args:
+#   x: Vector of numbers to be divided.
+#   y: Vector of divisors
+#
+# Returns:
+#   Results of division. If a divisor is infinity or negative infinity, the result
+#   is zero.
+Divide <- function(x, y) {
+
+  results <- x/y
+  results[(!is.finite(y))] <- 0
+
+  return(results)
+}
+
+# Values of Huber's loss function evaluated at residuals r.
+#
+# Args:
+#   r: Residuals
+#
+# Returns:
+#   result: Huber's loss function values evaluated at residuals r.
 HuberLoss <- function(r) {
-  # Values of Huber's loss function evaluated at residuals r.
-  #
-  # Args:
-  #   r: Residuals
-  #
-  # Returns:
-  #   result: Huber's loss function values evaluated at residuals r.
+
   const <- 1.345  # This value should be chosen in an adaptive fashion.
 
   ret.val <- r^2  # Vector of results
@@ -59,14 +79,15 @@ HuberLoss <- function(r) {
   return(ret.val)
 }
 
+# Values of Tukey's biweight loss function evaluated at residuals r.
+#
+# Args:
+#   r: Residuals
+#
+# Returns:
+#   result: Tukey's biweight loss function values evaluated at residuals r.
 TukeyBiweightLoss <- function(r) {
-  # Values of Tukey's biweight loss function evaluated at residuals r.
-  #
-  # Args:
-  #   r: Residuals
-  #
-  # Returns:
-  #   result: Tukey's biweight loss function values evaluated at residuals r.
+
   const <- 1.345
 
   ret.val <- (r^6)/(const^4) - 3*(r^4)/(const^2) + 3*r^2
@@ -76,16 +97,17 @@ TukeyBiweightLoss <- function(r) {
   return(ret.val)
 }
 
+# Returns an error function for given robust fitting method
+#
+# Args:
+#   theta: Parameters
+#   x: Dose
+#   y: Response
+#
+# Returns:
+#   Value of the sum of squared residuals
 ErrFcn <- function(method.robust) {
-  # Returns an error function for given robust fitting method
-  #
-  # Args:
-  #   theta: Parameters
-  #   x: Dose
-  #   y: Response
-  #
-  # Returns:
-  #   Value of the sum of squared residuals
+
   loss.fcn <- c()
 
   if(is.null(method.robust)) {
@@ -106,52 +128,34 @@ ErrFcn <- function(method.robust) {
     n <- length(y)
     f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
 
+    #cat("Parameters = ", theta, "\n")
+    #cat("f = ", f, "\n")
+
     return(sum(loss.fcn(y - f))/n)
   }
 
   return(err.fcn)
 }
 
-GradientFunction <- function(theta, dose, response) {
-  # Compute gradient values.
-  #
-  # Args:
-  #   theta: Parameters
-  #   dose: Dose
-  #   response: Response
-  #
-  # Returns:
-  #   Gradient values.
-  x <- dose
-  y <- response
+# Compute gradient values.
+#
+# Args:
+#   theta: Parameters
+#   dose: Dose
+#   response: Response
+#
+# Returns:
+#   Gradient values.
 
-  theta.1 <- theta[1]
-  theta.2 <- theta[2]
-  theta.3 <- theta[3]
-  theta.4 <- theta[4]
+GradientFunction <- function(theta, x, y) {
 
-  eta <- (x/theta.2)^theta.3
-  f <- theta.1 + (theta.4 - theta.1)/(1 + eta)
+  # The slope parameter is zero if and only if the left and right asymptotes are
+  # the same.
+  if(xor(theta[3] == 0, theta[1] == theta[4])) {
+    stop("The slope parameter is zero if and only if the left and right asymptotes
+         are the same.")
+  }
 
-  deriv.f.theta.1 <- 1 - 1/(1 + eta)
-  deriv.f.theta.2 <- (theta.4 - theta.1)*theta.3/theta.2*eta/(1 + eta)^2
-  deriv.f.theta.3 <- -(theta.4 - theta.1)/theta.3*log(eta)*eta/(1 + eta)^2
-  deriv.f.theta.4 <- 1/(1 + eta)
-
-  deriv.f.theta.2[eta == Inf] <- 0
-  deriv.f.theta.3[eta == Inf] <- 0
-
-  return(-2*(y - f)%*%cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
-}
-
-DerivativeF <- function(theta, x) {
-  # Compute the Jacobian matrix
-  #
-  # Args:
-  #   theta: Parameters
-  #
-  # Returns:
-  #   Jacobian matrix
   eta <- (x/theta[2])^theta[3]
   f <- theta[1] + (theta[4] - theta[1])/(1 + eta)
 
@@ -160,21 +164,96 @@ DerivativeF <- function(theta, x) {
   deriv.f.theta.3 <- -(theta[4] - theta[1])/theta[3]*log(eta)*eta/(1 + eta)^2
   deriv.f.theta.4 <- 1/(1 + eta)
 
-  deriv.f.theta.2[eta == Inf] <- 0
-  deriv.f.theta.3[eta == Inf] <- 0
+  # The limit of a derivative as x tends to zero depends on the sign of the slope
+  # parameter.
+  if(theta[3] > 0) {
+
+    deriv.f.theta.1[x == 0] <- 0
+    deriv.f.theta.2[x == 0] <- 0
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 1
+
+  } else if(theta[3] == 0) {
+
+    deriv.f.theta.1[x == 0] <- 0
+    deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 1/2
+
+  } else if(theta[3] < 0) {
+
+    deriv.f.theta.1[x == 0] <- 1
+    deriv.f.theta.2[x == 0] <- 0
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 0
+
+  }
+
+  return(-2*(y - f)%*%cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
+}
+
+# Compute the Jacobian matrix
+#
+# Args:
+#   theta: Parameters
+#
+# Returns:
+#   Jacobian matrix
+DerivativeF <- function(theta, x) {
+
+  # The slope parameter is zero if and only if the left and right asymptotes are
+  # the same.
+  if(xor(theta[3] == 0, theta[1] == theta[4])) {
+    stop("The slope parameter is zero if and only if the left and right asymptotes
+          are the same.")
+  }
+
+  eta <- (x/theta[2])^theta[3]
+  f <- theta[1] + (theta[4] - theta[1])/(1 + eta)
+
+  deriv.f.theta.1 <- 1 - 1/(1 + eta)
+  deriv.f.theta.2 <- (theta[4] - theta[1])*theta[3]/theta[2]*eta/(1 + eta)^2
+  deriv.f.theta.3 <- -(theta[4] - theta[1])/theta[3]*log(eta)*eta/(1 + eta)^2
+  deriv.f.theta.4 <- 1/(1 + eta)
+
+  # The limit of a derivative as x tends to zero depends on the sign of the slope
+  # parameter.
+  if(theta[3] > 0) {
+
+    deriv.f.theta.1[x == 0] <- 0
+    deriv.f.theta.2[x == 0] <- 0
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 1
+
+  } else if(theta[3] == 0) {
+
+    deriv.f.theta.1[x == 0] <- 0
+    deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 1/2
+
+  } else if(theta[3] < 0) {
+
+    deriv.f.theta.1[x == 0] <- 1
+    deriv.f.theta.2[x == 0] <- 0
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 0
+
+  }
 
   return(cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
 }
 
+# Compute the Hessian matrix
+#
+# Args:
+#    theta: Parameters
+#    x: Dose
+#
+# Returns:
+#    A Hessian matrix
 Hessian <- function(theta, x, y) {
-  # Compute the Hessian matrix
-  #
-  # Args:
-  #    theta: Parameters
-  #    x: Dose
-  #
-  # Returns:
-  #    A Hessian matrix
+
   n <- length(x)  # Number of observations
   p <- length(theta)  # Number of parameters
 

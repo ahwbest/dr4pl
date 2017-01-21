@@ -1,16 +1,18 @@
 # --------------------------------------------------------------------------------
 ### User-defined functions
 #
-FindLeftRightAsymptotes <- function(x, y) {
-  # Find initial parameter estimates for the left and right asymptotes in the
-  # 4PL model.
+FindInitialParms <- function(x, y, method.init, method.robust) {
+  # Find initial values for the IC50 and slope parameters.
   #
   # Args:
   #   x: x values
   #   y: y values
+  #   method.init: Initialization method
+  #   method.robust: Robust fitting method
   #
   # Returns:
-  #   theta.left.right: Parameter estimates of the left and right asymptotes.
+  #   theta.IC50.slope: Parameter estimates of the IC50 and slope
+
   scale.inc <- 0.001
   y.range <- range(y)
   len.y.range <- scale.inc * diff(y.range)
@@ -18,22 +20,8 @@ FindLeftRightAsymptotes <- function(x, y) {
   theta.1.init <- max(y) + len.y.range
   theta.4.init <- min(y) - len.y.range
 
-  return(c(theta.1.init, theta.4.init))
-}
-
-FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
-  # Find initial values for the IC50 and slope parameters.
-  #
-  # Args:
-  #   x: x values
-  #   y: y values
-  #   theta.1.4.init: Estimates of the left and right asymptotes
-  #   method.init: Initialization method
-  #
-  # Returns:
-  #   theta.IC50.slope: Parameter estimates of the IC50 and slope
-  theta.1.init <- theta.1.4.init[1]
-  theta.4.init <- theta.1.4.init[2]
+  # If theta.1 < theta.4, then the curve is a growth curve.
+  # If theta.1 > theta.4, then the curve is a decline curve.
 
   if(method.init == "logistic") {
 
@@ -43,29 +31,70 @@ FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
     data.lm <- data.frame(x = x.log10, y = y.transf)
     data.lm <- data.lm[data.lm$x != -Inf, ]
 
-    lm.init <- lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
+    lm.init <- stats::lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
     beta.hat <- lm.init$coefficients
 
     theta.3.init <- beta.hat[2]
     theta.2.init <- 10^(-beta.hat[1]/theta.3.init)
 
+    theta.init <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
+
   } else if(method.init == "Mead") {
 
     log.x <- log(x)
-    y.zero.low <- y - theta.4.init
+    y.lower.bd <- min(theta.1.init, theta.4.init)
+    y.zero.low <- y - y.lower.bd
 
-    gamma.seq <- seq(from = 0.05, to = 0.95, by = 0.05)
+    gammas.temp <- seq(from = 0.05, to = 0.95, by = 0.05)  # Reciprocals of gamma values
+    gammas <- c(gammas.temp, rev(1/gammas.temp))
+    theta.matr <- matrix(0, nrow = length(gammas), ncol = 4)
 
-    for(gamma in gamma.seq) {
-      mat <- matrix(nrow = 2, ncol = 2)
-      mat[1, 1] <- sum(y.zero.low^2)
-      mat[2, 1] <- mat[1, 2] <- gamma^log.x%*%y.zero.low^2
-      mat[2, 2] <- gamma^(2*log.x)%*%y.zero.low^2
+    for(i in 1:length(gammas)) {
 
-      vec <- c(sum(y.zero.low), gamma^log.x%*%y.zero.low)
+      gamma <- gammas[i]
+
+      data.lm <- data.frame(y = y.zero.low,
+                            y.gamma.x = y.zero.low*gamma^log.x,
+                            Response = 1)
+
+      # Set the second predictor values to be zero when dose is zero
+      data.lm$y.gamma.x[x == 0] <- 0
+
+      lm.init <- stats::lm(Response ~ -1 + y + y.gamma.x, data = data.lm)
+
+      alpha.beta <- lm.init$coefficients
+      alpha <- alpha.beta[1]
+      beta <- alpha.beta[2]
+
+      theta.matr[i, 1] <- 1/alpha
+
+      if(alpha*beta > 0) {
+        theta.matr[i, 2] <- exp((log(alpha/beta))/log(gamma))
+      } else {
+        theta.matr[i, 2] <- 0
+      }
+
+      theta.matr[i, 3] <- log(gamma)
+      theta.matr[i, 4] <- 0
     }
+
+    theta.matr[, 1] <- theta.matr[, 1] + y.lower.bd
+    theta.matr[, 4] <- theta.matr[, 4] + y.lower.bd
+
+    err.fcn <- ErrFcn(method.robust)
+    errors <- rep(0, length(gammas))  # To save the error values
+
+    for(i in 1:length(gammas)) {
+
+      theta <- theta.matr[i, ]
+      errors[i] <- err.fcn(theta, x, y)
+    }
+
+    theta.init <- theta.matr[which.min(errors), ]
   }
 
-  return(c(theta.2.init, theta.3.init))
+  names(theta.init) <- c("theta.1", "theta.2", "theta.3", "theta.4")
+
+  return(theta.init)
 }
 
