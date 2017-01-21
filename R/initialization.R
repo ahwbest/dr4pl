@@ -1,16 +1,14 @@
-# --------------------------------------------------------------------------------
-### User-defined functions
-#
+
+#' Find initial parameter estimates for the left and right asymptotes in the
+#' 4PL model.
+#'
+#' @param x x values
+#' @param y y values
+#'
+#' @return theta.left.right: Parameter estimates of the left and right asymptotes.
+#' @export
 FindLeftRightAsymptotes <- function(x, y) {
-  # Find initial parameter estimates for the left and right asymptotes in the
-  # 4PL model.
-  #
-  # Args:
-  #   x: x values
-  #   y: y values
-  #
-  # Returns:
-  #   theta.left.right: Parameter estimates of the left and right asymptotes.
+
   scale.inc <- 0.001
   y.range <- range(y)
   len.y.range <- scale.inc * diff(y.range)
@@ -21,17 +19,17 @@ FindLeftRightAsymptotes <- function(x, y) {
   return(c(theta.1.init, theta.4.init))
 }
 
+
+#' Find initial values for the IC50 and slope parameters.
+#' @param x x values
+#' @param y y values
+#' @param theta.1.4.init Estimates of the left and right asymptotes
+#' @param method.init Initialization method
+#'
+#' @return theta.IC50.slope: Parameter estimates of the IC50 and slope
+#' @export
 FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
-  # Find initial values for the IC50 and slope parameters.
-  #
-  # Args:
-  #   x: x values
-  #   y: y values
-  #   theta.1.4.init: Estimates of the left and right asymptotes
-  #   method.init: Initialization method
-  #
-  # Returns:
-  #   theta.IC50.slope: Parameter estimates of the IC50 and slope
+
   theta.1.init <- theta.1.4.init[1]
   theta.4.init <- theta.1.4.init[2]
 
@@ -43,7 +41,7 @@ FindIC50Slope <- function(x, y, theta.1.4.init, method.init) {
     data.lm <- data.frame(x = x.log10, y = y.transf)
     data.lm <- data.lm[data.lm$x != -Inf, ]
 
-    lm.init <- lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
+    lm.init <- stats::lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
     beta.hat <- lm.init$coefficients
 
     theta.3.init <- beta.hat[2]
