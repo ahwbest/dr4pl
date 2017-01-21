@@ -9,6 +9,28 @@ source(".\\R\\initialization.R")
 # -----------------------------------------------------------------------------
 ### Methods
 #
+
+#' @name drra
+#' @docType package
+#' @title  Dose response relation analysis (drra)
+#' @description Main functions related to fitting
+#' @author Hyowon An, Lineberger Comprehensive Cancer Center
+#' @details Last updated: 09/19/2016
+#' @import stats
+#' @import graphics
+#' @import ggplot2
+
+
+
+#' @param grad Gradient function
+#' @param init.parm Vector of initial parameters
+#' @param method.init Initialization method
+#' @param method.optim Optimization method
+#' @param method.robust Robust estimation method
+#'      - NULL: Sum of squares loss
+#'      - absolute: Absolute deviation loss
+#'      - Huber: Huber's loss
+#'      - Tukey: Tukey's biweight loss
 drraEst <- function(dose, response,
                     constrained = constrained,
                     grad,
@@ -84,6 +106,10 @@ drraEst <- function(dose, response,
 
 drra <- function(x, ...) UseMethod("drra")
 
+
+#' @describeIn drra Used in the default case, supplying a single dose and response variable
+#' @param dose Dose
+#' @param response Response
 drra.default <- function(dose, response,
                          constrained = FALSE,
                          grad = NULL,
@@ -92,28 +118,11 @@ drra.default <- function(dose, response,
                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
                          method.robust = NULL,
                          ...) {
-  # Fit the 4PL model using the function `drraEst'
-  #
-  # Args:
-  #   formula: Formula
-  #   data: Data
-  #   grad: Gradient function
-  #   init.parm: Vector of initial parameters
-  #   method.init: Initialization method
-  #   method.optim: Optimization method
-  #   method.robust: Robust estimation method
-  #      - NULL: Sum of squares loss
-  #      - absolute: Absolute deviation loss
-  #      - Huber: Huber's loss
-  #      - Tukey: Tukey's biweight loss
-  #
-  # Returns:
-  #   drra.obj: The object of class `drra'
 
   ### If doses and responses are not numeric, then throw.
-  if(class(dose) != "numeric" || class(response) != "numeric") {
-    stop("Both doses and responses should be given numeric values.")
-  }
+  # if(class(dose) != "numeric" || class(response) != "numeric") {
+  #   stop("Both doses and responses should be given numeric values.")
+  # }
 
   dose <- as.numeric(dose)
   response <- as.numeric(response)
@@ -130,6 +139,7 @@ drra.default <- function(dose, response,
 
   class(drra.obj) <- "drra"
   drra.obj
+
 }
 
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
@@ -212,46 +222,25 @@ drra.formula <- function(formula,
   est
 }
 
+#' @description Coefficient of a `drra' object
+#' @title coef
+#' @name coef.drra
+#' @param object A 'drra' object
+#' @param ... arguments passed to coef
+#
+#' @return A vector of parameters
+#' @export
 coef.drra <- function(object, ...) {
-  # Coefficient of a `drra' object
-  #
-  # Args:
-  #   object: A `drra' object
-  #
-  # Returns:
-  #   A vector of parameters
   object$parameters
 }
 
-confint.drra <- function(object, ...) {
-  x <- object$data$Dose
-  y <- object$data$Response
-  theta <- object$parameters
-
-  n <- length(y)  # Number of observations in data
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-  jacobian <- DerivativeF(theta, x)  # Jacobian matrix
-
-  C.hat.inv <- solve(Hessian(theta, x, y)/2)
-  s <- sqrt(sum((y - f)^2)/(n - 4))
-
-  q.t <- qt(0.975, df = n - 4)
-  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
-
-  return(ci)
-}
-
 plot.drra <- function(object, ...) {
-  # Make a scatter plot of a `drra' object
-  #
-  # Args:
-  #   object: A `drra' object
-  a <- ggplot(aes(x = Dose, y = Response), data = object$data)
+
+  a <- ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
 
   a <- a + stat_function(fun = MeanResponseCurve,
-                         args = list(theta = object$parameters),
-                         size = 1.2)
+                                  args = list(theta = object$parameters),
+                                  size = 1.2)
 
   a <- a + geom_point(size = I(5), alpha = I(0.8), color = "blue")
 
@@ -283,16 +272,13 @@ plot.drra <- function(object, ...) {
 #'
 #' print(ryegrass.drra)
 print.drra <- function(x, ...) {
-  # Print a `drra' object to screen
-  #
-  # Args:
-  #   x: A `drra' object
   cat("Call:\n")
   print(x$call)
 
   cat("\nCoefficients:\n")
   print(x$parameters)
 }
+
 
 print.summary.drra <- function(x, ...) {
   cat("Call:\n")
@@ -303,13 +289,7 @@ print.summary.drra <- function(x, ...) {
 }
 
 summary.drra <- function(object, ...) {
-  # Summary of a `drra' object
-  #
-  # Args:
-  #   object: A `drra' object
-  #
-  # Returns:
-  #   res: A `summary.drra' object
+
   TAB <- cbind(Estimate = object$parameters,
                StdErr = object$std.err,
                t.value = object$t.value,

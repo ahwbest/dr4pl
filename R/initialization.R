@@ -1,17 +1,15 @@
-# --------------------------------------------------------------------------------
-### User-defined functions
-#
+
+#' Find initial values for the 4PL model.
+#'
+#' Args:
+#' @param x x values
+#' @param y y values
+#' @param method.init Initialization method
+#' @param method.robust Robust fitting method
+#'
+#' @returns theta.IC50.slope Parameter estimates of the IC50 and slope
+#' @export
 FindInitialParms <- function(x, y, method.init, method.robust) {
-  # Find initial values for the IC50 and slope parameters.
-  #
-  # Args:
-  #   x: x values
-  #   y: y values
-  #   method.init: Initialization method
-  #   method.robust: Robust fitting method
-  #
-  # Returns:
-  #   theta.IC50.slope: Parameter estimates of the IC50 and slope
 
   scale.inc <- 0.001
   y.range <- range(y)
