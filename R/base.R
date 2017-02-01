@@ -8,9 +8,10 @@
 #
 #' @return Predicted response values.
 #' @export
-MeanResponseCurve <- function(x, theta) {
+MeanResponse <- function(x, theta) {
 
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+  #f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+  f <- theta[1] + (theta[4] - theta[1])/(1 + exp(theta[3]*(log(x) - log(theta[2]))))
 
   return(f)
 }
@@ -96,17 +97,19 @@ ErrFcn <- function(method.robust) {
   }
 
   err.fcn <- function(theta, x, y) {
+
     if(length(theta) != 4) {
       stop("The number of parameters is not 4.")
     }
 
+    if(length(x) != length(y)) {
+      stop("The numbers of dose values and response values should be the same.")
+    }
+
     n <- length(y)
-    f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+    f <- MeanResponse(x, theta)
 
-    #cat("Parameters = ", theta, "\n")
-    #cat("f = ", f, "\n")
-
-    return(sum(loss.fcn(y - f))/n)
+    return(sum(loss.fcn(y - f)))
   }
 
   return(err.fcn)

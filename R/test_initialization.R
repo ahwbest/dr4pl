@@ -2,8 +2,59 @@
 ### Load libraries and source code
 #
 library(drc)
+library(ggplot2)
+library(RColorBrewer)
 source(".\\R\\initialization.R")
 source(".\\R\\main.R")
+
+ComparisonPlot <- function(dose, response, parm.matr) {
+# Draw curves of different 4PL models
+#
+# Args:
+#   dose: Vector of dose values
+#   response: Vector of response values
+#   parm.matr: Matrix of parameter values. Each row corresponds to paramters of
+#              of each model. There are 4 columns corresponding to 4 parameters.
+
+  if(length(dose) != length(response)) {
+    stop("The numbers of does and response values should be the same.")
+  }
+
+  n.curves <- nrow(parm.matr)  # Number of curves to be plotted
+  data.plot <- data.frame(Dose = dose, Response = response)
+  color.vec <- brewer.pal(n.curves, "Dark2")  # Obtain colors from brewer.pal
+
+  a <- ggplot(aes(x = dose, y = response), data = data.plot)
+
+  for(i in 1:n.curves) {
+
+    a <- a + stat_function(fun = MeanResponse,
+                           args = list(theta = parm.matr[i, ]),
+                           colour = color.vec[i],
+                           size = 1.2)
+  }
+
+  a <- a + geom_point(size = I(5), alpha = I(0.8))
+
+  a <- a + labs(title = "Dose response curve")
+  a <- a + xlab("Dose") + ylab("Response")
+
+  # Set parameters for the grids
+  a <- a + theme(strip.text.x = element_text(size = 16))
+  a <- a + theme(panel.grid.minor = element_blank())
+  a <- a + theme(panel.grid.major = element_blank())
+  a <- a + scale_x_log10()
+  a <- a + theme_bw()
+
+  # Set parameters for the titles and text / margin(top, right, bottom, left)
+  a <- a + theme(plot.title = element_text(size = 20, margin = margin(0, 0, 10, 0)))
+  a <- a + theme(axis.title.x = element_text(size = 16, margin = margin(15, 0, 0, 0)))
+  a <- a + theme(axis.title.y = element_text(size = 16, margin = margin(0, 15, 0, 0)))
+  a <- a + theme(axis.text.x = element_text(size = 16))
+  a <- a + theme(axis.text.y = element_text(size = 16))
+
+  plot(a)
+}
 
 CompareInitializationMethods <- function(data.to.comp,
                                          ind.plot = FALSE,
@@ -24,6 +75,7 @@ CompareInitializationMethods <- function(data.to.comp,
 
   result <- c()
 
+  # There is only one drug
   if(length(var.ref) == 0) {
 
     data.new <- subset(x = data.to.comp, select = c(var.dose, var.response))
@@ -82,7 +134,7 @@ CompareInitializationMethods <- function(data.to.comp,
     #   ComparisonPlot(dose = data.new$Dose, response = data.new$Response, parm.mat)
     # }
 
-  } else {
+  } else {  # There are multiple drugs
 
     data.new <- subset(x = data.to.comp, select = c(var.ref, var.dose, var.response))
     colnames(data.new) <- c("Ref", "Dose", "Response")
@@ -99,11 +151,17 @@ CompareInitializationMethods <- function(data.to.comp,
       cat(var.ref, "=", level.ref[i], "\n")
 
       # drc
+      drc.ctrl <- drmc(method = "Nelder-Mead", trace = TRUE)
+
+      sink("output_drc.txt")
+
       obj.drc.1 <- drm(Response ~ Dose,
                        data = data.each,
                        fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
                                   method = "1"),
-                       control = drmc(method = "Nelder-Mead"))
+                       control = drc.ctrl)
+
+      sink()
 
       obj.drc.2 <- drm(Response ~ Dose,
                        data = data.each,
@@ -123,8 +181,12 @@ CompareInitializationMethods <- function(data.to.comp,
       result <- cbind(result, c(obj.drc.1$fit$value, obj.drc.2$fit$value, obj.drc.3$fit$value)/n)
 
       # drra
+      sink("output_drra.txt")
+
       obj.drra <- drra(Response ~ Dose,
                        data = data.each)
+
+      sink()
 
       parm.drra <- coef(obj.drra)
 

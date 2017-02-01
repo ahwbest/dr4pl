@@ -39,10 +39,11 @@ drraEst <- function(dose, response,
                     method.optim,
                     method.robust) {
 
-  x <- dose
-  y <- response
+  x <- dose  # Vector of dose values
+  y <- response  # Vector of responses
 
-  data.drra <- data.frame(Dose = x, Response = y)
+  # Choose the loss function depending on the robust estimation method
+  err.fcn <- ErrFcn(method.robust)
 
   if(!is.null(init.parm)) {  # When initial parameter estimates are given
 
@@ -57,7 +58,7 @@ drraEst <- function(dose, response,
                    method = method.optim,
                    x = x,
                    y = y,
-                   control = list(trace = 2))
+                   control = list(trace = 1))
     } else {
 
       constraint.matr <- t(as.matrix(c(0, 0, -1, 0)))
@@ -75,21 +76,20 @@ drraEst <- function(dose, response,
     theta <- drr$par
     error <- drr$value
 
-  } else {
+  } else {  # When initial parameter values are not given
 
     # Set initial values of parameters
     theta.init <- FindInitialParms(x, y, method.init, method.robust)
 
     names(theta.init) <- c("Left limit", "IC50", "Slope", "Right limit")
 
-    err.fcn <- ErrFcn(method.robust)
-
     drr <- optim(par = theta.init,
                  fn = err.fcn,
                  gr = grad,
                  method = method.optim,
                  x = x,
-                 y = y)
+                 y = y,
+                 control = list(trace = 1))
 
     theta <- drr$par
     error <- drr$value
@@ -105,7 +105,6 @@ drraEst <- function(dose, response,
 }
 
 drra <- function(x, ...) UseMethod("drra")
-
 
 #' @describeIn drra Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
@@ -234,13 +233,20 @@ coef.drra <- function(object, ...) {
   object$parameters
 }
 
+#' @description A default plotting function for a `drra' object.
+#'
+#' @param object A `drra' object whose mean response function should be plotted.
+#' @examples
+#' ryegrass.drra <- drra(rootl ~ conc, data = ryegrass)
+#'
+#' plot(ryegrass.drra)
 plot.drra <- function(object, ...) {
 
   a <- ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
 
-  a <- a + stat_function(fun = MeanResponseCurve,
-                                  args = list(theta = object$parameters),
-                                  size = 1.2)
+  a <- a + stat_function(fun = MeanResponse,
+                         args = list(theta = object$parameters),
+                         size = 1.2)
 
   a <- a + geom_point(size = I(5), alpha = I(0.8), color = "blue")
 
