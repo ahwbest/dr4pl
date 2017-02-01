@@ -1,10 +1,10 @@
 # -----------------------------------------------------------------------------
 ### Load libraries and source codes
 #
-library(ggplot2)
-library(tensor)
-source(".\\R\\base.R")
-source(".\\R\\initialization.R")
+#library(ggplot2)
+#library(tensor)
+#source(".\\R\\base.R")
+#source(".\\R\\initialization.R")
 
 # -----------------------------------------------------------------------------
 ### Methods
@@ -242,7 +242,7 @@ coef.drra <- function(object, ...) {
 #' plot(ryegrass.drra)
 plot.drra <- function(object, ...) {
 
-  a <- ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
+  a <- ggplot2::ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
 
   a <- a + stat_function(fun = MeanResponse,
                          args = list(theta = object$parameters),
