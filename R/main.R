@@ -89,7 +89,7 @@ drraEst <- function(dose, response,
                  method = method.optim,
                  x = x,
                  y = y,
-                 control = list(trace = 1))
+                 control = list(trace = 2))
 
     theta <- drr$par
     error <- drr$value
