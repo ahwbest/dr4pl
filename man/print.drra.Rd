@@ -14,7 +14,7 @@ Print the drra object to screen.
 }
 \examples{
 ryegrass.drra <- drra(rootl ~ conc,
-                      data = ryegrass)
+                      data = drc::ryegrass)
 
 print(ryegrass.drra)
 }

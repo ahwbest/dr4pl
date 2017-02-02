@@ -7,7 +7,7 @@
 #' @param method.init Initialization method
 #' @param method.robust Robust fitting method
 #'
-#' @returns theta.IC50.slope Parameter estimates of the IC50 and slope
+#' @return theta.IC50.slope Parameter estimates of the IC50 and slope
 #' @export
 FindInitialParms <- function(x, y, method.init, method.robust) {
 

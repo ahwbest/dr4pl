@@ -1,15 +1,3 @@
-# -----------------------------------------------------------------------------
-### Load libraries and source codes
-#
-#library(ggplot2)
-#library(tensor)
-#source(".\\R\\base.R")
-#source(".\\R\\initialization.R")
-
-# -----------------------------------------------------------------------------
-### Methods
-#
-
 #' @name drra
 #' @docType package
 #' @title  Dose response relation analysis (drra)
@@ -104,7 +92,12 @@ drraEst <- function(dose, response,
        error.value = error)
 }
 
+#' @description Fit the 4 parameter logistic model to the data using the function `drraEst'
+#' @param x Object to drra.
+#' @param ... arguments passed to coef
+#' @export
 drra <- function(x, ...) UseMethod("drra")
+
 
 #' @describeIn drra Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
@@ -185,13 +178,17 @@ drra.default <- function(dose, response,
 #'   method. This package implements 4 loss functions: sum of squares loss,
 #'   absolute deviation loss, Huber's loss and Tukey's biweight loss. Each of
 #'   loss function is explained in detail in the vignette.
+#' @author Hyowon An, Dirk P. Dittmer and J. S. Marron
+#' @seealso \code{\link{confint.drra}}, \code{\link{gof.drra}},
+#' \code{\link{print.drra}}, \code{\link{summary.drra}}
 #' @examples
-#' ryegrass.drra <- drra(rootl ~ conc, data = ryegrass)
+#' ryegrass.drra <- drra(rootl ~ conc, data = drc::ryegrass)
 #'
 #' ryegrass.drra
 #' @author Hyowon An, Dirk P. Dittmer and J. S. Marron
 #' @seealso \code{\link{confint.drra}}, \code{\link{gof.drra}},
 #' \code{\link{print.drra}}, \code{\link{summary.drra}}
+#' @export
 drra.formula <- function(formula,
                          constrained = FALSE,
                          data = list(),
@@ -234,10 +231,11 @@ coef.drra <- function(object, ...) {
 }
 
 #' @description A default plotting function for a `drra' object.
-#'
+#' @title print
+#' @name print
 #' @param object A `drra' object whose mean response function should be plotted.
-#' @examples
-#' ryegrass.drra <- drra(rootl ~ conc, data = ryegrass)
+#' #@examples
+#' ryegrass.drra <- drra::drra(rootl ~ conc, data = drc::ryegrass)
 #'
 #' plot(ryegrass.drra)
 plot.drra <- function(object, ...) {
@@ -274,7 +272,7 @@ plot.drra <- function(object, ...) {
 #' @param x A drra object.
 #' @examples
 #' ryegrass.drra <- drra(rootl ~ conc,
-#'                       data = ryegrass)
+#'                       data = drc::ryegrass)
 #'
 #' print(ryegrass.drra)
 print.drra <- function(x, ...) {
