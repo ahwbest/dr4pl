@@ -29,6 +29,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     data.lm <- data.frame(x = x.log10, y = y.transf)
     data.lm <- data.lm[data.lm$x != -Inf, ]
 
+    #lm.init <- stats::lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
     lm.init <- stats::lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
     beta.hat <- lm.init$coefficients
 
