@@ -142,7 +142,7 @@ CompareInitializationMethods <- function(data.to.comp,
       # drc
       drc.ctrl <- drc::drmc(method = "Nelder-Mead", trace = TRUE)
 
-      sink("output_drc.txt")
+      sink("tests/testthat/output_drc.Rout")
 
       obj.drc.1 <- drc::drm(Response ~ Dose,
                        data = data.each,
@@ -158,7 +158,7 @@ CompareInitializationMethods <- function(data.to.comp,
       result <- cbind(result, c(obj.drc.1$fit$value)/n)
 
       # drra
-      sink("output_drra.txt")
+      sink("tests/testthat/output_drra.Rout")
 
       obj.drra <- drra(Response ~ Dose,
                        data = data.each)
@@ -182,7 +182,7 @@ CompareInitializationMethods <- function(data.to.comp,
 # -------------------------------------------------------------------------------
 ### Compare the parameter estimates
 #
-sink(file = "parameter_comparison.txt")
+sink(file = "tests/testthat/parameter_comparison.Rout")
 
 files_list<-c("G.aparine", "H.virescens", "M.bahia", "O.mykiss", "P.promelas", "RScompetition",
               "S.alba", "S.capricornutum", "acidiq", "algae", "auxins", "chickweed", "chickweed0",
@@ -353,3 +353,9 @@ CompareInitializationMethods(data.to.comp = vinclozolin,
                              var.response = "effect")
 
 sink()
+
+drc.out.saved <- read.csv("tests/testthat/output_drc.Rout.save")
+drra.out.saved <- read.csv("tests/testthat/output_drc.Rout.save")
+
+drc.out.new <- read.csv("tests/testthat/output_drc.Rout")
+drc.out.new <- read.csv("tests/testthat/output_drra.Rout")
