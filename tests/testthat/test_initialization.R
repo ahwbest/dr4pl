@@ -5,6 +5,7 @@ library(drc)
 library(ggplot2)
 library(RColorBrewer)
 library(drra)
+library(testthat)
 
 ComparisonPlot <- function(dose, response, parm.matr) {
 # Draw curves of different 4PL models
@@ -142,7 +143,7 @@ CompareInitializationMethods <- function(data.to.comp,
       # drc
       drc.ctrl <- drc::drmc(method = "Nelder-Mead", trace = TRUE)
 
-      sink("tests/testthat/output_drc.Rout")
+      sink("output_drc.Rout")
 
       obj.drc.1 <- drc::drm(Response ~ Dose,
                        data = data.each,
@@ -158,7 +159,7 @@ CompareInitializationMethods <- function(data.to.comp,
       result <- cbind(result, c(obj.drc.1$fit$value)/n)
 
       # drra
-      sink("tests/testthat/output_drra.Rout")
+      sink("output_drra.Rout")
 
       obj.drra <- drra(Response ~ Dose,
                        data = data.each)
@@ -182,7 +183,7 @@ CompareInitializationMethods <- function(data.to.comp,
 # -------------------------------------------------------------------------------
 ### Compare the parameter estimates
 #
-sink(file = "tests/testthat/parameter_comparison.Rout")
+sink(file = "parameter_comparison.Rout")
 
 files_list<-c("G.aparine", "H.virescens", "M.bahia", "O.mykiss", "P.promelas", "RScompetition",
               "S.alba", "S.capricornutum", "acidiq", "algae", "auxins", "chickweed", "chickweed0",
@@ -354,8 +355,14 @@ CompareInitializationMethods(data.to.comp = vinclozolin,
 
 sink()
 
-drc.out.saved <- read.csv("tests/testthat/output_drc.Rout.save")
-drra.out.saved <- read.csv("tests/testthat/output_drc.Rout.save")
-
-drc.out.new <- read.csv("tests/testthat/output_drc.Rout")
-drc.out.new <- read.csv("tests/testthat/output_drra.Rout")
+# drc.out.saved <- read.csv("tests/testthat/output_drc.Rout.save")
+# drra.out.saved <- read.csv("tests/testthat/output_drra.Rout.save")
+# parameter_comparison.saved <- read.csv("tests/testthat/parameter_comparison.Rout.save")
+#
+# drc.out.new <- read.csv("output_drc.Rout")
+# drra.out.new <- read.csv("output_drra.Rout")
+# parameter_comparison.new <- read.csv("parameter_comparison.Rout")
+#
+# expect_identical(drc.out.new, drc.out.saved)
+# expect_identical(drra.out.new, drra.out.saved)
+# expect_identical(parameter_comparison.new, parameter_comparison.saved)
