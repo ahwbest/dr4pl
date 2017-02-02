@@ -4,8 +4,8 @@
 library(drc)
 library(ggplot2)
 library(RColorBrewer)
-source(".\\R\\initialization.R")
-source(".\\R\\main.R")
+library(drra)
+library(testthat)
 
 ComparisonPlot <- function(dose, response, parm.matr) {
 # Draw curves of different 4PL models
@@ -71,6 +71,7 @@ CompareInitializationMethods <- function(data.to.comp,
   #
   # Returns:
   #   Print the estimated parameters to standard output
+  #data(list=data.to.comp, package="drc")
   data.to.comp <- na.omit(data.to.comp)
 
   result <- c()
@@ -83,28 +84,17 @@ CompareInitializationMethods <- function(data.to.comp,
     n <- nrow(data.new)  # Number of observations
 
     # drc
-    obj.drc.1 <- drm(Response ~ Dose,
+    obj.drc.1 <- drc::drm(Response ~ Dose,
                      data = data.new,
-                     fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
+                     fct = drc::LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
                                 method = "1"),
-                     control = drmc(method = "Nelder-Mead"))
+                     control = drc::drmc(method = "Nelder-Mead"))
 
-    obj.drc.2 <- drm(Response ~ Dose,
-                     data = data.new,
-                     fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                method = "2"),
-                     control = drmc(method = "Nelder-Mead"))
-
-    obj.drc.3 <- drm(Response ~ Dose,
-                     data = data.new,
-                     fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                method = "3"),
-                     control = drmc(method = "Nelder-Mead"))
-
-    result <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-    result <- result[, c(3, 4, 1, 2)]
-    result[, 3] <- -result[, 3]
-    result <- cbind(result, c(obj.drc.1$fit$value, obj.drc.2$fit$value, obj.drc.3$fit$value)/n)
+    result <- rbind(coef(obj.drc.1))
+    #result <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
+    #result <- result[, c(3, 4, 1, 2)]
+    result <- -result
+    result <- cbind(result, c(obj.drc.1$fit$value)/n)
 
     # drra
     obj.drra <- drra(Response ~ Dose,
@@ -114,7 +104,7 @@ CompareInitializationMethods <- function(data.to.comp,
 
     result <- rbind(result, c(parm.drra, obj.drra$error.value))
 
-    row.names(result) <- c("drc 1", "drc 2", "drc 3", "drra")
+    row.names(result) <- c("drc 1", "drra")
     colnames(result) <- c("Lower limit", "IC50", "Slope", "Upper limit", "Loss value")
 
     print(result)
@@ -151,37 +141,25 @@ CompareInitializationMethods <- function(data.to.comp,
       cat(var.ref, "=", level.ref[i], "\n")
 
       # drc
-      drc.ctrl <- drmc(method = "Nelder-Mead", trace = TRUE)
+      drc.ctrl <- drc::drmc(method = "Nelder-Mead", trace = TRUE)
 
-      sink("output_drc.txt")
+      sink("output_drc.Rout")
 
-      obj.drc.1 <- drm(Response ~ Dose,
+      obj.drc.1 <- drc::drm(Response ~ Dose,
                        data = data.each,
-                       fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
+                       fct = drc::LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
                                   method = "1"),
                        control = drc.ctrl)
 
       sink()
 
-      obj.drc.2 <- drm(Response ~ Dose,
-                       data = data.each,
-                       fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                  method = "2"),
-                       control = drmc(method = "Nelder-Mead"))
-
-      obj.drc.3 <- drm(Response ~ Dose,
-                       data = data.each,
-                       fct = LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                  method = "3"),
-                       control = drmc(method = "Nelder-Mead"))
-
-      result <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-      result <- result[, c(3, 4, 1, 2)]
-      result[, 3] <- -result[, 3]
-      result <- cbind(result, c(obj.drc.1$fit$value, obj.drc.2$fit$value, obj.drc.3$fit$value)/n)
+      result <- rbind(coef(obj.drc.1))
+      #result <- result[, c(3, 4, 1, 2)]
+      result <- -result
+      result <- cbind(result, c(obj.drc.1$fit$value)/n)
 
       # drra
-      sink("output_drra.txt")
+      sink("output_drra.Rout")
 
       obj.drra <- drra(Response ~ Dose,
                        data = data.each)
@@ -192,7 +170,7 @@ CompareInitializationMethods <- function(data.to.comp,
 
       result <- rbind(result, c(parm.drra, obj.drra$error.value))
 
-      row.names(result) <- c("drc 1", "drc 2", "drc 3", "drra")
+      row.names(result) <- c("drc 1", "drra")
       colnames(result) <- c("Left limit", "IC50", "Slope", "Right limit", "Loss value")
 
       print(result)
@@ -205,7 +183,18 @@ CompareInitializationMethods <- function(data.to.comp,
 # -------------------------------------------------------------------------------
 ### Compare the parameter estimates
 #
-sink(file = "parameter_comparison.txt")
+sink(file = "parameter_comparison.Rout")
+
+files_list<-c("G.aparine", "H.virescens", "M.bahia", "O.mykiss", "P.promelas", "RScompetition",
+              "S.alba", "S.capricornutum", "acidiq", "algae", "auxins", "chickweed", "chickweed0",
+              "daphnids", "decontaminants", "deguelin", "earthworms", "etmotc", "finney71",
+              "germination", "glymet", "heartrate", "leaflength", "lepidium", "lettuce", "mecter",
+              "metals", "methionine", "nasturtium", "ryegrass", "secalonic", "selenium", "spinach",
+              "terbuthylazin", "vinclozolin"
+)
+lapply(files_list, function(filename){
+  data(list=filename, package = "drc")
+})
 
 ### acidiq
 cat("acidiq\n")
@@ -214,6 +203,7 @@ CompareInitializationMethods(data.to.comp = acidiq,
                              var.ref = "pct",
                              var.dose = "dose",
                              var.response = "rgr")
+#rm(acidiq)
 
 ### algae
 cat("algae\n")
@@ -364,3 +354,15 @@ CompareInitializationMethods(data.to.comp = vinclozolin,
                              var.response = "effect")
 
 sink()
+
+# drc.out.saved <- read.csv("tests/testthat/output_drc.Rout.save")
+# drra.out.saved <- read.csv("tests/testthat/output_drra.Rout.save")
+# parameter_comparison.saved <- read.csv("tests/testthat/parameter_comparison.Rout.save")
+#
+# drc.out.new <- read.csv("output_drc.Rout")
+# drra.out.new <- read.csv("output_drra.Rout")
+# parameter_comparison.new <- read.csv("parameter_comparison.Rout")
+#
+# expect_identical(drc.out.new, drc.out.saved)
+# expect_identical(drra.out.new, drra.out.saved)
+# expect_identical(parameter_comparison.new, parameter_comparison.saved)

@@ -4,9 +4,10 @@
 \alias{drra.formula}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
-\method{drra}{formula}(formula, data = list(), grad = NULL,
-  init.parm = NULL, method.init = "logistic", method.optim = if
-  (is.null(grad)) "Nelder-Mead" else "BFGS", method.robust = NULL, ...)
+\method{drra}{formula}(formula, constrained = FALSE, data = list(),
+  grad = NULL, init.parm = NULL, method.init = "logistic",
+  method.optim = if (is.null(grad)) "Nelder-Mead" else "BFGS",
+  method.robust = NULL, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be fit. Either of the
@@ -65,14 +66,19 @@ This function fits a 4 parameter logistic (4PL) model to dose-response
   loss function is explained in detail in the vignette.
 }
 \examples{
-ryegrass.drra <- drra(rootl ~ conc, data = ryegrass)
+ryegrass.drra <- drra(rootl ~ conc, data = drc::ryegrass)
 
 ryegrass.drra
 }
 \author{
 Hyowon An, Dirk P. Dittmer and J. S. Marron
+
+Hyowon An, Dirk P. Dittmer and J. S. Marron
 }
 \seealso{
+\code{\link{confint.drra}}, \code{\link{gof.drra}},
+\code{\link{print.drra}}, \code{\link{summary.drra}}
+
 \code{\link{confint.drra}}, \code{\link{gof.drra}},
 \code{\link{print.drra}}, \code{\link{summary.drra}}
 }
