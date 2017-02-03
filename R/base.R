@@ -10,8 +10,8 @@
 #' @export
 MeanResponse <- function(x, theta) {
 
-  #f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-  f <- theta[1] + (theta[4] - theta[1])/(1 + exp(theta[3]*(log(x) - log(theta[2]))))
+  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+  #f <- theta[1] + (theta[4] - theta[1])/(1 + exp(theta[3]*(log(x) - log(theta[2]))))
 
   return(f)
 }
@@ -109,7 +109,7 @@ ErrFcn <- function(method.robust) {
     n <- length(y)
     f <- MeanResponse(x, theta)
 
-    return(sum(loss.fcn(y - f)))
+    return(sum(loss.fcn(y - f))/n)
   }
 
   return(err.fcn)
@@ -142,28 +142,28 @@ GradientFunction <- function(theta, dose, response) {
 
   # The limit of a derivative as x tends to zero depends on the sign of the slope
   # parameter.
-  if(theta[3] > 0) {
-
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1
-
-  } else if(theta[3] == 0) {
-
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1/2
-
-  } else if(theta[3] < 0) {
-
-    deriv.f.theta.1[x == 0] <- 1
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 0
-
-  }
+  # if(theta[3] > 0) {
+  #
+  #   deriv.f.theta.1[x == 0] <- 0
+  #   deriv.f.theta.2[x == 0] <- 0
+  #   deriv.f.theta.3[x == 0] <- 0
+  #   deriv.f.theta.4[x == 0] <- 1
+  #
+  # } else if(theta[3] == 0) {
+  #
+  #   deriv.f.theta.1[x == 0] <- 0
+  #   deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
+  #   deriv.f.theta.3[x == 0] <- 0
+  #   deriv.f.theta.4[x == 0] <- 1/2
+  #
+  # } else if(theta[3] < 0) {
+  #
+  #   deriv.f.theta.1[x == 0] <- 1
+  #   deriv.f.theta.2[x == 0] <- 0
+  #   deriv.f.theta.3[x == 0] <- 0
+  #   deriv.f.theta.4[x == 0] <- 0
+  #
+  # }
 
   return(-2*(y - f)%*%cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
 }

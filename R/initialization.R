@@ -18,9 +18,8 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
   theta.1.init <- max(y) + len.y.range
   theta.4.init <- min(y) - len.y.range
 
-  # If theta.1 < theta.4, then the curve is a growth curve.
-  # If theta.1 > theta.4, then the curve is a decline curve.
-
+  ### If theta.1 < theta.4, then the curve is a growth curve.
+  ### If theta.1 > theta.4, then the curve is a decline curve.
   if(method.init == "logistic") {
 
     y.transf <- log10((y - theta.4.init)/(theta.1.init - y))
@@ -30,7 +29,9 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     data.lm <- data.lm[data.lm$x != -Inf, ]
 
     #lm.init <- stats::lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
-    lm.init <- stats::lm(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
+    lm.init <- robustbase::ltsReg(y ~ x, data = data.lm)  # Linear model for initial parameter estimates
+    # lm.init <- robustbase::lmrob(y ~ x, data = data.lm,
+    #                              maxit.scale = 500)  # Linear model for initial parameter estimates
     beta.hat <- lm.init$coefficients
 
     theta.3.init <- beta.hat[2]
