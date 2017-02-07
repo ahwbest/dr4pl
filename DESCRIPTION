@@ -2,6 +2,7 @@ Package: drra
 Type: Package
 Title: Dose Response Relation Analysis
 Version: 0.1.0
+Depends: R (>= 2.10)
 Author: Hyowon An
 Maintainer: Hyowon An <ahwbest@gmail.com>
 Description: This package models the relationship between dose and response in chemical experiments.
