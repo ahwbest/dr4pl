@@ -8,8 +8,6 @@
 #' @import graphics
 #' @import ggplot2
 
-
-
 #' @param grad Gradient function
 #' @param init.parm Vector of initial parameters
 #' @param method.init Initialization method
@@ -60,13 +58,26 @@ drraEst <- function(dose, response,
 
     names(theta.init) <- c("Left limit", "IC50", "Slope", "Right limit")
 
-    drr <- optim(par = theta.init,
-                 fn = err.fcn,
-                 gr = grad,
-                 method = method.optim,
-                 x = x,
-                 y = y,
-                 control = list(trace = trace))
+    # drr <- optim(par = theta.init,
+    #              fn = err.fcn,
+    #              gr = grad,
+    #              method = method.optim,
+    #              x = x,
+    #              y = y,
+    #              control = list(trace = trace))
+
+    constr.matr <- matrix(c(0, 1, 0, 0), nrow = 1, ncol = 4)
+    constr.vec <- 0
+
+    drr <- constrOptim(theta = theta.init,
+                       f = err.fcn,
+                       grad = grad,
+                       ui = constr.matr,
+                       ci = constr.vec,
+                       method = method.optim,
+                       control = list(trace = trace),
+                       x = x,
+                       y = y)
 
     theta <- drr$par
     error <- drr$value
@@ -74,7 +85,10 @@ drraEst <- function(dose, response,
 
   data.drr <- data.frame(Dose = dose, Response = response)
 
-  list(data = data.drr,
+  convergence <- TRUE
+
+  list(convergence = convergence,
+       data = data.drr,
        dose = x,
        response = y,
        parameters = theta,
@@ -86,7 +100,6 @@ drraEst <- function(dose, response,
 #' @param ... arguments passed to coef
 #' @export
 drra <- function(x, ...) UseMethod("drra")
-
 
 #' @describeIn drra Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
@@ -271,6 +284,7 @@ plot.drra <- function(object, ...) {
 #'
 #' print(ryegrass.drra)
 print.drra <- function(x, ...) {
+
   cat("Call:\n")
   print(x$call)
 
@@ -280,6 +294,7 @@ print.drra <- function(x, ...) {
 
 
 print.summary.drra <- function(x, ...) {
+
   cat("Call:\n")
   print(x$call)
   cat("\n")

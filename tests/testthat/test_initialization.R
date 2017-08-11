@@ -141,9 +141,7 @@ CompareInitializationMethods <- function(data.to.comp,
       cat(var.ref, "=", level.ref[i], "\n")
 
       # drc
-      drc.ctrl <- drc::drmc(method = "Nelder-Mead", trace = TRUE)
-
-      sink("output_drc.Rout")
+      drc.ctrl <- drc::drmc(method = "Nelder-Mead")
 
       obj.drc.1 <- drc::drm(Response ~ Dose,
                        data = data.each,
@@ -151,20 +149,14 @@ CompareInitializationMethods <- function(data.to.comp,
                                   method = "1"),
                        control = drc.ctrl)
 
-      sink()
-
       result <- rbind(coef(obj.drc.1))
       #result <- result[, c(3, 4, 1, 2)]
       result <- -result
       result <- cbind(result, c(obj.drc.1$fit$value)/n)
 
       # drra
-      sink("output_drra.Rout")
-
       obj.drra <- drra(Response ~ Dose,
                        data = data.each)
-
-      sink()
 
       parm.drra <- coef(obj.drra)
 
@@ -184,17 +176,6 @@ CompareInitializationMethods <- function(data.to.comp,
 ### Compare the parameter estimates
 #
 sink(file = "parameter_comparison.Rout")
-
-files_list<-c("G.aparine", "H.virescens", "M.bahia", "O.mykiss", "P.promelas", "RScompetition",
-              "S.alba", "S.capricornutum", "acidiq", "algae", "auxins", "chickweed", "chickweed0",
-              "daphnids", "decontaminants", "deguelin", "earthworms", "etmotc", "finney71",
-              "germination", "glymet", "heartrate", "leaflength", "lepidium", "lettuce", "mecter",
-              "metals", "methionine", "nasturtium", "ryegrass", "secalonic", "selenium", "spinach",
-              "terbuthylazin", "vinclozolin"
-)
-lapply(files_list, function(filename){
-  data(list=filename, package = "drc")
-})
 
 ### acidiq
 cat("acidiq\n")
