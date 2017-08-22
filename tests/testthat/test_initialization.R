@@ -7,55 +7,6 @@ library(RColorBrewer)
 library(drra)
 library(testthat)
 
-ComparisonPlot <- function(dose, response, parm.matr) {
-# Draw curves of different 4PL models
-#
-# Args:
-#   dose: Vector of dose values
-#   response: Vector of response values
-#   parm.matr: Matrix of parameter values. Each row corresponds to paramters of
-#              of each model. There are 4 columns corresponding to 4 parameters.
-
-  if(length(dose) != length(response)) {
-    stop("The numbers of does and response values should be the same.")
-  }
-
-  n.curves <- nrow(parm.matr)  # Number of curves to be plotted
-  data.plot <- data.frame(Dose = dose, Response = response)
-  color.vec <- brewer.pal(n.curves, "Dark2")  # Obtain colors from brewer.pal
-
-  a <- ggplot(aes(x = dose, y = response), data = data.plot)
-
-  for(i in 1:n.curves) {
-
-    a <- a + stat_function(fun = MeanResponse,
-                           args = list(theta = parm.matr[i, ]),
-                           colour = color.vec[i],
-                           size = 1.2)
-  }
-
-  a <- a + geom_point(size = I(5), alpha = I(0.8))
-
-  a <- a + labs(title = "Dose response curve")
-  a <- a + xlab("Dose") + ylab("Response")
-
-  # Set parameters for the grids
-  a <- a + theme(strip.text.x = element_text(size = 16))
-  a <- a + theme(panel.grid.minor = element_blank())
-  a <- a + theme(panel.grid.major = element_blank())
-  a <- a + scale_x_log10()
-  a <- a + theme_bw()
-
-  # Set parameters for the titles and text / margin(top, right, bottom, left)
-  a <- a + theme(plot.title = element_text(size = 20, margin = margin(0, 0, 10, 0)))
-  a <- a + theme(axis.title.x = element_text(size = 16, margin = margin(15, 0, 0, 0)))
-  a <- a + theme(axis.title.y = element_text(size = 16, margin = margin(0, 15, 0, 0)))
-  a <- a + theme(axis.text.x = element_text(size = 16))
-  a <- a + theme(axis.text.y = element_text(size = 16))
-
-  plot(a)
-}
-
 CompareInitializationMethods <- function(data.to.comp,
                                          ind.plot = FALSE,
                                          var.dose,
@@ -91,10 +42,9 @@ CompareInitializationMethods <- function(data.to.comp,
                      control = drc::drmc(method = "Nelder-Mead"))
 
     result <- rbind(coef(obj.drc.1))
-    #result <- rbind(coef(obj.drc.1), coef(obj.drc.2), coef(obj.drc.3))
-    #result <- result[, c(3, 4, 1, 2)]
-    result <- -result
-    result <- cbind(result, c(obj.drc.1$fit$value)/n)
+    result <- result[, c(3, 4, 1, 2)]
+
+    result <- c(result, obj.drc.1$fit$value/n)
 
     # drra
     obj.drra <- drra(Response ~ Dose,
@@ -104,7 +54,7 @@ CompareInitializationMethods <- function(data.to.comp,
 
     result <- rbind(result, c(parm.drra, obj.drra$error.value))
 
-    row.names(result) <- c("drc 1", "drra")
+    row.names(result) <- c("drc", "drra")
     colnames(result) <- c("Lower limit", "IC50", "Slope", "Upper limit", "Loss value")
 
     print(result)
@@ -135,6 +85,7 @@ CompareInitializationMethods <- function(data.to.comp,
     level.ref <- levels(data.new$Ref)
 
     for(i in 1:length(level.ref)) {
+
       data.each <- subset(x = data.new, subset = Ref == level.ref[i])
       n <- nrow(data.each)  # Number of observations
 

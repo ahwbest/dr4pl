@@ -287,7 +287,5 @@ CompareRobustMethods(data.to.comp = vinclozolin,
                              var.dose = "conc",
                              var.response = "effect")
 
-
-
 sink()
 

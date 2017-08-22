@@ -43,7 +43,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
 
     # summary(lm.hill)
     # summary(lm.hill.simple)
-    #
+
     # plot(x = data.hill$x.log, y = data.hill$y.logit, pch = 16)
     # abline(a = lm.hill$coefficients[1], b = lm.hill$coefficients[2],
     #        col = "blue", lwd = 2)
@@ -53,8 +53,8 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
 
     # Fully estimate the IC50 and slope parameters first, and then others
     data.resid <- data.frame(res = lm.hill.simple$residuals,
-                             y.max.y = 1/(y.max - y),
-                             y.y.min = 1/(y - y.min))
+                             y.max.y = data.hill$y.max.y,
+                             y.y.min = data.hill$y.y.min)
     lm.resid <- lm(res ~ y.max.y + y.y.min, data = data.resid)
 
     # plot(x = log10(x), y = y, pch = 16)
