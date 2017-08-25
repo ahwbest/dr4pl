@@ -25,7 +25,7 @@ CompareInitializationMethods <- function(data.to.comp,
   #data(list=data.to.comp, package="drc")
   data.to.comp <- na.omit(data.to.comp)
 
-  result <- c()
+  result.comparison <- TRUE
 
   # There is only one drug
   if(length(var.ref) == 0) {
@@ -35,16 +35,17 @@ CompareInitializationMethods <- function(data.to.comp,
     n <- nrow(data.new)  # Number of observations
 
     # drc
-    obj.drc.1 <- drc::drm(Response ~ Dose,
+    obj.drc <- drc::drm(Response ~ Dose,
                      data = data.new,
                      fct = drc::LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
                                 method = "1"),
                      control = drc::drmc(method = "Nelder-Mead"))
 
-    result <- rbind(coef(obj.drc.1))
-    result <- result[, c(3, 4, 1, 2)]
+    result <- coef(obj.drc)
+    result <- result[c(3, 4, 1, 2)]
+    result[3] <- result[3]
 
-    result <- c(result, obj.drc.1$fit$value/n)
+    result <- c(result, obj.drc$fit$value/n)
 
     # drra
     obj.drra <- drra(Response ~ Dose,
@@ -59,6 +60,9 @@ CompareInitializationMethods <- function(data.to.comp,
 
     print(result)
     cat("\n")
+
+    result.comparison <- result.comparison&
+                         (signif(result[1, 5], 3) == signif(result[2, 5], 3))
 
     # Temporarily disabled
     # if(ind.plot) {
@@ -94,16 +98,16 @@ CompareInitializationMethods <- function(data.to.comp,
       # drc
       drc.ctrl <- drc::drmc(method = "Nelder-Mead")
 
-      obj.drc.1 <- drc::drm(Response ~ Dose,
+      obj.drc <- drc::drm(Response ~ Dose,
                        data = data.each,
-                       fct = drc::LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50"),
-                                  method = "1"),
+                       fct = drc::LL.4(names = c("Slope", "Lower limit", "Upper limit", "IC50")),
                        control = drc.ctrl)
 
-      result <- rbind(coef(obj.drc.1))
-      #result <- result[, c(3, 4, 1, 2)]
-      result <- -result
-      result <- cbind(result, c(obj.drc.1$fit$value)/n)
+      result <- coef(obj.drc)
+      result <- result[ c(3, 4, 1, 2)]
+      result[3] <- -result[3]
+
+      result <- c(result, obj.drc$fit$value/n)
 
       # drra
       obj.drra <- drra(Response ~ Dose,
@@ -113,188 +117,157 @@ CompareInitializationMethods <- function(data.to.comp,
 
       result <- rbind(result, c(parm.drra, obj.drra$error.value))
 
-      row.names(result) <- c("drc 1", "drra")
+      row.names(result) <- c("drc", "drra")
       colnames(result) <- c("Left limit", "IC50", "Slope", "Right limit", "Loss value")
 
       print(result)
       cat("\n")
 
+      result.comparison <- result.comparison&
+                           (signif(result[1, 5], 3) == signif(result[2, 5], 3))
     }
   }
+
+  return(result.comparison)
 }
 
 # -------------------------------------------------------------------------------
 ### Compare the parameter estimates
 #
-sink(file = "parameter_comparison.Rout")
-
 ### acidiq
-cat("acidiq\n")
+test_that("The output of drc and drra should be the same.", {
 
-CompareInitializationMethods(data.to.comp = acidiq,
+cat("acidiq\n")
+expect_true(CompareInitializationMethods(data.to.comp = acidiq,
                              var.ref = "pct",
                              var.dose = "dose",
-                             var.response = "rgr")
-#rm(acidiq)
+                             var.response = "rgr"))
 
 ### algae
 cat("algae\n")
-
 # Plot fitted curves
-CompareInitializationMethods(data.to.comp = algae,
+expect_true(CompareInitializationMethods(data.to.comp = algae,
                              var.dose = "conc",
-                             var.response = "vol")
+                             var.response = "vol"))
 
 ### etmotc
 cat("etmotc\n")
-
-CompareInitializationMethods(data.to.comp = etmotc,
+expect_true(CompareInitializationMethods(data.to.comp = etmotc,
                              var.ref = "pct1",
                              var.dose = "dose1",
-                             var.response = "rgr1")
+                             var.response = "rgr1"))
 
 ### G.aparine
 cat("G.aparine\n")
-
-CompareInitializationMethods(data.to.comp = G.aparine,
+expect_true(CompareInitializationMethods(data.to.comp = G.aparine,
                              var.ref = "treatment",
                              var.dose = "dose",
-                             var.response = "drymatter")
+                             var.response = "drymatter"))
 
 ### glymet
 cat("glylmet\n")
-
-CompareInitializationMethods(data.to.comp = glymet,
+expect_true(CompareInitializationMethods(data.to.comp = glymet,
                              var.ref = "pct",
                              var.dose = "dose",
-                             var.response = "rgr")
+                             var.response = "rgr"))
 
 ### heartrate
 cat("heartrate\n")
-
-CompareInitializationMethods(data.to.comp = heartrate,
+expect_true(CompareInitializationMethods(data.to.comp = heartrate,
                              var.dose = "pressure",
-                             var.response = "rate")
+                             var.response = "rate"))
 
 ### leaflength
 cat("leaflength\n")
-
-CompareInitializationMethods(data.to.comp = leaflength,
+expect_true(CompareInitializationMethods(data.to.comp = leaflength,
                              var.dose = "Dose",
-                             var.response = "DW")
+                             var.response = "DW"))
 
 ### lepidium
 cat("lepidium\n")
-
-CompareInitializationMethods(data.to.comp = lepidium,
+expect_true(CompareInitializationMethods(data.to.comp = lepidium,
                              var.dose = "conc",
-                             var.response = "weight")
+                             var.response = "weight"))
 
 ### lettuce
 cat("lettuce\n")
-
-CompareInitializationMethods(data.to.comp = lettuce,
+expect_true(CompareInitializationMethods(data.to.comp = lettuce,
                              var.dose = "conc",
-                             var.response = "weight")
+                             var.response = "weight"))
 
 ### mecter
 cat("mecter\n")
-
-CompareInitializationMethods(data.to.comp = mecter,
+expect_true(CompareInitializationMethods(data.to.comp = mecter,
                              var.ref = "pct",
                              var.dose = "dose",
-                             var.response = "rgr")
+                             var.response = "rgr"))
 
 ### M.bahia
 cat("M.bahia\n")
-
-CompareInitializationMethods(data.to.comp = M.bahia,
+expect_true(CompareInitializationMethods(data.to.comp = M.bahia,
                              var.dose = "conc",
-                             var.response = "dryweight")
+                             var.response = "dryweight"))
 
 ### nasturtium
 cat("nasturtium\n")
-
-CompareInitializationMethods(data.to.comp = nasturtium,
+expect_true(CompareInitializationMethods(data.to.comp = nasturtium,
                              var.dose = "conc",
-                             var.response = "weight")
+                             var.response = "weight"))
 
 ### O.mykiss
 cat("O.mykiss\n")
-
-CompareInitializationMethods(data.to.comp = O.mykiss,
+expect_true(CompareInitializationMethods(data.to.comp = O.mykiss,
                              var.dose = "conc",
-                             var.response = "weight")
+                             var.response = "weight"))
 
 ### P.promelas
 cat("P.promelas\n")
-
-CompareInitializationMethods(data.to.comp = P.promelas,
+expect_true(CompareInitializationMethods(data.to.comp = P.promelas,
                              var.dose = "conc",
-                             var.response = "dryweight")
+                             var.response = "dryweight"))
 
 ### ryegrass
 cat("ryegrass\n")
-
-CompareInitializationMethods(data.to.comp = ryegrass,
+expect_true(CompareInitializationMethods(data.to.comp = ryegrass,
                              var.dose = "conc",
-                             var.response = "rootl")
+                             var.response = "rootl"))
 
 ### S.alba
 cat("S.alba\n")
-
-CompareInitializationMethods(data.to.comp = S.alba,
+expect_true(CompareInitializationMethods(data.to.comp = S.alba,
                              var.ref = "Herbicide",
                              var.dose = "Dose",
-                             var.response = "DryMatter")
+                             var.response = "DryMatter"))
 
 ### S.capricornutum
 cat("S.capricornutum\n")
-
-CompareInitializationMethods(data.to.comp = S.capricornutum,
+expect_true(CompareInitializationMethods(data.to.comp = S.capricornutum,
                              var.dose = "conc",
-                             var.response = "count")
+                             var.response = "count"))
 
 ### secalonic
 cat("secalonic\n")
-
-CompareInitializationMethods(data.to.comp = secalonic,
+expect_true(CompareInitializationMethods(data.to.comp = secalonic,
                              var.dose = "dose",
-                             var.response = "rootl")
+                             var.response = "rootl"))
 
 ### spinach
 cat("spinach\n")
-
-CompareInitializationMethods(data.to.comp = spinach,
+expect_true(CompareInitializationMethods(data.to.comp = spinach,
                              var.ref = "CURVE",
                              var.dose = "DOSE",
-                             var.response = "SLOPE")
+                             var.response = "SLOPE"))
 
 ### terbuthylazin
 cat("terbuthylazin\n")
-
-CompareInitializationMethods(data.to.comp = terbuthylazin,
+expect_true(CompareInitializationMethods(data.to.comp = terbuthylazin,
                              var.dose = "dose",
-                             var.response = "rgr")
+                             var.response = "rgr"))
 
 ### vinclozolin
 cat("vinclozolin\n")
-
-CompareInitializationMethods(data.to.comp = vinclozolin,
+expect_true(CompareInitializationMethods(data.to.comp = vinclozolin,
                              var.ref = "exper",
                              var.dose = "conc",
-                             var.response = "effect")
-
-sink()
-
-# drc.out.saved <- read.csv("tests/testthat/output_drc.Rout.save")
-# drra.out.saved <- read.csv("tests/testthat/output_drra.Rout.save")
-# parameter_comparison.saved <- read.csv("tests/testthat/parameter_comparison.Rout.save")
-#
-# drc.out.new <- read.csv("output_drc.Rout")
-# drra.out.new <- read.csv("output_drra.Rout")
-# parameter_comparison.new <- read.csv("parameter_comparison.Rout")
-#
-# expect_identical(drc.out.new, drc.out.saved)
-# expect_identical(drra.out.new, drra.out.saved)
-# expect_identical(parameter_comparison.new, parameter_comparison.saved)
+                             var.response = "effect"))
+})

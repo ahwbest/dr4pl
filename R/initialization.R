@@ -64,12 +64,18 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     #                 data = data.hill,
     #                 maxit.scale = 500)
 
-    beta.hat <- lm.hill$coefficients
+    # beta.hat <- lm.hill$coefficients
+    #
+    # theta.1.init <- beta.hat[3]
+    # theta.3.init <- beta.hat[2]
+    # theta.2.init <- exp(-beta.hat[1]/theta.3.init)
+    # theta.4.init <- beta.hat[4]
 
-    theta.1.init <- beta.hat[3]
+    beta.hat <- lm.hill.simple$coefficients
+    theta.1.init <- y.max
     theta.3.init <- beta.hat[2]
     theta.2.init <- exp(-beta.hat[1]/theta.3.init)
-    theta.4.init <- beta.hat[4]
+    theta.4.init <- y.min
 
     theta.init <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
   } else if(method.init == "Mead") {

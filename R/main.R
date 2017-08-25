@@ -248,15 +248,17 @@ coef.drra <- function(object, ...) {
 #' plot(ryegrass.drra)
 plot.drra <- function(object, ...) {
 
-  a <- ggplot2::ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
-
+  a <- ggplot2::ggplot(aes(x = object$data$Dose, y = object$data$Response), data = object$data)
   a <- a + stat_function(fun = MeanResponse,
                          args = list(theta = object$parameters),
                          size = 1.2)
-
   a <- a + geom_point(size = I(5), alpha = I(0.8), color = "blue")
 
-  a <- a + labs(title = "Dose response curve")
+  a <- a + labs(x = "Dose",
+                y = "Response",
+                title = "Dose response curve")
+
+  a <- a + theme(plot.title = element_text(hjust = 0.5))
 
   # Set parameters for the grids
   a <- a + theme(strip.text.x = element_text(size = 16))
