@@ -12,6 +12,8 @@ export(MeanResponse)
 export(SquaredLoss)
 export(TukeyBiweightLoss)
 export(drra)
+export(plot.drra)
 import(ggplot2)
 import(graphics)
 import(stats)
+

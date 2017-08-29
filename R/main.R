@@ -246,6 +246,7 @@ coef.drra <- function(object, ...) {
 #' ryegrass.drra <- drra::drra(rootl ~ conc, data = drc::ryegrass)
 #'
 #' plot(ryegrass.drra)
+#' @export
 plot.drra <- function(object, ...) {
 
   a <- ggplot2::ggplot(aes(x = object$data$Dose, y = object$data$Response), data = object$data)
