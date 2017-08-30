@@ -8,6 +8,7 @@
 #' @import graphics
 #' @import ggplot2
 
+#' @param constrained Boolean for whether or not this function is constrained.
 #' @param grad Gradient function
 #' @param init.parm Vector of initial parameters
 #' @param method.init Initialization method
@@ -104,6 +105,7 @@ drra <- function(x, ...) UseMethod("drra")
 #' @describeIn drra Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
 #' @param response Response
+#' @export
 drra.default <- function(dose, response,
                          constrained = FALSE,
                          grad = NULL,
@@ -143,9 +145,10 @@ drra.default <- function(dose, response,
 #' @description A general 4PL model fitting function for analysis of
 #'   dose-response relation.
 #'
-#' @param formula A symbolic description of the model to be fit. Either of the
+#' @param  formula A symbolic description of the model to be fit. Either of the
 #'   form 'response ~ dose' or as a data frame with response values in first
 #'   column and dose values in second column.
+#' @param constrained Boolean for whether or not this function is constrained.
 #' @param data A data frame containing variables in the model.
 #' @param grad A function returning the gradient values for the optimization
 #'   methods "BFGS", "CG" and "L-BFGS-B". If it is NULL, the Nelder-Mead method
@@ -188,7 +191,7 @@ drra.default <- function(dose, response,
 #' @author Hyowon An, Dirk P. Dittmer and J. S. Marron
 #' @seealso \code{\link{print.drra}}
 #' @examples
-#' ryegrass.drra <- drra(rootl ~ conc, data = drc::ryegrass)
+#' ryegrass.drra <- drra(Response ~ Dose, data = sample_data1)
 #'
 #' ryegrass.drra
 #' @author Hyowon An, Dirk P. Dittmer and J. S. Marron
@@ -239,71 +242,77 @@ coef.drra <- function(object, ...) {
 }
 
 #' @description A default plotting function for a `drra' object.
-#' @title print
-#' @name print
+#' @title plot
+#' @name plot.drra
 #' @param object A `drra' object whose mean response function should be plotted.
-#' #@examples
-#' ryegrass.drra <- drra::drra(rootl ~ conc, data = drc::ryegrass)
+#' @param ... All arguments that can normally be passed to plot.
+#' @examples
+#' ryegrass.drra <- drra::drra(Response ~ Dose, data = sample_data_1)
 #'
 #' plot(ryegrass.drra)
+#' @export
 plot.drra <- function(object, ...) {
 
-  a <- ggplot2::ggplot(aes(x = object$data$Dose, y = object$data$Response), data = object$data)
-  a <- a + stat_function(fun = MeanResponse,
+  a <- ggplot2::ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
+
+  a <- a + ggplot2::stat_function(fun = MeanResponse,
                          args = list(theta = object$parameters),
                          size = 1.2)
-  a <- a + geom_point(size = I(5), alpha = I(0.8), color = "blue")
 
-  a <- a + labs(x = "Dose",
-                y = "Response",
-                title = "Dose response curve")
+  a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = "blue")
 
-  a <- a + theme(plot.title = element_text(hjust = 0.5))
+  a <- a + ggplot2::labs(title = "Dose response curve")
 
   # Set parameters for the grids
-  a <- a + theme(strip.text.x = element_text(size = 16))
-  a <- a + theme(panel.grid.minor = element_blank())
-  a <- a + theme(panel.grid.major = element_blank())
-  a <- a + scale_x_log10()
-  a <- a + theme_classic()
-
+  a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
+  a <- a + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
+  a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
+  a <- a + ggplot2::scale_x_log10()
+  a <- a + ggplot2::theme_bw()
   # Set parameters for the titles and text / margin(top, right, bottom, left)
-  a <- a + theme(plot.title = element_text(size = 20, margin = margin(0, 0, 10, 0)))
-  a <- a + theme(axis.title.x = element_text(size = 16, margin = margin(15, 0, 0, 0)))
-  a <- a + theme(axis.title.y = element_text(size = 16, margin = margin(0, 15, 0, 0)))
-  a <- a + theme(axis.text.x = element_text(size = 16))
-  a <- a + theme(axis.text.y = element_text(size = 16))
+  a <- a + ggplot2::theme(plot.title = ggplot2::element_text(size = 20, margin = ggplot2::margin(0, 0, 10, 0)))
+  a <- a + ggplot2::theme(axis.title.x = ggplot2::element_text(size = 16, margin = ggplot2::margin(15, 0, 0, 0)))
+  a <- a + ggplot2::theme(axis.title.y = ggplot2::element_text(size = 16, margin = ggplot2::margin(0, 15, 0, 0)))
+  a <- a + ggplot2::theme(axis.text.x = ggplot2::element_text(size = 16))
+  a <- a + ggplot2::theme(axis.text.y = ggplot2::element_text(size = 16))
 
   return(a)
 }
 
 #' Print the drra object to screen.
 #'
-#' @param x A drra object.
+#' @param object a drra object to be printed
+#' @param ... all normally printable arguments
 #' @examples
-#' ryegrass.drra <- drra(rootl ~ conc,
-#'                       data = drc::ryegrass)
+#' ryegrass.drra <- drra(Response ~ Dose,
+#'                       data = sample_data_1)
 #'
 #' print(ryegrass.drra)
-print.drra <- function(x, ...) {
-
+print.drra <- function(object, ...) {
+  
   cat("Call:\n")
-  print(x$call)
+  print(object$call)
 
   cat("\nCoefficients:\n")
-  print(x$parameters)
+  print(object$parameters)
 }
 
-
-print.summary.drra <- function(x, ...) {
-
+#' Print the drra object summary to screen.
+#' @param object a drra object to be summarized
+#' @param ... all normally printable arguments
+print.summary.drra <- function(object, ...) {
+  
   cat("Call:\n")
-  print(x$call)
+  print(object$call)
   cat("\n")
 
-  printCoefmat(x$coefficients, P.value = TRUE, has.Pvalue = TRUE)
+  printCoefmat(object$coefficients, P.value = TRUE, has.Pvalue = TRUE)
 }
 
+#' Print the drra object summary.
+#' @param object a drra object to be summarized
+#' @param ... all normal summary arguments
+#' @export
 summary.drra <- function(object, ...) {
 
   TAB <- cbind(Estimate = object$parameters,
@@ -317,3 +326,96 @@ summary.drra <- function(object, ...) {
   class(res) <- "summary.drra"
   res
 }
+
+
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_1
+#' @name sample_data_1
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_2
+#' @name sample_data_2
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_3
+#' @name sample_data_3
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_4
+#' @name sample_data_4
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_5
+#' @name sample_data_5
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_6
+#' @name sample_data_6
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_7
+#' @name sample_data_7
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_8
+#' @name sample_data_8
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_9
+#' @name sample_data_9
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_10
+#' @name sample_data_10
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_11
+#' @name sample_data_11
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_12
+#' @name sample_data_12
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title sample_data_13
+#' @name sample_data_13
+#' @docType data
+#' @keywords sample_data
+NULL
