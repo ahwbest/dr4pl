@@ -253,7 +253,7 @@ coef.drra <- function(object, ...) {
 #' @export
 plot.drra <- function(object, ...) {
 
-  a <- ggplot2::ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
+  a <- ggplot2::ggplot(aes(x = object$data$Dose, y = object$data$Response), data = object$data)
 
   a <- a + ggplot2::stat_function(fun = MeanResponse,
                          args = list(theta = object$parameters),
@@ -261,7 +261,10 @@ plot.drra <- function(object, ...) {
 
   a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = "blue")
 
-  a <- a + ggplot2::labs(title = "Dose response curve")
+  a <- a + ggplot2::labs(title = "Dose response curve",
+                         x = "Dose",
+                         y = "Response")
+  
 
   # Set parameters for the grids
   a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
