@@ -4,17 +4,19 @@
 \alias{print.drra}
 \title{Print the drra object to screen.}
 \usage{
-\method{print}{drra}(x, ...)
+\method{print}{drra}(object, ...)
 }
 \arguments{
-\item{x}{A drra object.}
+\item{object}{a drra object to be printed}
+
+\item{...}{all normally printable arguments}
 }
 \description{
 Print the drra object to screen.
 }
 \examples{
-ryegrass.drra <- drra(rootl ~ conc,
-                      data = drc::ryegrass)
+ryegrass.drra <- drra(Response ~ Dose,
+                      data = sample_data_1)
 
 print(ryegrass.drra)
 }
