@@ -104,6 +104,7 @@ drra <- function(x, ...) UseMethod("drra")
 #' @describeIn drra Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
 #' @param response Response
+#' @export
 drra.default <- function(dose, response,
                          constrained = FALSE,
                          grad = NULL,
@@ -143,7 +144,7 @@ drra.default <- function(dose, response,
 #' @description A general 4PL model fitting function for analysis of
 #'   dose-response relation.
 #'
-#' @param formula A symbolic description of the model to be fit. Either of the
+#' @param  formula A symbolic description of the model to be fit. Either of the
 #'   form 'response ~ dose' or as a data frame with response values in first
 #'   column and dose values in second column.
 #' @param data A data frame containing variables in the model.

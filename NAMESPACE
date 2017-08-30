@@ -2,6 +2,7 @@
 
 S3method(coef,drra)
 S3method(drra,formula)
+S3method(drra,default)
 export(AbsoluteLoss)
 export(DerivativeF)
 export(ErrFcn)
