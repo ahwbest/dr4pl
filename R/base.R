@@ -10,8 +10,12 @@
 #' @export
 MeanResponse <- function(x, theta) {
 
+  if(theta[2] < 0) {
+
+    stop("The IC50 parameter estimates become negative during the optimization process.")
+  }
+
   f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-  #f <- theta[1] + (theta[4] - theta[1])/(1 + exp(theta[3]*(log(x) - log(theta[2]))))
 
   return(f)
 }
@@ -33,6 +37,7 @@ SquaredLoss <- function(r) {
 #' @return Absolute valued residuals
 #' @export
 AbsoluteLoss <- function(r) {
+
   return(abs(r))
 }
 
@@ -42,6 +47,7 @@ AbsoluteLoss <- function(r) {
 #' @return result: Huber's loss function values evaluated at residuals r.
 #' @export
 HuberLoss <- function(r) {
+
   # This value should be chosen in an adaptive fashion.
   const <- 1.345
 
@@ -109,6 +115,10 @@ ErrFcn <- function(method.robust) {
     n <- length(y)
     f <- MeanResponse(x, theta)
 
+    if(anyNA(f)) {
+      stop("Some of the evaluated function values are NA's.")
+    }
+
     return(sum(loss.fcn(y - f))/n)
   }
 
@@ -124,6 +134,7 @@ ErrFcn <- function(method.robust) {
 #' @return Gradient values.
 #' @export
 GradientFunction <- function(theta, dose, response) {
+
   x <- dose
   y <- response
 
@@ -171,7 +182,7 @@ GradientFunction <- function(theta, dose, response) {
 #' Compute the Jacobian matrix
 #
 #' @param theta Parameters
-#' @param x FILL ME OUT!
+#' @param x Dose values
 #'
 #' @return Jacobian matrix
 #' @export

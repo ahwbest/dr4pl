@@ -8,7 +8,6 @@
 #' @import graphics
 #' @import ggplot2
 
-
 #' @param constrained Boolean for whether or not this function is constrained.
 #' @param grad Gradient function
 #' @param init.parm Vector of initial parameters
@@ -60,13 +59,26 @@ drraEst <- function(dose, response,
 
     names(theta.init) <- c("Left limit", "IC50", "Slope", "Right limit")
 
-    drr <- optim(par = theta.init,
-                 fn = err.fcn,
-                 gr = grad,
-                 method = method.optim,
-                 x = x,
-                 y = y,
-                 control = list(trace = trace))
+    # drr <- optim(par = theta.init,
+    #              fn = err.fcn,
+    #              gr = grad,
+    #              method = method.optim,
+    #              x = x,
+    #              y = y,
+    #              control = list(trace = trace))
+
+    constr.matr <- matrix(c(0, 1, 0, 0), nrow = 1, ncol = 4)
+    constr.vec <- 0
+
+    drr <- constrOptim(theta = theta.init,
+                       f = err.fcn,
+                       grad = grad,
+                       ui = constr.matr,
+                       ci = constr.vec,
+                       method = method.optim,
+                       control = list(trace = trace),
+                       x = x,
+                       y = y)
 
     theta <- drr$par
     error <- drr$value
@@ -74,7 +86,10 @@ drraEst <- function(dose, response,
 
   data.drr <- data.frame(Dose = dose, Response = response)
 
-  list(data = data.drr,
+  convergence <- TRUE
+
+  list(convergence = convergence,
+       data = data.drr,
        dose = x,
        response = y,
        parameters = theta,
@@ -87,10 +102,10 @@ drraEst <- function(dose, response,
 #' @export
 drra <- function(x, ...) UseMethod("drra")
 
-
 #' @describeIn drra Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
 #' @param response Response
+#' @export
 drra.default <- function(dose, response,
                          constrained = FALSE,
                          grad = NULL,
@@ -130,7 +145,7 @@ drra.default <- function(dose, response,
 #' @description A general 4PL model fitting function for analysis of
 #'   dose-response relation.
 #'
-#' @param formula A symbolic description of the model to be fit. Either of the
+#' @param  formula A symbolic description of the model to be fit. Either of the
 #'   form 'response ~ dose' or as a data frame with response values in first
 #'   column and dose values in second column.
 #' @param constrained Boolean for whether or not this function is constrained.
@@ -235,6 +250,7 @@ coef.drra <- function(object, ...) {
 #' ryegrass.drra <- drra::drra(Response ~ Dose, data = sample_data_1)
 #'
 #' plot(ryegrass.drra)
+#' @export
 plot.drra <- function(object, ...) {
 
   a <- ggplot2::ggplot(aes(x = object$Data$Dose, y = object$Data$Response), data = object$data)
@@ -253,7 +269,6 @@ plot.drra <- function(object, ...) {
   a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
   a <- a + ggplot2::scale_x_log10()
   a <- a + ggplot2::theme_bw()
-
   # Set parameters for the titles and text / margin(top, right, bottom, left)
   a <- a + ggplot2::theme(plot.title = ggplot2::element_text(size = 20, margin = ggplot2::margin(0, 0, 10, 0)))
   a <- a + ggplot2::theme(axis.title.x = ggplot2::element_text(size = 16, margin = ggplot2::margin(15, 0, 0, 0)))
@@ -261,7 +276,7 @@ plot.drra <- function(object, ...) {
   a <- a + ggplot2::theme(axis.text.x = ggplot2::element_text(size = 16))
   a <- a + ggplot2::theme(axis.text.y = ggplot2::element_text(size = 16))
 
-  plot(a)
+  return(a)
 }
 
 #' Print the drra object to screen.
@@ -274,6 +289,7 @@ plot.drra <- function(object, ...) {
 #'
 #' print(ryegrass.drra)
 print.drra <- function(object, ...) {
+  
   cat("Call:\n")
   print(object$call)
 
@@ -285,6 +301,7 @@ print.drra <- function(object, ...) {
 #' @param object a drra object to be summarized
 #' @param ... all normally printable arguments
 print.summary.drra <- function(object, ...) {
+  
   cat("Call:\n")
   print(object$call)
   cat("\n")
