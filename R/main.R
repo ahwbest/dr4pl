@@ -267,7 +267,7 @@ plot.drra <- function(object, ...) {
   a <- a + theme(panel.grid.minor = element_blank())
   a <- a + theme(panel.grid.major = element_blank())
   a <- a + scale_x_log10()
-  a <- a + theme_bw()
+  a <- a + theme_classic()
 
   # Set parameters for the titles and text / margin(top, right, bottom, left)
   a <- a + theme(plot.title = element_text(size = 20, margin = margin(0, 0, 10, 0)))
@@ -276,7 +276,7 @@ plot.drra <- function(object, ...) {
   a <- a + theme(axis.text.x = element_text(size = 16))
   a <- a + theme(axis.text.y = element_text(size = 16))
 
-  a
+  return(a)
 }
 
 #' Print the drra object to screen.
