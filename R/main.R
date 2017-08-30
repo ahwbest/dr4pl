@@ -1,6 +1,6 @@
-#' @name drra
+#' @name DR4PL
 #' @docType package
-#' @title  Dose response relation analysis (drra)
+#' @title Dose response data analysis using the 4 Parameter Logistic model
 #' @description Main functions related to fitting
 #' @author Hyowon An, Lineberger Comprehensive Cancer Center
 #' @details Last updated: 09/19/2016
