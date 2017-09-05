@@ -10,6 +10,11 @@
 #' @export
 MeanResponse <- function(x, theta) {
 
+  if(any(is.na(theta))) {
+    
+    stop("One of the parameter values is NA.")
+  }
+  
   if(theta[2] < 0) {
 
     stop("The IC50 parameter estimates become negative during the optimization process.")
