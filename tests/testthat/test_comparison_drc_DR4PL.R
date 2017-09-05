@@ -7,11 +7,11 @@ library(RColorBrewer)
 library(drra)
 library(testthat)
 
-CompareInitializationMethods <- function(data.to.comp,
-                                         ind.plot = FALSE,
-                                         var.dose,
-                                         var.response,
-                                         var.ref = NULL) {
+Compare.drc.DR4PL <- function(data.to.comp,
+                              ind.plot = FALSE,
+                              var.dose,
+                              var.response,
+                              var.ref = NULL) {
   # Compare different initialization methods.
   #
   # Args:
@@ -138,7 +138,7 @@ CompareInitializationMethods <- function(data.to.comp,
 test_that("The output of drc and drra should be the same.", {
 
 cat("acidiq\n")
-expect_true(CompareInitializationMethods(data.to.comp = acidiq,
+expect_true(Compare.drc.DR4PL(data.to.comp = acidiq,
                              var.ref = "pct",
                              var.dose = "dose",
                              var.response = "rgr"))
@@ -146,127 +146,127 @@ expect_true(CompareInitializationMethods(data.to.comp = acidiq,
 ### algae
 cat("algae\n")
 # Plot fitted curves
-expect_true(CompareInitializationMethods(data.to.comp = algae,
+expect_true(Compare.drc.DR4PL(data.to.comp = algae,
                              var.dose = "conc",
                              var.response = "vol"))
 
 ### etmotc
 cat("etmotc\n")
-expect_true(CompareInitializationMethods(data.to.comp = etmotc,
+expect_true(Compare.drc.DR4PL(data.to.comp = etmotc,
                              var.ref = "pct1",
                              var.dose = "dose1",
                              var.response = "rgr1"))
 
 ### G.aparine
 cat("G.aparine\n")
-expect_true(CompareInitializationMethods(data.to.comp = G.aparine,
+expect_true(Compare.drc.DR4PL(data.to.comp = G.aparine,
                              var.ref = "treatment",
                              var.dose = "dose",
                              var.response = "drymatter"))
 
 ### glymet
 cat("glylmet\n")
-expect_true(CompareInitializationMethods(data.to.comp = glymet,
+expect_true(Compare.drc.DR4PL(data.to.comp = glymet,
                              var.ref = "pct",
                              var.dose = "dose",
                              var.response = "rgr"))
 
 ### heartrate
 cat("heartrate\n")
-expect_true(CompareInitializationMethods(data.to.comp = heartrate,
+expect_true(Compare.drc.DR4PL(data.to.comp = heartrate,
                              var.dose = "pressure",
                              var.response = "rate"))
 
 ### leaflength
 cat("leaflength\n")
-expect_true(CompareInitializationMethods(data.to.comp = leaflength,
+expect_true(Compare.drc.DR4PL(data.to.comp = leaflength,
                              var.dose = "Dose",
                              var.response = "DW"))
 
 ### lepidium
 cat("lepidium\n")
-expect_true(CompareInitializationMethods(data.to.comp = lepidium,
+expect_true(Compare.drc.DR4PL(data.to.comp = lepidium,
                              var.dose = "conc",
                              var.response = "weight"))
 
 ### lettuce
 cat("lettuce\n")
-expect_true(CompareInitializationMethods(data.to.comp = lettuce,
+expect_true(Compare.drc.DR4PL(data.to.comp = lettuce,
                              var.dose = "conc",
                              var.response = "weight"))
 
 ### mecter
 cat("mecter\n")
-expect_true(CompareInitializationMethods(data.to.comp = mecter,
+expect_true(Compare.drc.DR4PL(data.to.comp = mecter,
                              var.ref = "pct",
                              var.dose = "dose",
                              var.response = "rgr"))
 
 ### M.bahia
 cat("M.bahia\n")
-expect_true(CompareInitializationMethods(data.to.comp = M.bahia,
+expect_true(Compare.drc.DR4PL(data.to.comp = M.bahia,
                              var.dose = "conc",
                              var.response = "dryweight"))
 
 ### nasturtium
 cat("nasturtium\n")
-expect_true(CompareInitializationMethods(data.to.comp = nasturtium,
+expect_true(Compare.drc.DR4PL(data.to.comp = nasturtium,
                              var.dose = "conc",
                              var.response = "weight"))
 
 ### O.mykiss
 cat("O.mykiss\n")
-expect_true(CompareInitializationMethods(data.to.comp = O.mykiss,
+expect_true(Compare.drc.DR4PL(data.to.comp = O.mykiss,
                              var.dose = "conc",
                              var.response = "weight"))
 
 ### P.promelas
 cat("P.promelas\n")
-expect_true(CompareInitializationMethods(data.to.comp = P.promelas,
+expect_true(Compare.drc.DR4PL(data.to.comp = P.promelas,
                              var.dose = "conc",
                              var.response = "dryweight"))
 
 ### ryegrass
 cat("ryegrass\n")
-expect_true(CompareInitializationMethods(data.to.comp = ryegrass,
+expect_true(Compare.drc.DR4PL(data.to.comp = ryegrass,
                              var.dose = "conc",
                              var.response = "rootl"))
 
 ### S.alba
 cat("S.alba\n")
-expect_true(CompareInitializationMethods(data.to.comp = S.alba,
+expect_true(Compare.drc.DR4PL(data.to.comp = S.alba,
                              var.ref = "Herbicide",
                              var.dose = "Dose",
                              var.response = "DryMatter"))
 
 ### S.capricornutum
 cat("S.capricornutum\n")
-expect_true(CompareInitializationMethods(data.to.comp = S.capricornutum,
+expect_true(Compare.drc.DR4PL(data.to.comp = S.capricornutum,
                              var.dose = "conc",
                              var.response = "count"))
 
 ### secalonic
 cat("secalonic\n")
-expect_true(CompareInitializationMethods(data.to.comp = secalonic,
+expect_true(Compare.drc.DR4PL(data.to.comp = secalonic,
                              var.dose = "dose",
                              var.response = "rootl"))
 
 ### spinach
 cat("spinach\n")
-expect_true(CompareInitializationMethods(data.to.comp = spinach,
+expect_true(Compare.drc.DR4PL(data.to.comp = spinach,
                              var.ref = "CURVE",
                              var.dose = "DOSE",
                              var.response = "SLOPE"))
 
 ### terbuthylazin
 cat("terbuthylazin\n")
-expect_true(CompareInitializationMethods(data.to.comp = terbuthylazin,
+expect_true(Compare.drc.DR4PL(data.to.comp = terbuthylazin,
                              var.dose = "dose",
                              var.response = "rgr"))
 
 ### vinclozolin
 cat("vinclozolin\n")
-expect_true(CompareInitializationMethods(data.to.comp = vinclozolin,
+expect_true(Compare.drc.DR4PL(data.to.comp = vinclozolin,
                              var.ref = "exper",
                              var.dose = "conc",
                              var.response = "effect"))

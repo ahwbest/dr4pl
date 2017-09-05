@@ -19,4 +19,3 @@ Value of the sum of squared residuals
 \description{
 Returns an error function for given robust fitting method
 }
-

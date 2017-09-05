@@ -17,4 +17,3 @@ Predicted response values.
 \description{
 Compute predicted responses.
 }
-

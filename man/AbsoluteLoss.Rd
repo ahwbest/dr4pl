@@ -15,4 +15,3 @@ Absolute valued residuals
 \description{
 Absolute values of residuals
 }
-

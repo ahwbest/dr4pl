@@ -15,4 +15,3 @@ result: Tukey's biweight loss function values evaluated at residuals r.
 \description{
 Values of Tukey's biweight loss function evaluated at residuals r.
 }
-

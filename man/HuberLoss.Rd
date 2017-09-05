@@ -15,4 +15,3 @@ result: Huber's loss function values evaluated at residuals r.
 \description{
 Values of Huber's loss function evaluated at residuals r.
 }
-

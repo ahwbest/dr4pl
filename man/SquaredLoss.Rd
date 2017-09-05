@@ -15,4 +15,3 @@ Squared residuals
 \description{
 Squares of residuals
 }
-
