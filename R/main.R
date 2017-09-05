@@ -76,7 +76,6 @@ drraEst <- function(dose, response,
                        ui = constr.matr,
                        ci = constr.vec,
                        method = method.optim,
-                       control = list(trace = trace),
                        x = x,
                        y = y)
 
