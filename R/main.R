@@ -57,7 +57,7 @@ drraEst <- function(dose, response,
     # Set initial values of parameters
     theta.init <- FindInitialParms(x, y, method.init, method.robust)
 
-    names(theta.init) <- c("Left limit", "IC50", "Slope", "Right limit")
+    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
 
     # drr <- optim(par = theta.init,
     #              fn = err.fcn,
@@ -136,8 +136,7 @@ drra.default <- function(dose, response,
   drra.obj$call <- match.call()
 
   class(drra.obj) <- "drra"
-  drra.obj
-
+  return(drra.obj)
 }
 
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
@@ -188,7 +187,7 @@ drra.default <- function(dose, response,
 #'   method. This package implements 4 loss functions: sum of squares loss,
 #'   absolute deviation loss, Huber's loss and Tukey's biweight loss. Each of
 #'   loss function is explained in detail in the vignette.
-#' @author Hyowon An, Dirk P. Dittmer and J. S. Marron
+#' @author Hyowon An, J. S. Marron and Dirk P. Dittmer
 #' @seealso \code{\link{print.drra}}
 #' @examples
 #' ryegrass.drra <- drra(Response ~ Dose, data = sample_data1)
@@ -225,8 +224,9 @@ drra.formula <- function(formula,
 
   est$call <- match.call()
   est$formula <- formula
-  names(est$parameters) <- c("Left limit", "IC50", "Slope", "Right limit")
-  est
+  names(est$parameters) <- c("Upper limit", "IC50", "Slope", "Lower limit")
+  
+  return(est)
 }
 
 #' @description Coefficient of a `drra' object
@@ -238,6 +238,7 @@ drra.formula <- function(formula,
 #' @return A vector of parameters
 #' @export
 coef.drra <- function(object, ...) {
+  
   object$parameters
 }
 
@@ -269,6 +270,7 @@ plot.drra <- function(object, ...) {
   a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
   a <- a + ggplot2::scale_x_log10()
   a <- a + ggplot2::theme_bw()
+  
   # Set parameters for the titles and text / margin(top, right, bottom, left)
   a <- a + ggplot2::theme(plot.title = ggplot2::element_text(size = 20, margin = ggplot2::margin(0, 0, 10, 0)))
   a <- a + ggplot2::theme(axis.title.x = ggplot2::element_text(size = 16, margin = ggplot2::margin(15, 0, 0, 0)))
