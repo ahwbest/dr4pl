@@ -11,6 +11,7 @@
 #' @export
 FindInitialParms <- function(x, y, method.init, method.robust) {
 
+
   scale.inc <- 0.001
   y.range <- range(y)
   len.y.range <- scale.inc * diff(y.range)
@@ -38,9 +39,9 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
                             y.max.y = 1/(y.max - y),
                             y.y.min = 1/(y - y.min))
 
-    data.hill <- subset(data.hill, subset = x.log != -Inf)
+    data.hill <- subset(data.hill, subset = x.log != -Inf) #should take out any x=0
 
-    lm.hill <- lm(y.logit ~ x.log + y.max.y + y.y.min, data = data.hill)
+    lm.hill <- lm(y.logit ~ x.log + y.max.y + y.y.min, data = data.hill) #paper makes no mention of y.max.y and y.y.min in the regression model
     lm.hill.simple <- lm(y.logit ~ x.log, data = data.hill)
 
     # summary(lm.hill)

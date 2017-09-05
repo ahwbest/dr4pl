@@ -19,4 +19,3 @@ Gradient values.
 \description{
 Compute gradient values.
 }
-

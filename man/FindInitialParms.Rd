@@ -21,4 +21,3 @@ theta.IC50.slope Parameter estimates of the IC50 and slope
 \description{
 Args:
 }
-

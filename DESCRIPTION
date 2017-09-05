@@ -10,7 +10,7 @@ License: GPL
 LazyData: TRUE
 URL: https://github.com/ahwbest/DR4PL
 BugReports: https://github.com/ahwbest/DR4PL/issues
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Imports:
     ggplot2,
     graphics,

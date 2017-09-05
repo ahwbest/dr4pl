@@ -9,7 +9,7 @@ DerivativeF(theta, x)
 \arguments{
 \item{theta}{Parameters}
 
-\item{x}{FILL ME OUT!}
+\item{x}{Dose values}
 }
 \value{
 Jacobian matrix
@@ -17,4 +17,3 @@ Jacobian matrix
 \description{
 Compute the Jacobian matrix
 }
-
