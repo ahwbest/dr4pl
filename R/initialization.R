@@ -11,83 +11,89 @@
 #' @export
 FindInitialParms <- function(x, y, method.init, method.robust) {
 
-
-  scale.inc <- 0.001
-  y.range <- range(y)
-  len.y.range <- scale.inc * diff(y.range)
-
-  y.max <- max(y) + len.y.range
-  y.min <- min(y) - len.y.range
-
   ### Check whether input are appropriate.
   if(length(x) == 0 || length(y) == 0 || length(x) != length(y)) {
 
     stop("The same numbers of dose and response values should be supplied.")
   }
-  
-  print(method.init)
 
-  ### If theta.1 < theta.4, then the curve is a growth curve.
-  ### If theta.1 > theta.4, then the curve is a decline curve.
+  ### Logistic method
   if(method.init == "logistic") {
+  
+    y.range <- diff(range(y))
+    
+    theta.1.4.zero <- 0.001*y.range  # This value will be added to the maximum and minimum
+    theta.1.4.grid.size <- 0.025*y.range  # This value is the size of the grid
+    
+    y.max <- max(y) + theta.1.4.zero
+    y.min <- min(y) - theta.1.4.zero
 
-    y.logit <- log((y - y.min)/(y.max - y))  # Logit transformed responses
-    x.log <- log(x)  # Log transformed doses
+    grid <- c(-2*theta.1.4.grid.size, -theta.1.4.grid.size, 0, theta.1.4.grid.size,
+              2*theta.1.4.grid.size)
+    
+    theta.1.grid <- y.max + grid
+    theta.4.grid <- y.min + grid
+    
+    theta.mat <- matrix(NA, nrow = length(grid)^2, ncol = 4)
+    i.row <- 1
 
-    data.hill <- data.frame(y.logit = y.logit,
-                            x.log = x.log,
-                            y.max.y = 1/(y.max - y),
-                            y.y.min = 1/(y - y.min))
+    for(theta.1.init in theta.1.grid) {
+      
+      for(theta.4.init in theta.4.grid) {
+        
+        data.hill <- data.frame(x = x, y = y)
+        data.hill <- subset(data.hill, subset = (data.hill$y<theta.1.init)&
+                                                (data.hill$y>theta.4.init)&
+                                                (data.hill$x>0))
+        
+        # There are not enough data to estimate paramter estimates
+        if(nrow(data.hill) <= 4) {
+          
+          next
+        }
+        
+        data.hill$y.logit <- log((data.hill$y - theta.4.init)/(theta.1.init - data.hill$y))  # Logit transformed responses
+        data.hill$x.log <- log(data.hill$x)  # Log transformed doses
+        
+        lm.hill <- lm(y.logit ~ x.log, data = data.hill)
+        
+        beta.hat <- lm.hill$coefficients
+        theta.3.init <- beta.hat[2]
+        theta.2.init <- exp(-beta.hat[1]/theta.3.init)
+        
+        theta.mat[i.row, ] <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
+        i.row <- i.row + 1
+      }
+    }
+    
+    theta.mat <- theta.mat[!is.na(theta.mat[, 3]), ]
 
-    data.hill <- subset(data.hill, subset = x.log != -Inf) #should take out any x=0
+    if(nrow(theta.mat) == 0) {
+      
+      stop("The logistic method is not applicable for the inupt data. Please try
+            Mead's method instead.")
+    }
 
-    lm.hill <- lm(y.logit ~ x.log + y.max.y + y.y.min, data = data.hill) #paper makes no mention of y.max.y and y.y.min in the regression model
-    lm.hill.simple <- lm(y.logit ~ x.log, data = data.hill)
-
-    # summary(lm.hill)
-    # summary(lm.hill.simple)
-
-    # plot(x = data.hill$x.log, y = data.hill$y.logit, pch = 16)
-    # abline(a = lm.hill$coefficients[1], b = lm.hill$coefficients[2],
-    #        col = "blue", lwd = 2)
-    # plot(x = data.hill$x.log, y = data.hill$y.logit - data.hill)
-    # abline(a = lm.hill.simple$coefficients[1], b = lm.hill.simple$coefficients[2],
-    #        col = "red", lwd = 2)
-
-    # Fully estimate the IC50 and slope parameters first, and then others
-    data.resid <- data.frame(res = lm.hill.simple$residuals,
-                             y.max.y = data.hill$y.max.y,
-                             y.y.min = data.hill$y.y.min)
-    lm.resid <- lm(res ~ y.max.y + y.y.min, data = data.resid)
-
-    # plot(x = log10(x), y = y, pch = 16)
-
-    #lm.hill <- ltsReg(y.logit ~ x.log + y.max.y + y.y.min, data = data.hill)
-    #lm.hill <- lmrob(y.logit ~ x.log + y.max.y + y.y.min,
-    #                 data = data.hill,
-    #                 maxit.scale = 500)
-
-    # beta.hat <- lm.hill$coefficients
-    #
-    # theta.1.init <- beta.hat[3]
-    # theta.3.init <- beta.hat[2]
-    # theta.2.init <- exp(-beta.hat[1]/theta.3.init)
-    # theta.4.init <- beta.hat[4]
-
-    beta.hat <- lm.hill.simple$coefficients
-    theta.1.init <- y.max
-    theta.3.init <- beta.hat[2]
-    theta.2.init <- exp(-beta.hat[1]/theta.3.init)
-    theta.4.init <- y.min
-
-    theta.init <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
+    err.fcn <- ErrFcn(method.robust)
+    errors <- rep(0, nrow(theta.mat))   # To save the error values
+    
+    for(i in 1:nrow(theta.mat)) {
+      
+      theta <- theta.mat[i, ]
+      errors[i] <- err.fcn(theta, x, y)
+    }
+    
+    theta.init <- theta.mat[which.min(errors), ]
+  
+  ### Mead's method
   } else if(method.init == "Mead") {
-
+    
     log.x <- log10(x)
-    y.lower.bd <- y.min
-    y.zero.low <- y - y.lower.bd
+    y.zero.low <- y
+    # y.lower.bd <- y.min
+    # y.zero.low <- y - y.lower.bd
 
-    mu.3.vec <- 10^seq(from = 0.1, to = 2, by = 0.1)
+    mu.3.vec <- 10^seq(from = 0.1, to = 2.5, by = 0.1)
     theta.mat <- matrix(0, nrow = length(mu.3.vec), ncol = 4)
 
     for(i in 1:length(mu.3.vec)) {
@@ -114,8 +120,8 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       theta.mat[i, 3] <- -log10(mu.3)
     }
 
-    theta.mat[, 1] <- theta.mat[, 1] + y.lower.bd
-    theta.mat[, 4] <- theta.mat[, 4] + y.lower.bd
+    theta.mat[, 1] <- theta.mat[, 1]# + y.lower.bd
+    theta.mat[, 4] <- theta.mat[, 4]# + y.lower.bd
 
     colnames(theta.mat) <- c("Theta1", "Theta2", "Theta3", "Theta4")
     theta.mat <- theta.mat[theta.mat[, 3] != 0, ]
