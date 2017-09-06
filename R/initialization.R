@@ -135,7 +135,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       errors[i] <- err.fcn(theta, x, y)
     }
 
-    theta.init <- theta.matr[which.min(errors), ]
+    theta.init <- theta.mat[which.min(errors), ]
   }
 
   names(theta.init) <- c("theta.1", "theta.2", "theta.3", "theta.4")
