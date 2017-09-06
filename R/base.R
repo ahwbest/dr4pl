@@ -49,11 +49,12 @@ AbsoluteLoss <- function(r) {
 #' Values of Huber's loss function evaluated at residuals r.
 #
 #' @param r Residuals
-#' @return result: Huber's loss function values evaluated at residuals r.
+#' @return Huber's loss function values evaluated at residuals r.
 #' @export
 HuberLoss <- function(r) {
 
-  # This value should be chosen in an adaptive fashion.
+  # The value 1.345 was suggested by Huber (1964).
+  # See Huber, P. J. (1964). Robust Estimation of a Location Parameter. Annals of Statistics 53(1)
   const <- 1.345
 
   ret.val <- r^2  # Vector of results
@@ -74,7 +75,8 @@ HuberLoss <- function(r) {
 #' @export
 TukeyBiweightLoss <- function(r) {
 
-  const <- 1.345
+  # The value 4.685 was suggested by Tukey.
+  const <- 4.685
 
   ret.val <- (r^6)/(const^4) - 3*(r^4)/(const^2) + 3*r^2
 
