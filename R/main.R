@@ -423,3 +423,31 @@ NULL
 #' @docType data
 #' @keywords sample_data
 NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title Single High Outlier
+#' @name drc_error_1
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title Multiple High Outliers at Different measurements 
+#' @name drc_error_2
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title Support Problem and Outliers at a Single Dose Level
+#' @name drc_error_3
+#' @docType data
+#' @keywords sample_data
+NULL
+#' These are a handful of experimentally derived datasets from the wet-laboratory.
+#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
+#' @title Support Problem
+#' @name drc_error_4
+#' @docType data
+#' @keywords sample_data
+NULL
