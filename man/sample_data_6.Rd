@@ -9,4 +9,3 @@ These are a handful of experimentally derived datasets from the wet-laboratory.
 These all have numerical errors in other dose-response curve-packages, but not using these methods.
 }
 \keyword{sample_data}
-
