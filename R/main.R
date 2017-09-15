@@ -8,6 +8,45 @@
 #' @import graphics
 #' @import ggplot2
 
+#' @description Compute the confidence intervals of parameter estimates of a fitted
+#'   model.
+#' @param object An object of the dr4pl class.
+#' @return A matrix of the confidence intervals in which each row represents a
+#'   parameter and each column represents the lower and upper bounds of the
+#'   confidence intervals of the corresponding parameters.
+#' @details This function computes the confidence intervals of the parameters of the
+#'   4PL model based on the second order approximation to the Hessian matrix of the
+#'   loss function of the model. Refer to Subsection 5.2.2 of 
+#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
+#'   Probability and Mathematical Statistics: Probability and Mathematical
+#'   Statistics. John Wiley & Sons, Inc., New York.
+#' @examples
+#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
+#'
+#' confint(obj.dr4pl)
+#' @author Hyowon An and Justin T. Landis
+#' @export
+confint.dr4pl <- function(object, ...) {
+  
+  x <- object$data$Dose
+  y <- object$data$Response
+  theta <- object$parameters
+  
+  n <- length(y)  # Number of observations in data
+  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+  jacobian <- DerivativeF(theta, x)  # Jacobian matrix
+  
+  C.hat.inv <- solve(Hessian(theta, x, y)/2)
+  s <- sqrt(sum((y - f)^2)/(n - 4))
+  
+  q.t <- qt(0.975, df = n - 4)
+  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
+  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
+  
+  return(ci)
+}
+
+
 #' @param constrained Boolean for whether or not this function is constrained.
 #' @param grad Gradient function
 #' @param init.parm Vector of initial parameters
@@ -101,7 +140,7 @@ dr4plEst <- function(dose, response,
 #' @export
 dr4pl <- function(x, ...) UseMethod("dr4pl")
 
-#' @describeIn dr4pl Used in the default case, supplying a single dose and response variable
+#' @describeIn  dr4pl Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
 #' @param response Response
 #' @export
@@ -119,7 +158,6 @@ dr4pl.default <- function(dose, response,
   # if(class(dose) != "numeric" || class(response) != "numeric") {
   #   stop("Both doses and responses should be given numeric values.")
   # }
-
   dose <- as.numeric(dose)
   response <- as.numeric(response)
 
@@ -212,14 +250,14 @@ dr4pl.formula <- function(formula,
   response <- model.response(mf)
 
   est <- dr4pl.default(dose = dose, response = response,
-                      constrained = constrained,
-                      grad = grad,
-                      init.parm = init.parm,
-                      method.init = method.init,
-                      method.optim = method.optim,
-                      method.robust = method.robust,
-                      trace = trace,
-                      ...)
+                       constrained = constrained,
+                       grad = grad,
+                       init.parm = init.parm,
+                       method.init = method.init,
+                       method.optim = method.optim,
+                       method.robust = method.robust,
+                       trace = trace,
+                       ...)
 
   est$call <- match.call()
   est$formula <- formula
@@ -265,7 +303,6 @@ plot.dr4pl <- function(object, ...) {
                          x = "Dose",
                          y = "Response")
   
-
   # Set parameters for the grids
   a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
   a <- a + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
@@ -330,7 +367,6 @@ summary.dr4pl <- function(object, ...) {
   class(res) <- "summary.dr4pl"
   res
 }
-
 
 #' These are a handful of experimentally derived datasets from the wet-laboratory.
 #' These all have numerical errors in other dose-response curve-packages, but not using these methods.
