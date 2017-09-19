@@ -31,12 +31,12 @@ confint.dr4pl <- function(object, ...) {
   x <- object$data$Dose
   y <- object$data$Response
   theta <- object$parameters
+  hessian <- object$hessian
   
   n <- length(y)  # Number of observations in data
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
-  jacobian <- DerivativeF(theta, x)  # Jacobian matrix
-  
-  C.hat.inv <- solve(Hessian(theta, x, y)/2)
+  f <- MeanResponse(x, theta)
+
+  C.hat.inv <- solve(hessian/2)
   s <- sqrt(sum((y - f)^2)/(n - 4))
   
   q.t <- qt(0.975, df = n - 4)
@@ -45,7 +45,6 @@ confint.dr4pl <- function(object, ...) {
   
   return(ci)
 }
-
 
 #' @param constrained Boolean for whether or not this function is constrained.
 #' @param grad Gradient function
@@ -77,34 +76,33 @@ dr4plEst <- function(dose, response,
 
   if(!is.null(init.parm)) {  # When initial parameter estimates are given
 
+    # Use given initial parameter estimates
     theta.init <- init.parm
+    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
 
+    constr.matr <- matrix(c(0, 1, 0, 0), nrow = 1, ncol = 4)
+    constr.vec <- 0
+    
     # Fit a dose-response model
-    drr <- optim(par = theta.init,
-                 fn = err.fcn,
-                 gr = grad,
-                 method = method.optim,
-                 x = x,
-                 y = y,
-                 control = list(trace = trace))
-
-    theta <- drr$par
+    drr <- constrOptim(theta = theta.init,
+                       f = err.fcn,
+                       grad = grad,
+                       ui = constr.matr,
+                       ci = constr.vec,
+                       method = method.optim,
+                       hessian = TRUE,
+                       x = x,
+                       y = y)
+    
     error <- drr$value
+    hessian <- drr$hessian
+    theta <- drr$par
 
   } else {  # When initial parameter values are not given
 
     # Set initial values of parameters
     theta.init <- FindInitialParms(x, y, method.init, method.robust)
-
     names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
-
-    # drr <- optim(par = theta.init,
-    #              fn = err.fcn,
-    #              gr = grad,
-    #              method = method.optim,
-    #              x = x,
-    #              y = y,
-    #              control = list(trace = trace))
 
     constr.matr <- matrix(c(0, 1, 0, 0), nrow = 1, ncol = 4)
     constr.vec <- 0
@@ -115,11 +113,14 @@ dr4plEst <- function(dose, response,
                        ui = constr.matr,
                        ci = constr.vec,
                        method = method.optim,
+                       hessian = TRUE,
                        x = x,
                        y = y)
 
-    theta <- drr$par
     error <- drr$value
+    hessian <- drr$hessian
+    theta <- drr$par
+    
   }
 
   data.drr <- data.frame(Dose = dose, Response = response)
@@ -131,7 +132,8 @@ dr4plEst <- function(dose, response,
        dose = x,
        response = y,
        parameters = theta,
-       error.value = error)
+       error.value = error,
+       hessian = hessian)
 }
 
 #' @description Fit the 4 parameter logistic model to the data using the function `dr4plEst'
@@ -146,7 +148,7 @@ dr4pl <- function(x, ...) UseMethod("dr4pl")
 #' @export
 dr4pl.default <- function(dose, response,
                          constrained = FALSE,
-                         grad = NULL,
+                         grad = GradientFunction,
                          init.parm = NULL,
                          method.init = "logistic",
                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
@@ -163,7 +165,7 @@ dr4pl.default <- function(dose, response,
 
   dr4pl.obj <- dr4plEst(dose = dose, response = response,
                       constrained = constrained,
-                      grad = grad,
+                      grad = GradientFunction,
                       init.parm = init.parm,
                       method.init = method.init,
                       method.optim = method.optim,
@@ -237,7 +239,7 @@ dr4pl.default <- function(dose, response,
 dr4pl.formula <- function(formula,
                          constrained = FALSE,
                          data = list(),
-                         grad = NULL,
+                         grad = GradientFunction,
                          init.parm = NULL,
                          method.init = "logistic",
                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",

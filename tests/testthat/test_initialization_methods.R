@@ -18,15 +18,15 @@ CompareInitializationMethods <- function(data.input,
     
     data.part <- data.whole
     
-    obj.drra.logistic <- drra(Response ~ Dose,
+    obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
                               data = data.part,
                               method.init = "Logistic")
-    loss.logistic <- obj.drra.logistic$error.value
+    loss.logistic <- obj.dr4pl.logistic$error.value
     
-    obj.drra.Mead <- drra(Response ~ Dose,
+    obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
                           data = data.part,
                           method.init = "Mead")
-    loss.mead <- obj.drra.Mead$error.value
+    loss.mead <- obj.dr4pl.Mead$error.value
     
     n.win.logistic <- n.win.logistic + as.numeric(loss.logistic<loss.mead)
     n.comparisons <- 1
@@ -49,15 +49,15 @@ CompareInitializationMethods <- function(data.input,
                           select = c(Dose, Response),
                           subset = Ref == levels.ref[i])
 
-      obj.drra.logistic <- drra(Response ~ Dose,
+      obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
                                 data = data.part,
                                 method.init = "Logistic")
-      loss.logistic <- obj.drra.logistic$error.value
+      loss.logistic <- obj.dr4pl.logistic$error.value
       
-      obj.drra.Mead <- drra(Response ~ Dose,
+      obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
                             data = data.part,
                             method.init = "Mead")
-      loss.mead <- obj.drra.Mead$error.value
+      loss.mead <- obj.dr4pl.Mead$error.value
       
       n.win.logistic <- n.win.logistic + as.numeric(loss.logistic<loss.mead)
     }
