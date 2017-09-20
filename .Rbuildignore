@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 ^revdep$
 ^\.cran-comments\.md$ # Comments for CRAN submission
+^README\.Rmd$
+^README-.*\.png$
