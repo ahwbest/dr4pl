@@ -27,8 +27,20 @@ devtools::install_github("ahwbest/dr4pl")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how to solve a common problem. This example may be used with drc_error_1, drc_error_2, drc_error_3, and drc_error_4:
 
-```{r example}
+```{r example_problem}
 ## basic example code
+## example requires drc package
+.df <- read.csv("data/drc_error_1.csv", header = TRUE)
+a <- drc::drm(.df$Response~.df$Dose, fct = LL.4())
+summary(a)
+plot(a)
 ```
+```{r example_solution}
+.df <- read.csv("data/drc_error_1.csv", header = TRUE)
+b <- dr4pl(.df$Response~.df$Dose, method.robust = "Tukey") #Tukey's Biweight loss function estimates best
+summary(b)
+plot(b)
+```
+
