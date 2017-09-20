@@ -189,7 +189,7 @@ dr4pl.default <- function(dose, response,
 #' @author Hyowon An, J. S. Marron and Dirk P. Dittmer
 #' @seealso \code{\link{print.dr4pl}}
 #' @examples
-#' ryegrass.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
+#' ryegrass.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
 #'
 #' ryegrass.dr4pl
 #' @author Hyowon An, Dirk P. Dittmer and J. S. Marron
@@ -247,7 +247,7 @@ coef.dr4pl <- function(object, ...) {
 #' @param object A `dr4pl' object whose mean response function should be plotted.
 #' @param ... All arguments that can normally be passed to plot.
 #' @examples
-#' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
+#' ryegrass.dr4pl <- DR4PL::dr4pl(Response ~ Dose, data = sample_data_1)
 #'
 #' plot(ryegrass.dr4pl)
 #' @export
