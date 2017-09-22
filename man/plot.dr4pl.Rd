@@ -15,7 +15,7 @@
 A default plotting function for a `dr4pl' object.
 }
 \examples{
-ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
+ryegrass.dr4pl <- DR4PL::dr4pl(Response ~ Dose, data = sample_data_1)
 
 plot(ryegrass.dr4pl)
 }
