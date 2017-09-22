@@ -4,7 +4,7 @@
 \alias{GradientFunction}
 \title{Compute gradient values.}
 \usage{
-GradientFunction(theta, dose, response)
+GradientFunction(theta, x, y)
 }
 \arguments{
 \item{theta}{Parameters}

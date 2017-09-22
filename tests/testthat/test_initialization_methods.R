@@ -1,4 +1,10 @@
-# -----------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+### Load libraries
+#
+library(drc)
+library(testthat)
+
+# -----------------------------------------------------------------------------
 ### User-defined functions
 #
 CompareInitializationMethods <- function(data.input,
@@ -10,6 +16,7 @@ CompareInitializationMethods <- function(data.input,
   n.methods <- 2  # Number of initialization methods to be tried
   n.comparisons <- 0
   n.win.logistic <- 0
+  n.win.Mead <- 0
   
   if(length(var.ref) == 0) {
     
@@ -18,21 +25,30 @@ CompareInitializationMethods <- function(data.input,
     
     data.part <- data.whole
     
-    obj.drra.logistic <- drra(Response ~ Dose,
-                              data = data.part,
-                              method.init = "Logistic")
-    loss.logistic <- obj.drra.logistic$error.value
+    ### Dose response model obtained by the logistic method
+    obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
+                                data = data.part,
+                                method.init = "logistic")
+    loss.logistic <- signif(obj.dr4pl.logistic$error.value, 4)
+    parms.logistic <- obj.dr4pl.logistic$parameters
     
-    obj.drra.Mead <- drra(Response ~ Dose,
+    ### Dose response model obtained by the Mead method
+    obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
                           data = data.part,
                           method.init = "Mead")
-    loss.mead <- obj.drra.Mead$error.value
+    loss.Mead <- signif(obj.dr4pl.Mead$error.value, 4)
+    parms.Mead <- obj.dr4pl.Mead$parameters
     
-    n.win.logistic <- n.win.logistic + as.numeric(loss.logistic<loss.mead)
+    ### Count the number of times that each method 
+    n.win.logistic <- n.win.logistic + as.numeric(loss.logistic<loss.Mead)
+    n.win.Mead <- n.win.Mead + as.numeric(loss.logistic>loss.Mead)
     n.comparisons <- 1
+
+    result.table <- rbind(c(parms.logistic, loss.logistic), c(parms.Mead, loss.Mead))
+    colnames(result.table) <- c("Upper limit", "IC50", "Slope", "Lower limit", "Loss")
+
+    print(result.table)
     
-    # result.comparison <- result.comparison&
-    #   (signif(result[1, 5], 3) == signif(result[2, 5], 3))
   } else {
     
     data.whole <- subset(x = data.input, select = c(var.ref, var.dose, var.response))
@@ -49,28 +65,41 @@ CompareInitializationMethods <- function(data.input,
                           select = c(Dose, Response),
                           subset = Ref == levels.ref[i])
 
-      obj.drra.logistic <- drra(Response ~ Dose,
+      ### Dose response model obtained by the logistic method
+      obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
                                 data = data.part,
-                                method.init = "Logistic")
-      loss.logistic <- obj.drra.logistic$error.value
-      
-      obj.drra.Mead <- drra(Response ~ Dose,
+                                method.init = "logistic")
+      loss.logistic <- signif(obj.dr4pl.logistic$error.value, 4)
+      parms.logistic <- obj.dr4pl.logistic$parameters
+
+      ### Dose response model obtained by the Mead method
+      obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
                             data = data.part,
                             method.init = "Mead")
-      loss.mead <- obj.drra.Mead$error.value
-      
-      n.win.logistic <- n.win.logistic + as.numeric(loss.logistic<loss.mead)
+      loss.Mead <- signif(obj.dr4pl.Mead$error.value, 4)
+      parms.Mead <- obj.dr4pl.Mead$parameters
+
+      ### Count the number of times that each method 
+      n.win.logistic <- n.win.logistic + as.numeric(loss.logistic<loss.Mead)
+      n.win.Mead <- n.win.Mead + as.numeric(loss.logistic>loss.Mead)
+
+      result.table <- rbind(c(parms.logistic, loss.logistic), c(parms.Mead, loss.Mead))
+      colnames(result.table) <- c("Upper limit", "IC50", "Slope", "Lower limit", "Loss")
+
+      print(result.table)
     }
-    
+
     n.comparisons <- length(levels.ref)
   }
-  
-  return(c(n.win.logistic, n.comparisons))
+
+  return(c(n.win.logistic, n.win.Mead, n.comparisons))
 }
 
 TestInitializationMethods <- function() {
   
-  results <- c(0, 0)
+  sink("comparison_intialization_methods.Rout")
+  
+  results <- c(0, 0, 0)
   
   results <- results + CompareInitializationMethods(data.input = acidiq,
                                                     var.ref = "pct",
@@ -163,11 +192,19 @@ TestInitializationMethods <- function() {
                                                     var.dose = "conc",
                                                     var.response = "effect")
   
-  return(results[1])
+  sink()
+  
+  return(results)
 }
+
+# --------------------------------------------------------------------------------
+### Test
+#
+context("Test whether running `dr4pl' on the data sets of `drc' using different
+        initialization methods does not draw any error.")
 
 test_that("The number of times that the logistic method outperforms Mead's method
            on the `drc' data sets should remain the same.", {
   
-  expect_equal(TestInitializationMethods(), 3)
-           })
+  expect_error(cat(TestInitializationMethods()), NA)
+})

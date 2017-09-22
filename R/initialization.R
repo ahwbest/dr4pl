@@ -11,23 +11,32 @@
 #' @export
 FindInitialParms <- function(x, y, method.init, method.robust) {
 
-  ### Check whether input are appropriate.
+  methods.init <- c("logistic", "Mead")  # Vector of available initialization methods
+  
+  ### Check whether function arguments are appropriate.
   if(length(x) == 0 || length(y) == 0 || length(x) != length(y)) {
 
     stop("The same numbers of dose and response values should be supplied.")
   }
+  
+  if(!is.element(method.init, methods.init)) {
+    
+    stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
+  }
 
+  ### Set the upper and lower asymptotes
+  y.range <- diff(range(y))
+  
+  theta.1.4.zero <- 0.001*y.range  # This value will be added to the maximum and minimum
+
+  y.max <- max(y) + theta.1.4.zero
+  y.min <- min(y) - theta.1.4.zero
+    
   ### Logistic method
   if(method.init == "logistic") {
-  
-    y.range <- diff(range(y))
     
-    theta.1.4.zero <- 0.001*y.range  # This value will be added to the maximum and minimum
     theta.1.4.grid.size <- 0.025*y.range  # This value is the size of the grid
     
-    y.max <- max(y) + theta.1.4.zero
-    y.min <- min(y) - theta.1.4.zero
-
     grid <- c(-2*theta.1.4.grid.size, -theta.1.4.grid.size, 0, theta.1.4.grid.size,
               2*theta.1.4.grid.size)
     
@@ -66,7 +75,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       }
     }
     
-    theta.mat <- theta.mat[!is.na(theta.mat[, 3]), ]
+    theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ]
 
     if(nrow(theta.mat) == 0) {
       
@@ -89,9 +98,9 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
   } else if(method.init == "Mead") {
     
     log.x <- log10(x)
-    y.zero.low <- y
-    # y.lower.bd <- y.min
-    # y.zero.low <- y - y.lower.bd
+    # y.zero.low <- y
+    y.lower.bd <- y.min
+    y.zero.low <- y - y.lower.bd
 
     mu.3.vec <- 10^seq(from = 0.1, to = 2.5, by = 0.1)
     theta.mat <- matrix(0, nrow = length(mu.3.vec), ncol = 4)
@@ -120,8 +129,8 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       theta.mat[i, 3] <- -log10(mu.3)
     }
 
-    theta.mat[, 1] <- theta.mat[, 1]# + y.lower.bd
-    theta.mat[, 4] <- theta.mat[, 4]# + y.lower.bd
+    theta.mat[, 1] <- theta.mat[, 1] + y.lower.bd
+    theta.mat[, 4] <- theta.mat[, 4] + y.lower.bd
 
     colnames(theta.mat) <- c("Theta1", "Theta2", "Theta3", "Theta4")
     theta.mat <- theta.mat[theta.mat[, 3] != 0, ]
@@ -129,7 +138,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     if(nrow(theta.mat) == 0) {
       
       stop("Mead's method is not applicable for the inupt data. Please try
-           the Logistic method instead.")
+           the logistic method instead.")
     }
     
     err.fcn <- ErrFcn(method.robust)
