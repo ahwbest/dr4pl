@@ -58,7 +58,7 @@ This function computes the confidence intervals of the parameters of the
 }}
 
 \examples{
-  obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
+  obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
 
 confint(obj.dr4pl)
 }

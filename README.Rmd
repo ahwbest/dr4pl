@@ -31,14 +31,14 @@ This is a basic example which shows you how to solve a common problem. This exam
 
 ```{r example_problem}
 ## basic example code, datasets
-## example requires the drc and DR4PL package to be loaded
+## example requires the drc and dr4pl package to be loaded
 a <- drc::drm(drc_error_1$Response~drc_error_1$Dose)
 summary(a)
 plot(a)
 ```
 ```{r example_solution}
 ## basic example code
-## example requires the DR4PL package to be loaded
+## example requires the dr4pl package to be loaded
 b <- dr4pl(drc_error_1$Response~drc_error_1$Dose, method.robust = "Tukey") #Tukey's Biweight loss function estimates best for this particular data set
 summary(b)
 plot(b)
