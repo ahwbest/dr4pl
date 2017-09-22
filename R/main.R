@@ -165,14 +165,21 @@ dr4plEst <- function(dose, response,
 }
 
 #' @description Fit the 4 parameter logistic model to the data using the function `dr4plEst'
-#' @param x Object to dr4pl.
-#' @param ... arguments passed to coef
+#' 
+#' @param ... Dose Response dataframe to dr4pl object and arguments passed to coef
 #' @export
 dr4pl <- function(...) UseMethod("dr4pl")
 
 #' @describeIn  dr4pl Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
 #' @param response Response
+#' @param constrain tba
+#' @param grad Gradient Function to use
+#' @param init.parm Default leads to aproximation of theta parameters, or pass desired theta parameters
+#' @param method.init Method to approximate theta by logistic or Mead's method
+#' @param method.optim tba
+#' @param method.robust Loss Function... Squared loss = NULL, Absolute = "absolute", Huber = "Huber", Tukey's Biweight = "Tukey"
+#' @param trace tba
 #' @export
 dr4pl.default <- function(dose, response,
                          constrained = FALSE,

@@ -21,13 +21,25 @@ dr4pl(...)
 \arguments{
 \item{object}{An object of the dr4pl class.}
 
-\item{...}{arguments passed to coef}
+\item{...}{Dose Response dataframe to dr4pl object and arguments passed to coef}
 
 \item{dose}{Dose}
 
 \item{response}{Response}
 
-\item{x}{Object to dr4pl.}
+\item{grad}{Gradient Function to use}
+
+\item{init.parm}{Default leads to aproximation of theta parameters, or pass desired theta parameters}
+
+\item{method.init}{Method to approximate theta by logistic or Mead's method}
+
+\item{method.optim}{tba}
+
+\item{method.robust}{Loss Function... Squared loss = NULL, Absolute = "absolute", Huber = "Huber", Tukey's Biweight = "Tukey"}
+
+\item{trace}{tba}
+
+\item{constrain}{tba}
 }
 \value{
 A matrix of the confidence intervals in which each row represents a
