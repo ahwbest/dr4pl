@@ -76,7 +76,7 @@ This function fits a 4 parameter logistic (4PL) model to dose-response
   loss function is explained in detail in the vignette.
 }
 \examples{
-ryegrass.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
+ryegrass.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
 
 ryegrass.dr4pl
 }
