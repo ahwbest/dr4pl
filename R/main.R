@@ -168,7 +168,7 @@ dr4plEst <- function(dose, response,
 #' @param x Object to dr4pl.
 #' @param ... arguments passed to coef
 #' @export
-dr4pl <- function(x, ...) UseMethod("dr4pl")
+dr4pl <- function(...) UseMethod("dr4pl")
 
 #' @describeIn  dr4pl Used in the default case, supplying a single dose and response variable
 #' @param dose Dose
@@ -318,19 +318,20 @@ coef.dr4pl <- function(object, ...) {
 #' @description A default plotting function for a `dr4pl' object.
 #' @title plot
 #' @name plot.dr4pl
-#' @param object A `dr4pl' object whose mean response function should be plotted.
+#' @param x A `dr4pl' object whose mean response function should be plotted.
 #' @param ... All arguments that can normally be passed to plot.
 #' @examples
 #' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
 #'
 #' plot(ryegrass.dr4pl)
 #' @export
-plot.dr4pl <- function(object, ...) {
-
-  a <- ggplot2::ggplot(aes(x = object$data$Dose, y = object$data$Response), data = object$data)
+plot.dr4pl <- function(x, ...) {
+  
+ 
+  a <- ggplot2::ggplot(aes(x = x$data$Dose, y = x$data$Response), data = x$data)
 
   a <- a + ggplot2::stat_function(fun = MeanResponse,
-                         args = list(theta = object$parameters),
+                         args = list(theta = x$parameters),
                          size = 1.2)
 
   a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = "blue")

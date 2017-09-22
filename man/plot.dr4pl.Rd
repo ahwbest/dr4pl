@@ -4,10 +4,10 @@
 \alias{plot.dr4pl}
 \title{plot}
 \usage{
-\method{plot}{dr4pl}(object, ...)
+\method{plot}{dr4pl}(x, ...)
 }
 \arguments{
-\item{object}{A `dr4pl' object whose mean response function should be plotted.}
+\item{x}{A `dr4pl' object whose mean response function should be plotted.}
 
 \item{...}{All arguments that can normally be passed to plot.}
 }

@@ -11,7 +11,7 @@
 \usage{
 \method{confint}{dr4pl}(object, ...)
 
-dr4pl(x, ...)
+dr4pl(...)
 
 \method{dr4pl}{default}(dose, response, constrained = FALSE,
   grad = GradientFunction, init.parm = NULL, method.init = "logistic",
@@ -23,11 +23,11 @@ dr4pl(x, ...)
 
 \item{...}{arguments passed to coef}
 
-\item{x}{Object to dr4pl.}
-
 \item{dose}{Dose}
 
 \item{response}{Response}
+
+\item{x}{Object to dr4pl.}
 }
 \value{
 A matrix of the confidence intervals in which each row represents a

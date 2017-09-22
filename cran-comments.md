@@ -13,10 +13,8 @@ output: html_document
 ## R CMD check results
 There was no Erros.
 
-There was 4 WARNINGs:
+There was 3 WARNINGs:
 
-* checking S3 generic/method consistency
-  See section ‘Generic functions and methods’ in the ‘Writing R   Extensions’ manual
 
 * checking Rd cross-references 
   Missing link or links in documentation object 'dr4pl.formula.Rd':
@@ -24,6 +22,8 @@ There was 4 WARNINGs:
 
   See section 'Cross-references' in the 'Writing R Extensions' manual.
 
+  This will be fixed when Hyowon updates github with 'gof.dr4pl'
+  
 * checking for missing documentation entries
   Undocumented data sets:
   ‘Dirk_data_14’ ‘Dirk_data_15’ ‘Dirk_data_16’ ‘Dirk_data_17’
