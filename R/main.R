@@ -21,7 +21,7 @@
 #'   Probability and Mathematical Statistics: Probability and Mathematical
 #'   Statistics. John Wiley & Sons, Inc., New York.
 #' @examples
-#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
+#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
 #'
 #' confint(obj.dr4pl)
 #' @author Hyowon An and Justin T. Landis
@@ -189,12 +189,6 @@ dr4pl.default <- function(dose, response,
     
     stop("The same numbers of dose and response values should be supplied.")
   }
-  
-  if(!is.element(method.init, methods.init)) {
-    
-    stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
-  }
-  
   
   dose <- as.numeric(dose)
   response <- as.numeric(response)
