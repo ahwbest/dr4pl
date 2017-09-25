@@ -13,17 +13,17 @@ output: html_document
 ## R CMD check results
 There was no Erros.
 
-There was 3 WARNINGs:
+There was 2 WARNINGs:
 
-* checking S3 generic/method consistency
-  See section ‘Generic functions and methods’ in the ‘Writing R   Extensions’ manual
 
 * checking Rd cross-references 
   Missing link or links in documentation object 'dr4pl.formula.Rd':
-  ‘confint.dr4pl’ ‘gof.dr4pl’
+  ‘gof.dr4pl’
 
   See section 'Cross-references' in the 'Writing R Extensions' manual.
 
+  This will be fixed when Hyowon updates github with 'gof.dr4pl'
+  
 * checking for missing documentation entries
   Undocumented data sets:
   ‘Dirk_data_14’ ‘Dirk_data_15’ ‘Dirk_data_16’ ‘Dirk_data_17’
@@ -35,7 +35,11 @@ There was 3 WARNINGs:
   See chapter ‘Writing R documentation files’ in the ‘Writing R
   Extensions’ manual.
 
+  These data sets are NOT intended to be included in the final package
+
+
 There was 1 NOTE:
+
 
 * checking R code for possible problems 
   print.summary.dr4pl: warning in printCoefmat(object$coefficients,

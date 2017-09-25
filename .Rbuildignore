@@ -1,6 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^revdep$
-^\.cran-comments\.md$ # Comments for CRAN submission
+^cran-comments\.md$
 ^README\.Rmd$
 ^README-.*\.png$
+^test_ignore\.Rmd$
+^test_ignore_also\.Rmd$
+^comparison_intialization_methods\.Rout$

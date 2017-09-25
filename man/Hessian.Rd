@@ -10,6 +10,8 @@ Hessian(theta, x, y)
 \item{theta}{Parameters}
 
 \item{x}{Doses}
+
+\item{y}{Response}
 }
 \value{
 A hessian matrix
