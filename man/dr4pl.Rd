@@ -3,13 +3,13 @@
 \docType{package}
 \name{dr4pl}
 \alias{dr4pl}
-\alias{confint.dr4pl}
+\alias{coef.dr4pl}
 \alias{dr4pl-package}
 \alias{dr4pl}
 \alias{dr4pl.default}
 \title{Dose response data analysis using the 4 Parameter Logistic model}
 \usage{
-\method{confint}{dr4pl}(object, ...)
+\method{coef}{dr4pl}(object, ...)
 
 dr4pl(x, ...)
 
@@ -19,7 +19,7 @@ dr4pl(x, ...)
   method.robust = NULL, trace = 0, ...)
 }
 \arguments{
-\item{object}{An object of the dr4pl class.}
+\item{object}{A 'dr4pl' object}
 
 \item{...}{arguments passed to coef}
 
@@ -28,42 +28,27 @@ dr4pl(x, ...)
 \item{dose}{Dose}
 
 \item{response}{Response}
+
+\item{...}{arguments passed to coef}
 }
 \value{
-A matrix of the confidence intervals in which each row represents a
-  parameter and each column represents the lower and upper bounds of the
-  confidence intervals of the corresponding parameters.
+A vector of parameters
 }
 \description{
 Main functions related to fitting
 
-Compute the confidence intervals of parameter estimates of a fitted
-  model.
+Coefficient of a `dr4pl' object
 
 Fit the 4 parameter logistic model to the data using the function `dr4plEst'
 }
 \details{
 Last updated: 09/19/2016
-
-This function computes the confidence intervals of the parameters of the
-  4PL model based on the second order approximation to the Hessian matrix of the
-  loss function of the model. Refer to Subsection 5.2.2 of 
-  Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-  Probability and Mathematical Statistics: Probability and Mathematical
-  Statistics. John Wiley & Sons, Inc., New York.
 }
 \section{Methods (by class)}{
 \itemize{
 \item \code{default}: Used in the default case, supplying a single dose and response variable
 }}
 
-\examples{
-  obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
-
-confint(obj.dr4pl)
-}
 \author{
 Hyowon An, Lineberger Comprehensive Cancer Center
-
-Hyowon An and Justin T. Landis
 }

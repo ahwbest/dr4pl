@@ -8,22 +8,42 @@
 #' @import graphics
 #' @import ggplot2
 
+#' @description Coefficient of a `dr4pl' object
+#' @name coef.dr4pl
+#' @param object A 'dr4pl' object
+#' @param ... arguments passed to coef
+#
+#' @return A vector of parameters
+#' @export
+coef.dr4pl <- function(object, ...) {
+  
+  object$parameters
+  
+}
+
+#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
+#' 
 #' @description Compute the confidence intervals of parameter estimates of a fitted
 #'   model.
+#'   
 #' @param object An object of the dr4pl class.
+#' 
 #' @return A matrix of the confidence intervals in which each row represents a
 #'   parameter and each column represents the lower and upper bounds of the
 #'   confidence intervals of the corresponding parameters.
+#'   
 #' @details This function computes the confidence intervals of the parameters of the
 #'   4PL model based on the second order approximation to the Hessian matrix of the
 #'   loss function of the model. Refer to Subsection 5.2.2 of 
 #'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
 #'   Probability and Mathematical Statistics: Probability and Mathematical
 #'   Statistics. John Wiley & Sons, Inc., New York.
+#'   
 #' @examples
 #'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
 #'
-#' confint(obj.dr4pl)
+#'   confint(obj.dr4pl)
+#' 
 #' @author Hyowon An and Justin T. Landis
 #' @export
 confint.dr4pl <- function(object, ...) {
@@ -130,7 +150,7 @@ dr4plEst <- function(dose, response,
   }
 
   ### If boundaries are hit.
-  if(constr.matr%*%theta == constr.vec) {
+  if(all(constr.matr%*%theta == constr.vec)) {
     
     convergence <- FALSE
     
@@ -151,6 +171,10 @@ dr4plEst <- function(dose, response,
     robust.scale <- quantile(abs(residuals), 0.6827)*n/(n - 4)
     abs.res.sorted <- sort(abs(residuals))
     
+    Q <- 0.1  # Motulsky and Brown (2006)
+    alpha.vec <- Q*seq(from = n, to = 1, by = -1)/n
+    t.stats <- abs.res.sorted/robust.scale
+    
   }
   
   data.drr <- data.frame(Dose = dose, Response = response)
@@ -159,6 +183,7 @@ dr4plEst <- function(dose, response,
        data = data.drr,
        dose = x,
        response = y,
+       sample.size = n,
        parameters = theta,
        error.value = error,
        hessian = hessian)
@@ -184,17 +209,15 @@ dr4pl.default <- function(dose, response,
                          trace = 0,
                          ...) {
 
-  ### Check whether function arguments are appropriate.
+  ### Check errors in functions arguments.
   if(length(dose) == 0 || length(response) == 0 || length(dose) != length(response)) {
     
     stop("The same numbers of dose and response values should be supplied.")
   }
-  
   if(!is.element(method.init, methods.init)) {
     
     stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
   }
-  
   
   dose <- as.numeric(dose)
   response <- as.numeric(response)
@@ -251,7 +274,7 @@ dr4pl.default <- function(dose, response,
 #'   
 #' @details This function fits a 4 parameter logistic (4PL) model to dose-response
 #'   data. A formula of the model is
-#'   \deqn{\theta[1]+(\theta[4]-\theta[1])/(1+(x/\theta[2])^\theta[3])}
+#'   \deqn{\theta[1]+(\theta[4]-\theta[1])/(1+(z/\theta[2])^\theta[3])}
 #'
 #'   \code{method.init} specifies an initialization method to get initial parameter
 #'   estimates based on data. The currently supported initialization methods are
@@ -308,19 +331,6 @@ dr4pl.formula <- function(formula,
   return(est)
 }
 
-#' @description Coefficient of a `dr4pl' object
-#' @title coef
-#' @name coef.dr4pl
-#' @param object A 'dr4pl' object
-#' @param ... arguments passed to coef
-#
-#' @return A vector of parameters
-#' @export
-coef.dr4pl <- function(object, ...) {
-  
-  object$parameters
-}
-
 #' @description A default plotting function for a `dr4pl' object.
 #' @title plot
 #' @name plot.dr4pl
@@ -331,17 +341,36 @@ coef.dr4pl <- function(object, ...) {
 #'
 #' plot(ryegrass.dr4pl)
 #' @export
-plot.dr4pl <- function(object, ...) {
+plot.dr4pl <- function(object,
+                       text.title = "Dose response plot",
+                       indices.outlier = NULL, ...) {
 
+  ### Check errors in functions arguments.
+  if(!is.character(text.title)) {
+    
+    stop("Title text should be characters.")
+    
+  }
+  
+  ### Draw a plot
+  n <- object$sample.size
+  color.vec <- rep("blue", n)
+  
+  if(!is.null(indices.outlier)) {
+    
+    color.vec[indices.outlier] <- "red"
+    
+  }
+  
   a <- ggplot2::ggplot(aes(x = object$data$Dose, y = object$data$Response), data = object$data)
 
   a <- a + ggplot2::stat_function(fun = MeanResponse,
-                         args = list(theta = object$parameters),
-                         size = 1.2)
+                                  args = list(theta = object$parameters),
+                                  size = 1.2)
 
-  a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = "blue")
+  a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec)
 
-  a <- a + ggplot2::labs(title = "Dose response curve",
+  a <- a + ggplot2::labs(title = text.title,
                          x = "Dose",
                          y = "Response")
   

@@ -26,4 +26,11 @@ test_that("No error message is drawn.", {
                      init.parm = theta.init.trial,
                      method.init = "logistic"),
                "Initial parameter values are not in the interior of the feasible region.")
+  
+  dr4pl.test <- dr4pl(y ~ x,
+                      data = data.test,
+                      method.init = "logistic")
+  
+  expect_error(plot(dr4pl.test, text.title = 123.45),
+               "Initial parameter values are not in the interior of the feasible region.")
 })

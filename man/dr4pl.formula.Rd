@@ -57,7 +57,7 @@ A general 4PL model fitting function for analysis of
 \details{
 This function fits a 4 parameter logistic (4PL) model to dose-response
   data. A formula of the model is
-  \deqn{\theta[1]+(\theta[4]-\theta[1])/(1+(x/\theta[2])^\theta[3])}
+  \deqn{\theta[1]+(\theta[4]-\theta[1])/(1+(z/\theta[2])^\theta[3])}
 
   \code{method.init} specifies an initialization method to get initial parameter
   estimates based on data. The currently supported initialization methods are
