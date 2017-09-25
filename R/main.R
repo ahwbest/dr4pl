@@ -234,14 +234,12 @@ dr4pl.default <- function(dose, response,
     
     stop("The same numbers of dose and response values should be supplied.")
   }
-<<<<<<< HEAD
+
   if(!is.element(method.init, methods.init)) {
     
     stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
   }
-=======
->>>>>>> f4ab7d1a9a52e41a5558735d24ad63803bc0e1c7
-  
+
   dose <- as.numeric(dose)
   response <- as.numeric(response)
 
@@ -365,7 +363,6 @@ dr4pl.formula <- function(formula,
 #'
 #' plot(ryegrass.dr4pl)
 #' @export
-<<<<<<< HEAD
 plot.dr4pl <- function(object,
                        text.title = "Dose response plot",
                        indices.outlier = NULL, ...) {
@@ -392,16 +389,6 @@ plot.dr4pl <- function(object,
   a <- a + ggplot2::stat_function(fun = MeanResponse,
                                   args = list(theta = object$parameters),
                                   size = 1.2)
-=======
-plot.dr4pl <- function(x, ...) {
-  
- 
-  a <- ggplot2::ggplot(aes(x = x$data$Dose, y = x$data$Response), data = x$data)
-
-  a <- a + ggplot2::stat_function(fun = MeanResponse,
-                         args = list(theta = x$parameters),
-                         size = 1.2)
->>>>>>> f4ab7d1a9a52e41a5558735d24ad63803bc0e1c7
 
   a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec)
 
