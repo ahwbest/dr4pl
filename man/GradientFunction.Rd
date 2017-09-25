@@ -9,9 +9,9 @@ GradientFunction(theta, x, y)
 \arguments{
 \item{theta}{Parameters}
 
-\item{dose}{Dose}
+\item{x}{Dose}
 
-\item{response}{Response}
+\item{y}{Response}
 }
 \value{
 Gradient values.

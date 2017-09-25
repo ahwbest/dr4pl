@@ -4,10 +4,10 @@
 \alias{plot.dr4pl}
 \title{plot}
 \usage{
-\method{plot}{dr4pl}(object, ...)
+\method{plot}{dr4pl}(x, ...)
 }
 \arguments{
-\item{object}{A `dr4pl' object whose mean response function should be plotted.}
+\item{x}{A `dr4pl' object whose mean response function should be plotted.}
 
 \item{...}{All arguments that can normally be passed to plot.}
 }
@@ -15,7 +15,7 @@
 A default plotting function for a `dr4pl' object.
 }
 \examples{
-ryegrass.dr4pl <- DR4PL::dr4pl(Response ~ Dose, data = sample_data_1)
+ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
 
 plot(ryegrass.dr4pl)
 }

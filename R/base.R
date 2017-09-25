@@ -175,8 +175,8 @@ ErrFcn <- function(method.robust) {
 #' Compute gradient values.
 #
 #' @param theta Parameters
-#' @param dose Dose
-#' @param response Response
+#' @param x Dose
+#' @param y Response
 #
 #' @return Gradient values.
 GradientFunction <- function(theta, x, y) {
@@ -226,7 +226,8 @@ GradientFunction <- function(theta, x, y) {
 #' 
 #' @param theta Parameters
 #' @param x Doses
-#' 
+#' @param y Response
+#'
 #' @return A hessian matrix
 #' @export
 Hessian <- function(theta, x, y) {

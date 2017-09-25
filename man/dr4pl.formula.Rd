@@ -26,7 +26,8 @@ used.}
 \item{init.parm}{A vector of initial parameters to be optimized in the model.}
 
 \item{method.init}{The method of obtaining initial values of the parameters.
-If it is NULL, a default "logistic" regression method will be used.}
+If it is NULL, a default "logistic" regression method will be used. Assign
+"Mead" to use Mead's method.}
 
 \item{method.optim}{The method of optimization of the parameters. This method
 name is directly applied to the \code{constrOptim} function provided in the
