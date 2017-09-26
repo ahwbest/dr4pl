@@ -4,7 +4,7 @@
 \alias{confint.dr4pl}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
-\method{confint}{dr4pl}(object)
+\method{confint}{dr4pl}(object, parm, level, ...)
 }
 \arguments{
 \item{object}{An object of the dr4pl class.}
