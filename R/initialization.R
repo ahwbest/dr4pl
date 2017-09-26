@@ -23,7 +23,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     
     stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
   }
-
+ 
   ### Set the upper and lower asymptotes
   y.range <- diff(range(y))
   
@@ -74,7 +74,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
         i.row <- i.row + 1
       }
     }
-    
+   
     theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ]
 
     if(nrow(theta.mat) == 0) {
