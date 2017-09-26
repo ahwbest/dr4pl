@@ -9,12 +9,10 @@ library(gridExtra)
 n.error.case <- 4
 data.error.list <- vector("list", n.error.case)
 
-for(i in 1:n.error.case) {
-  
-  file.name <- paste(".\\data\\drc_error_", i, ".csv", sep = "")
-  data.error.list[[i]] <- read.csv(file.name)
-  
-}
+data.error.list[[1]] <- drc_error_1
+data.error.list[[2]] <- drc_error_2
+data.error.list[[3]] <- drc_error_3
+data.error.list[[4]] <- drc_error_4
 
 # -----------------------------------------------------------------------------
 ### Fit a robust regression model and test outliers

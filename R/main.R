@@ -44,7 +44,7 @@ coef.dr4pl <- function(object, ...) {
 #'
 #'   confint(obj.dr4pl)
 #' 
-#' @author Hyowon An and Justin T. Landis
+#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
 #' @export
 confint.dr4pl <- function(object, ...) {
   
@@ -67,13 +67,13 @@ confint.dr4pl <- function(object, ...) {
 }
 
 dr4plEst <- function(dose, response,
-                    constrained = constrained,
-                    grad,
-                    init.parm,
-                    method.init,
-                    method.optim,
-                    method.robust,
-                    trace = 0) {
+                     constrained = constrained,
+                     grad,
+                     init.parm,
+                     method.init,
+                     method.optim,
+                     method.robust,
+                     trace = 0) {
 
   convergence <- TRUE
   
