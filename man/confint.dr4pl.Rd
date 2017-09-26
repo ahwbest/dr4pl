@@ -27,9 +27,9 @@ This function computes the confidence intervals of the parameters of the
   Statistics. John Wiley & Sons, Inc., New York.
 }
 \examples{
-  obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data1)
+  obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
 
-confint(obj.dr4pl)
+  confint(obj.dr4pl)
 
 }
 \author{

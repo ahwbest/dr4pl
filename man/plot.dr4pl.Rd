@@ -4,12 +4,13 @@
 \alias{plot.dr4pl}
 \title{plot}
 \usage{
-\method{plot}{dr4pl}(x, ...)
+\method{plot}{dr4pl}(object, text.title = "Dose response plot",
+  indices.outlier = NULL, ...)
 }
 \arguments{
-\item{x}{A `dr4pl' object whose mean response function should be plotted.}
-
 \item{...}{All arguments that can normally be passed to plot.}
+
+\item{x}{A `dr4pl' object whose mean response function should be plotted.}
 }
 \description{
 A default plotting function for a `dr4pl' object.
