@@ -4,7 +4,7 @@
 \alias{confint.dr4pl}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
-\method{confint}{dr4pl}(object, ...)
+\method{confint}{dr4pl}(object)
 }
 \arguments{
 \item{object}{An object of the dr4pl class.}
@@ -33,5 +33,5 @@ This function computes the confidence intervals of the parameters of the
 
 }
 \author{
-Hyowon An and Justin T. Landis
+Hyowon An, Justin T. Landis and Aubrey G. Bailey
 }

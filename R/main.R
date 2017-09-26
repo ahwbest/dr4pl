@@ -46,7 +46,7 @@ coef.dr4pl <- function(object, ...) {
 #' 
 #' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
 #' @export
-confint.dr4pl <- function(object, ...) {
+confint.dr4pl <- function(object, parm, level, ...) {
   
   x <- object$data$Dose
   y <- object$data$Response
@@ -229,6 +229,8 @@ dr4pl.default <- function(dose, response,
                          trace = 0,
                          ...) {
 
+  methods.init <- c("logistic", "Mead")
+  
   ### Check errors in functions arguments.
   if(length(dose) == 0 || length(response) == 0 || length(dose) != length(response)) {
     
@@ -353,19 +355,24 @@ dr4pl.formula <- function(formula,
   return(est)
 }
 
-#' @description A default plotting function for a `dr4pl' object.
+#' @description 
+
+#' @description Default plotting function for a `dr4pl' object.
 #' @title plot
 #' @name plot.dr4pl
-#' @param x A `dr4pl' object whose mean response function should be plotted.
-#' @param ... All arguments that can normally be passed to plot.
+#' @param x `dr4pl' object whose mean response function should be plotted.
+#' @param text.title Character string for the title of a plot
+#' @param indices.outlier Indices of outliers in data
+#' @param ... All arguments that can normally be passed to ggplot.
 #' @examples
 #' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
 #'
 #' plot(ryegrass.dr4pl)
 #' @export
-plot.dr4pl <- function(object,
+plot.dr4pl <- function(x,
                        text.title = "Dose response plot",
-                       indices.outlier = NULL, ...) {
+                       indices.outlier = NULL,
+                       ...) {
 
   ### Check errors in functions arguments.
   if(!is.character(text.title)) {
@@ -375,7 +382,7 @@ plot.dr4pl <- function(object,
   }
   
   ### Draw a plot
-  n <- object$sample.size
+  n <- x$sample.size
   color.vec <- rep("blue", n)
   
   if(!is.null(indices.outlier)) {
@@ -384,10 +391,10 @@ plot.dr4pl <- function(object,
     
   }
   
-  a <- ggplot2::ggplot(aes(x = object$data$Dose, y = object$data$Response), data = object$data)
+  a <- ggplot2::ggplot(aes(x = x$data$Dose, y = x$data$Response), data = x$data)
 
   a <- a + ggplot2::stat_function(fun = MeanResponse,
-                                  args = list(theta = object$parameters),
+                                  args = list(theta = x$parameters),
                                   size = 1.2)
 
   a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec)
@@ -440,7 +447,7 @@ print.summary.dr4pl <- function(object, ...) {
   print(object$call)
   cat("\n")
 
-  printCoefmat(object$coefficients, P.value = TRUE, has.Pvalue = TRUE)
+  printCoefmat(object$coefficients, P.values = TRUE, has.Pvalue = TRUE)
 }
 
 #' Print the dr4pl object summary.

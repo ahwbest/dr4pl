@@ -31,7 +31,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
 
   y.max <- max(y) + theta.1.4.zero
   y.min <- min(y) - theta.1.4.zero
-    
+  
   ### Logistic method
   if(method.init == "logistic") {
     
