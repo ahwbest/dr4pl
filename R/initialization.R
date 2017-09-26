@@ -79,7 +79,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
 
     if(nrow(theta.mat) == 0) {
       
-      stop("The logistic method is not applicable for the inupt data. Please try
+      stop("The logistic method is not applicable for the input data. Please try
             Mead's method instead.")
     }
 

@@ -7,3 +7,4 @@
 ^test_ignore\.Rmd$
 ^test_ignore_also\.Rmd$
 ^comparison_intialization_methods\.Rout$
+^R\/OutlierTest\.R$
