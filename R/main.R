@@ -12,7 +12,7 @@
 #' @name coef.dr4pl
 #' @param object A 'dr4pl' object
 #' @param ... arguments passed to coef
-#
+#'
 #' @return A vector of parameters
 #' @export
 coef.dr4pl <- function(object, ...) {
@@ -174,7 +174,9 @@ dr4plEst <- function(dose, response,
 #' @export
 dr4pl <- function(...) UseMethod("dr4pl")
 
-#' @describeIn  dr4pl Used in the default case, supplying a single dose and response variable
+#' @describeIn  dr4pl Used in the default case, supplying a single dose and 
+#'   response variable
+#'   
 #' @param dose Dose
 #' @param response Response
 #' @param constrained Boolean for whether or not this function is constrained.
@@ -194,10 +196,11 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'      - absolute: Absolute deviation loss
 #'      - Huber: Huber's loss
 #'      - Tukey: Tukey's biweight loss
+#'      
 #' @export
 dr4pl.default <- function(dose, response,
                           constrained = FALSE,
-                          grad = GradientFunction,
+                          grad = GradientSquaredLoss,
                           init.parm = NULL,
                           method.init = "logistic",
                           method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
@@ -210,11 +213,13 @@ dr4pl.default <- function(dose, response,
   if(length(dose) == 0 || length(response) == 0 || length(dose) != length(response)) {
     
     stop("The same numbers of dose and response values should be supplied.")
+    
   }
 
   if(!is.element(method.init, methods.init)) {
     
     stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
+    
   }
 
   dose <- as.numeric(dose)
@@ -223,7 +228,7 @@ dr4pl.default <- function(dose, response,
   obj.dr4pl <- dr4plEst(dose = dose,
                         response = response,
                         constrained = constrained,
-                        grad = GradientFunction,
+                        grad = GradientSquaredLoss,
                         init.parm = init.parm,
                         method.init = method.init,
                         method.optim = method.optim,
@@ -251,7 +256,7 @@ dr4pl.default <- function(dose, response,
     obj.dr4pl <- dr4plEst(dose = dose, 
                           response = response,
                           constrained = constrained,
-                          grad = GradientFunction,
+                          grad = GradientSquaredLoss,
                           init.parm = init.parm,
                           method.init = method.init,
                           method.optim = method.optim,
@@ -262,7 +267,7 @@ dr4pl.default <- function(dose, response,
     
     # We use the median absolute deviation (mad) as a robust estimator of scale 
     # instead of the estimator suggested in Motulsky and Brown (2006)
-    # robust.scale <- quantile(abs(residuals), 0.6827)*n/(n - 4)
+    # scale.robust <- quantile(abs(residuals), 0.6827)*n/(n - 4)
     scale.robust <- mad(residuals)  
     
     abs.res.sorted <- sort(abs(residuals), index.return = TRUE)$x
@@ -350,14 +355,14 @@ dr4pl.default <- function(dose, response,
 #' ryegrass.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
 #'
 #' ryegrass.dr4pl
-#' @author Hyowon An, Dirk P. Dittmer and J. S. Marron
+#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
 #' @seealso \code{\link{confint.dr4pl}}, \code{\link{gof.dr4pl}},
 #' \code{\link{print.dr4pl}}, \code{\link{summary.dr4pl}}
 #' @export
 dr4pl.formula <- function(formula,
                          constrained = FALSE,
                          data = list(),
-                         grad = GradientFunction,
+                         grad = GradientSquaredLoss,
                          init.parm = NULL,
                          method.init = "logistic",
                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",

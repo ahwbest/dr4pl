@@ -1,14 +1,11 @@
-### Hyowon An, UNC Lineberger Comprehensive Cancer Center
-### Last updated: 09/02/2016
-
 #' Compute predicted responses.
-#
-#' @param x Dose
+#'
+#' @param z Dose
 #' @param theta Parameters
-#
+#'
 #' @return Predicted response values.
 #' @export
-MeanResponse <- function(x, theta) {
+MeanResponse <- function(z, theta) {
 
   if(any(is.na(theta))) {
     
@@ -20,7 +17,7 @@ MeanResponse <- function(x, theta) {
     stop("The IC50 parameter estimates become negative during the optimization process.")
   }
 
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+  f <- theta[1] + (theta[4] - theta[1])/(1 + (z/theta[2])^theta[3])
 
   return(f)
 }
@@ -82,50 +79,6 @@ TukeyBiweightLoss <- function(r) {
   return(ret.val)
 }
 
-#' Compute the Jacobian matrix
-#
-#' @param theta Parameters
-#' @param x Dose values
-#'
-#' @return Jacobian matrix
-DerivativeF <- function(theta, x) {
-  
-  eta <- (x/theta[2])^theta[3]
-  f <- theta[1] + (theta[4] - theta[1])/(1 + eta)
-  
-  deriv.f.theta.1 <- 1 - 1/(1 + eta)
-  deriv.f.theta.2 <- (theta[4] - theta[1])*theta[3]/theta[2]*eta/(1 + eta)^2
-  deriv.f.theta.3 <- -(theta[4] - theta[1])/theta[3]*log(eta)*eta/(1 + eta)^2
-  deriv.f.theta.4 <- 1/(1 + eta)
-  
-  # The limit of a derivative as x tends to zero depends on the sign of the slope
-  # parameter.
-  if(theta[3] > 0) {
-    
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1
-    
-  } else if(theta[3] == 0) {
-    
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1/2
-    
-  } else if(theta[3] < 0) {
-    
-    deriv.f.theta.1[x == 0] <- 1
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 0
-    
-  }
-  
-  return(cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
-}
-
 #' Returns an error function for given robust fitting method
 #
 #' @param method.robust NULL, absolute, Huber, or Tukey
@@ -172,54 +125,54 @@ ErrFcn <- function(method.robust) {
   return(err.fcn)
 }
 
-#' Compute gradient values.
+#' Compute gradient values of the sum-of-squares loss function.
 #
 #' @param theta Parameters
 #' @param x Dose
 #' @param y Response
 #
-#' @return Gradient values.
-GradientFunction <- function(theta, x, y) {
+#' @return Gradient values of the sum-of-squares loss function.
+GradientSquaredLoss <- function(theta, z, y) {
 
   theta.1 <- theta[1]
   theta.2 <- theta[2]
   theta.3 <- theta[3]
   theta.4 <- theta[4]
 
-  eta <- (x/theta.2)^theta.3
-  f <- theta.1 + (theta.4 - theta.1)/(1 + eta)
+  eta <- (z/theta.2)^theta.3
+  f <- MeanResponse(z, theta)
 
   ### Compute derivatives
   deriv.f.theta.1 <- 1 - 1/(1 + eta)
-  deriv.f.theta.2 <- (theta[4] - theta[1])*theta[3]/theta[2]*eta/(1 + eta)^2
-  deriv.f.theta.3 <- -(theta[4] - theta[1])/theta[3]*log(eta)*eta/(1 + eta)^2
+  deriv.f.theta.2 <- (theta.4 - theta.1)*theta.3/theta.2*eta/(1 + eta)^2
+  deriv.f.theta.3 <- -(theta.4 - theta.1)/theta.3*log(eta)*eta/(1 + eta)^2
   deriv.f.theta.4 <- 1/(1 + eta)
 
   ### Handle the cases when dose values are zeros
-  if(theta[3] > 0) {
+  if(theta.3 > 0) {
 
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1
+    deriv.f.theta.1[z == 0] <- 0
+    deriv.f.theta.2[z == 0] <- 0
+    deriv.f.theta.3[z == 0] <- 0
+    deriv.f.theta.4[z == 0] <- 1
 
-  } else if(theta[3] == 0) {
+  } else if(theta.3 == 0) {
 
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1/2
+    deriv.f.theta.1[z == 0] <- 0
+    deriv.f.theta.2[z == 0] <- (theta.4 - theta.1)*theta.3/(4*theta.2)
+    deriv.f.theta.3[z == 0] <- 0
+    deriv.f.theta.4[z == 0] <- 1/2
 
-  } else if(theta[3] < 0) {
+  } else if(theta.3 < 0) {
 
-    deriv.f.theta.1[x == 0] <- 1
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 0
+    deriv.f.theta.1[z == 0] <- 1
+    deriv.f.theta.2[z == 0] <- 0
+    deriv.f.theta.3[z == 0] <- 0
+    deriv.f.theta.4[z == 0] <- 0
 
   }
 
-  return(-2*(y - f)%*%cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
+  return(-2*(y - f)%*%cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4)/n)
 }
 
 #' Compute the Hessian matrix of the sum-of-squares loss function
@@ -275,7 +228,7 @@ Hessian <- function(theta, x, y) {
     
     second.deriv.f[3, 2, x == 0] <- Inf
     
-  }else {
+  } else {
     
     second.deriv.f[3, 2, x == 0] <- -Inf
     
