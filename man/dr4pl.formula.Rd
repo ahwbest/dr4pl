@@ -4,17 +4,15 @@
 \alias{dr4pl.formula}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
-\method{dr4pl}{formula}(formula, constrained = FALSE, data = list(),
-  grad = GradientFunction, init.parm = NULL, method.init = "logistic",
-  method.optim = if (is.null(grad)) "Nelder-Mead" else "BFGS",
-  method.robust = NULL, trace = 0, ...)
+\method{dr4pl}{formula}(formula, data = list(), grad = GradientFunction,
+  init.parm = NULL, method.init = "logistic", method.optim = if
+  (is.null(grad)) "Nelder-Mead" else "BFGS", method.robust = NULL,
+  trace = 0, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be fit. Either of the
 form 'response ~ dose' or as a data frame with response values in first
 column and dose values in second column.}
-
-\item{constrained}{Boolean for whether or not this function is constrained.}
 
 \item{data}{A data frame containing variables in the model.}
 
@@ -33,10 +31,10 @@ If it is NULL, a default "logistic" regression method will be used. Assign
 name is directly applied to the \code{constrOptim} function provided in the
 "base" package of R.}
 
-\item{method.robust}{The robust estimation method to be used to fit a model.
-- NULL: Sum of squares loss
-- absolute: Absolute deviation loss
-- Huber: Huber's loss
+\item{method.robust}{Parameter to select error function for the robust estimation method to be used to fit a model. 
+- NULL: Sum of squares loss 
+- absolute: Absolute deviation loss 
+- Huber: Huber's loss 
 - Tukey: Tukey's biweight loss}
 
 \item{trace}{Nonnegative number indicating the level of detailedness of output

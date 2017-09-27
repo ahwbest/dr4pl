@@ -75,7 +75,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       }
     }
    
-    theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ] # This restircts approximation to decline curves only
+    theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ] # This restricts approximation to decline curves only
 
     if(nrow(theta.mat) == 0) {
       
