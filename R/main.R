@@ -237,8 +237,8 @@ dr4pl.default <- function(dose, response,
   ### When convergence failure happens.
   if(obj.dr4pl$convergence == FALSE) {
     
-    # Decide the method of robust estimation which is more robust than the method
-    # input by a user.
+    ### Decide the method of robust estimation which is more robust than the method
+    ### input by a user.
     if(is.null(method.robust)) {
       
       method.robust.new <- "absolute"
@@ -253,6 +253,8 @@ dr4pl.default <- function(dose, response,
       
     }
     
+    n <- length(dose)  # Number of data points
+    
     obj.dr4pl <- dr4plEst(dose = dose, 
                           response = response,
                           constrained = constrained,
@@ -263,7 +265,7 @@ dr4pl.default <- function(dose, response,
                           method.robust = method.robust.new)
     
     theta <- obj.dr4pl$parameters
-    residuals <- Residual(theta, x, y)
+    residuals <- Residual(theta, dose, response)
     
     # We use the median absolute deviation (mad) as a robust estimator of scale 
     # instead of the estimator suggested in Motulsky and Brown (2006)

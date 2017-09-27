@@ -1,11 +1,14 @@
+
+library(tensor)
+
 #' Compute predicted responses.
 #'
-#' @param z Dose
+#' @param x Dose
 #' @param theta Parameters
 #'
 #' @return Predicted response values.
 #' @export
-MeanResponse <- function(z, theta) {
+MeanResponse <- function(x, theta) {
 
   if(any(is.na(theta))) {
     
@@ -17,7 +20,7 @@ MeanResponse <- function(z, theta) {
     stop("The IC50 parameter estimates become negative during the optimization process.")
   }
 
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (z/theta[2])^theta[3])
+  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
 
   return(f)
 }
@@ -132,15 +135,17 @@ ErrFcn <- function(method.robust) {
 #' @param y Response
 #
 #' @return Gradient values of the sum-of-squares loss function.
-GradientSquaredLoss <- function(theta, z, y) {
+GradientSquaredLoss <- function(theta, x, y) {
 
+  n <- length(x)  # Number of data observations
+  
   theta.1 <- theta[1]
   theta.2 <- theta[2]
   theta.3 <- theta[3]
   theta.4 <- theta[4]
 
-  eta <- (z/theta.2)^theta.3
-  f <- MeanResponse(z, theta)
+  eta <- (x/theta.2)^theta.3
+  f <- MeanResponse(x, theta)
 
   ### Compute derivatives
   deriv.f.theta.1 <- 1 - 1/(1 + eta)
@@ -151,24 +156,24 @@ GradientSquaredLoss <- function(theta, z, y) {
   ### Handle the cases when dose values are zeros
   if(theta.3 > 0) {
 
-    deriv.f.theta.1[z == 0] <- 0
-    deriv.f.theta.2[z == 0] <- 0
-    deriv.f.theta.3[z == 0] <- 0
-    deriv.f.theta.4[z == 0] <- 1
+    deriv.f.theta.1[x == 0] <- 0
+    deriv.f.theta.2[x == 0] <- 0
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 1
 
   } else if(theta.3 == 0) {
 
-    deriv.f.theta.1[z == 0] <- 0
-    deriv.f.theta.2[z == 0] <- (theta.4 - theta.1)*theta.3/(4*theta.2)
-    deriv.f.theta.3[z == 0] <- 0
-    deriv.f.theta.4[z == 0] <- 1/2
+    deriv.f.theta.1[x == 0] <- 0
+    deriv.f.theta.2[x == 0] <- (theta.4 - theta.1)*theta.3/(4*theta.2)
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 1/2
 
   } else if(theta.3 < 0) {
 
-    deriv.f.theta.1[z == 0] <- 1
-    deriv.f.theta.2[z == 0] <- 0
-    deriv.f.theta.3[z == 0] <- 0
-    deriv.f.theta.4[z == 0] <- 0
+    deriv.f.theta.1[x == 0] <- 1
+    deriv.f.theta.2[x == 0] <- 0
+    deriv.f.theta.3[x == 0] <- 0
+    deriv.f.theta.4[x == 0] <- 0
 
   }
 
