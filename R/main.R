@@ -96,7 +96,7 @@ dr4plEst <- function(dose, response,
     constr.vec <- c(0, 0)
 
     if(any(constr.matr%*%theta.init<constr.vec)) {
-      
+
       stop("Initial parameter values are not in the interior of the feasible region.")
     }
         
@@ -127,9 +127,9 @@ dr4plEst <- function(dose, response,
     constr.vec <- c(0, 0)
 
     if(any(constr.matr%*%theta.init<constr.vec)) {
-      
+
       stop("Initial parameter values are not in the interior of the feasible region.")
-      
+
     }
     
     # Fit a dose-response model. The Hill bounds are currently not returned.
