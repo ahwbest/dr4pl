@@ -314,23 +314,45 @@ dr4plEst <- function(dose, response,
 #' @title plot
 #' @name plot.dr4pl
 #' @param x `dr4pl' object whose mean response function should be plotted.
-#' @param text.title Character string for the title of a plot
-#' @param indices.outlier Indices of outliers in data
+#' @param text.title Character string for the title of a plot, Default set to "Dose response plot".
+#' @param text.x Character string for the x-axis of the plot, Default set to "Dose".
+#' @param text.y Character string for the y-axis of the plot, Default set to "Response".
+#' @param indices.outlier Pass a vector indicating all indices which are outliers in the data.
 #' @param ... All arguments that can normally be passed to ggplot.
 #' @examples
 #' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
 #'
 #' plot(ryegrass.dr4pl)
 #' 
-#' #Able to further edit plots
+#' ##Able to further edit plots
 #' library(ggplot2)
 #' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1, text.title = "Sample Data Plot")
 #'
 #' a <- plot(ryegrass.dr4pl) 
 #' a + geom_point(color = "green", size = 5)
+#' 
+#' ##Bring attention to outliers using parameter indices.outlier.
+#' 
+#' a <- dr4pl(Response~Dose, data = drc_error_3, method.init = "Mead", method.robust = "absolute" )
+#' plot(a, indices.outlier = c(90, 101))
+#' 
+#' ##Change the plot title default with parameter text.title
+#' 
+#' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
+#' plot(ryegrass.dr4pl, text.title = "My New Dose Response plot")
+#' 
+#' ##Change the labels of the x and y axis to your need
+#' 
+#' library(drc)  #example requires decontaminants dataset from drc package.
+#' d <- subset(decontaminants, group %in% "hpc")
+#' e <- dr4pl(count~conc, data = d)
+#' plot(e, text.title = "hpc Decontaminants Plot", text.x = "Concentration", text.y = "Count")
+#' 
 #' @export
 plot.dr4pl <- function(x,
                        text.title = "Dose response plot",
+                       text.x = "Dose",
+                       text.y = "Response",
                        indices.outlier = NULL,
                        ...) {
 
@@ -338,6 +360,16 @@ plot.dr4pl <- function(x,
   if(!is.character(text.title)) {
     
     stop("Title text should be characters.")
+    
+  }
+  if(!is.character(text.x)) {
+    
+    stop("The x-axis label text should be characters.")
+    
+  }
+  if(!is.character(text.y)) {
+    
+    stop("The y-axis label text should be characters.")
     
   }
   
@@ -360,8 +392,8 @@ plot.dr4pl <- function(x,
   a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec)
 
   a <- a + ggplot2::labs(title = text.title,
-                         x = "Dose",
-                         y = "Response")
+                         x = text.x,
+                         y = text.y)
   
   # Set parameters for the grids
   a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
