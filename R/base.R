@@ -1,11 +1,11 @@
-### Hyowon An, UNC Lineberger Comprehensive Cancer Center
-### Last updated: 09/02/2016
+
+library(tensor)
 
 #' Compute predicted responses.
-#
+#'
 #' @param x Dose
 #' @param theta Parameters
-#
+#'
 #' @return Predicted response values.
 #' @export
 MeanResponse <- function(x, theta) {
@@ -82,50 +82,6 @@ TukeyBiweightLoss <- function(r) {
   return(ret.val)
 }
 
-#' Compute the Jacobian matrix
-#
-#' @param theta Parameters
-#' @param x Dose values
-#'
-#' @return Jacobian matrix
-DerivativeF <- function(theta, x) {
-  
-  eta <- (x/theta[2])^theta[3]
-  f <- theta[1] + (theta[4] - theta[1])/(1 + eta)
-  
-  deriv.f.theta.1 <- 1 - 1/(1 + eta)
-  deriv.f.theta.2 <- (theta[4] - theta[1])*theta[3]/theta[2]*eta/(1 + eta)^2
-  deriv.f.theta.3 <- -(theta[4] - theta[1])/theta[3]*log(eta)*eta/(1 + eta)^2
-  deriv.f.theta.4 <- 1/(1 + eta)
-  
-  # The limit of a derivative as x tends to zero depends on the sign of the slope
-  # parameter.
-  if(theta[3] > 0) {
-    
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1
-    
-  } else if(theta[3] == 0) {
-    
-    deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 1/2
-    
-  } else if(theta[3] < 0) {
-    
-    deriv.f.theta.1[x == 0] <- 1
-    deriv.f.theta.2[x == 0] <- 0
-    deriv.f.theta.3[x == 0] <- 0
-    deriv.f.theta.4[x == 0] <- 0
-    
-  }
-  
-  return(cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
-}
-
 #' Returns an error function for given robust fitting method
 #
 #' @param method.robust NULL, absolute, Huber, or Tukey
@@ -172,54 +128,68 @@ ErrFcn <- function(method.robust) {
   return(err.fcn)
 }
 
-#' Compute gradient values.
+#' Compute the derivative values of the mean response function.
 #
 #' @param theta Parameters
 #' @param x Dose
-#' @param y Response
 #
-#' @return Gradient values.
-GradientFunction <- function(theta, x, y) {
-
+#' @return Derivative values of the mean response function.
+DerivativeF <- function(theta, x) {
+  
   theta.1 <- theta[1]
   theta.2 <- theta[2]
   theta.3 <- theta[3]
   theta.4 <- theta[4]
-
+  
   eta <- (x/theta.2)^theta.3
-  f <- theta.1 + (theta.4 - theta.1)/(1 + eta)
-
+  f <- MeanResponse(x, theta)
+  
   ### Compute derivatives
   deriv.f.theta.1 <- 1 - 1/(1 + eta)
-  deriv.f.theta.2 <- (theta[4] - theta[1])*theta[3]/theta[2]*eta/(1 + eta)^2
-  deriv.f.theta.3 <- -(theta[4] - theta[1])/theta[3]*log(eta)*eta/(1 + eta)^2
+  deriv.f.theta.2 <- (theta.4 - theta.1)*theta.3/theta.2*eta/(1 + eta)^2
+  deriv.f.theta.3 <- -(theta.4 - theta.1)/theta.3*log(eta)*eta/(1 + eta)^2
   deriv.f.theta.4 <- 1/(1 + eta)
-
+  
   ### Handle the cases when dose values are zeros
-  if(theta[3] > 0) {
-
+  if(theta.3 > 0) {
+    
     deriv.f.theta.1[x == 0] <- 0
     deriv.f.theta.2[x == 0] <- 0
     deriv.f.theta.3[x == 0] <- 0
     deriv.f.theta.4[x == 0] <- 1
-
-  } else if(theta[3] == 0) {
-
+    
+  } else if(theta.3 == 0) {
+    
     deriv.f.theta.1[x == 0] <- 0
-    deriv.f.theta.2[x == 0] <- (theta[4] - theta[1])*theta[3]/(4*theta[2])
+    deriv.f.theta.2[x == 0] <- (theta.4 - theta.1)*theta.3/(4*theta.2)
     deriv.f.theta.3[x == 0] <- 0
     deriv.f.theta.4[x == 0] <- 1/2
-
-  } else if(theta[3] < 0) {
-
+    
+  } else if(theta.3 < 0) {
+    
     deriv.f.theta.1[x == 0] <- 1
     deriv.f.theta.2[x == 0] <- 0
     deriv.f.theta.3[x == 0] <- 0
     deriv.f.theta.4[x == 0] <- 0
-
+    
   }
+  
+  return(cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
+}
 
-  return(-2*(y - f)%*%cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
+#' Compute gradient values of the sum-of-squares loss function.
+#'
+#' @param theta Parameters
+#' @param x Dose
+#' @param y Response
+#'
+#' @return Gradient values of the sum-of-squares loss function.
+GradientSquaredLoss <- function(theta, x, y) {
+
+  n <- length(x)  # Number of data observations
+  
+  return(-2*(y - f)%*%DerivativeF(theta, x)/n)
+  
 }
 
 #' Compute the Hessian matrix of the sum-of-squares loss function
@@ -228,70 +198,46 @@ GradientFunction <- function(theta, x, y) {
 #' @param x Doses
 #' @param y Response
 #'
-#' @return A hessian matrix
+#' @return Hessian matrix of the sum-of-squares loss function.
 #' @export
 Hessian <- function(theta, x, y) {
 
   n <- length(x)  # Number of observations
   p <- length(theta)  # Number of parameters
+  
+  theta.1 <- theta[1]
+  theta.2 <- theta[2]
+  theta.3 <- theta[3]
+  theta.4 <- theta[4]
 
   # Second order derivatives of f
-  second.deriv.f <- array(dim = c(p, p, n))
+  second.deriv.f <- array(data = 0, dim = c(p, p, n))
 
-  eta <- (x/theta[2])^theta[3]  # Term needed in the Hessian matrix computation
-  eta[x == 0] <- 0
+  eta <- (x/theta.2)^theta.3  # Term needed in the Hessian matrix computation
 
-  deriv.eta.2 <- -theta[3]/theta[2]*eta
-  deriv.eta.3 <- eta*log(x/theta[2])
+  deriv.eta.2 <- -theta.3/theta.2*eta
+  deriv.eta.3 <- eta*log(x/theta.2)
   
-  if(theta[3] < 0) {
-    
-    deriv.eta.3[x == 0] <- -Inf
-    
-  }else {
-    
-    deriv.eta.3[x == 0] <- Inf
-    
-  }
-
   second.deriv.f[1, 1, ] <- 0
   second.deriv.f[1, 2, ] <- deriv.eta.2/(1+eta)^2
   second.deriv.f[1, 3, ] <- deriv.eta.3/(1+eta)^2
   second.deriv.f[1, 4, ] <- 0
 
-  second.deriv.f[2, 1, ] <- -theta[3]/theta[2]*eta/(1 + eta)^2
-  second.deriv.f[2, 2, ] <- (theta[4] - theta[1])*theta[3]/theta[2]/(1 + eta)^2*
-                            (-eta/theta[2] + (1 - eta)/(1 + eta)*deriv.eta.2)
-  second.deriv.f[2, 3, ] <- (theta[4] - theta[1])/theta[2]/(1 + eta)^2*
-                            (eta + theta[3]*(1 - eta)/(1 + eta)*deriv.eta.3)
-  second.deriv.f[2, 4, ] <- theta[3]/theta[2]*eta/(1 + eta)^2
+  second.deriv.f[2, 2, ] <- (theta.3*(theta.4 - theta.1))/(theta.2^2*(1 + eta)^3)*
+                            (theta.2*(1 - eta)*deriv.eta.2 - eta*(1 + eta))
+  second.deriv.f[2, 3, ] <- (theta.4 - theta.1)/(theta.2*(1 + eta)^3)*
+                            (eta*(1 + eta) + theta.3*(1 - eta)*deriv.eta.3)
+  second.deriv.f[2, 4, ] <- theta.3/theta.2*eta/(1 + eta)^2
 
-  second.deriv.f[3, 1, ] <- log(x/theta[2])*eta/(1 + eta)^2
-  second.deriv.f[3, 1, x == 0] <- -Inf
-  second.deriv.f[3, 2, ] <- (theta[4] - theta[1])/(1 + eta)^2*
-                            (eta/theta[2] - (log(x/theta[2]))*(1 - eta)/(1 + eta)*deriv.eta.2)
-
-  if(theta[4] > theta[1]) {
-    
-    second.deriv.f[3, 2, x == 0] <- Inf
-    
-  }else {
-    
-    second.deriv.f[3, 2, x == 0] <- -Inf
-    
-  }
-
-  second.deriv.f[3, 3, ] <- -(theta[4] - theta[1])*(log(x/theta[2]))*
-                            (1 - eta)/(1 + eta)^3*deriv.eta.3
-  second.deriv.f[3, 3, x == 0] <- Inf
+  second.deriv.f[3, 3, ] <- (theta.4 - theta.1)/(theta.3^2*(1 + eta)^3)*
+                            (eta*(1 = eta)*log(eta) - theta.3*(1 + eta) -
+                               eta*(1 - eta)*log(eta)^2)
   second.deriv.f[3, 4, ] <- -log(x/theta[2])*eta/(1 + eta)^2
-  second.deriv.f[3, 4, x == 0] <- Inf
 
-  second.deriv.f[4, 1, ] <- 0
-  second.deriv.f[4, 2, ] <- -deriv.eta.2/(1+eta)^2
-  second.deriv.f[4, 3, ] <- -deriv.eta.3/(1+eta)^2
   second.deriv.f[4, 4, ] <- 0
 
+  second.deriv.f <- (second.deriv.f + t(second.deriv.f))/2
+  
   deriv.f <- DerivativeF(theta, x)
   residual <- Residual(theta, x, y)
   

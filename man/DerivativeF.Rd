@@ -2,18 +2,18 @@
 % Please edit documentation in R/base.R
 \name{DerivativeF}
 \alias{DerivativeF}
-\title{Compute the Jacobian matrix}
+\title{Compute the derivative values of the mean response function.}
 \usage{
 DerivativeF(theta, x)
 }
 \arguments{
 \item{theta}{Parameters}
 
-\item{x}{Dose values}
+\item{x}{Dose}
 }
 \value{
-Jacobian matrix
+Derivative values of the mean response function.
 }
 \description{
-Compute the Jacobian matrix
+Compute the derivative values of the mean response function.
 }

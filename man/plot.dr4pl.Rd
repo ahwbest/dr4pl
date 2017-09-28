@@ -4,15 +4,15 @@
 \alias{plot.dr4pl}
 \title{plot}
 \usage{
-\method{plot}{dr4pl}(x, text.title = "Dose response plot",
-  indices.outlier = NULL, ...)
+\method{plot}{dr4pl}(x, indices.outlier = NULL,
+  text.title = "Dose response plot", ...)
 }
 \arguments{
 \item{x}{`dr4pl' object whose mean response function should be plotted.}
 
-\item{text.title}{Character string for the title of a plot}
+\item{indices.outlier}{Indices of outliers in data.}
 
-\item{indices.outlier}{Indices of outliers in data}
+\item{text.title}{Character string for the title of a plot.}
 
 \item{...}{All arguments that can normally be passed to ggplot.}
 }

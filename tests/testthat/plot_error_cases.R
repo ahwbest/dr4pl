@@ -17,6 +17,9 @@ data.error.list[[4]] <- drc_error_4
 # -----------------------------------------------------------------------------
 ### Fit a robust regression model and test outliers
 #
+wd <- getwd()
+setwd("C:\\Users\\Hyowon\\Research\\Dose_response_modelling\\Submission_JSS")
+
 jpeg(filename = "dr4pl_robust_fit_outlier.jpg",
      width = 10, height = 10, units = "in", res = 600)
 
@@ -36,15 +39,20 @@ for(i in 1:n.error.case) {
   
   theta <- dr4pl.robust$par
   residuals <- Residual(theta, x, y)
-  robust.scale <- quantile(abs(residuals), 0.6827)*n/(n - 4)
+  
+  # We use the median absolute deviation (mad) as a robust estimator of scale 
+  # instead of the estimator suggested in Motulsky and Brown (2006)
+  # robust.scale <- quantile(abs(residuals), 0.6827)*n/(n - 4)
+  scale.robust <- mad(residuals)  
+  
   abs.res.sorted <- sort(abs(residuals), index.return = TRUE)$x
-  indices.sort <- sort(abs(residuals), index.return = TRUE)$ix
+  indices.sorted <- sort(abs(residuals), index.return = TRUE)$ix
   
-  Q <- 0.1  # Refer to Motulsky and Brown (2006)
-  alpha.vec <- Q*seq(from = n, to = 1, by = -1)/n
-  p.values <- 2*pt(q = abs.res.sorted/robust.scale, df = n - 4, lower.tail = FALSE)
+  Q <- 0.05  # Refer to Motulsky and Brown (2006)
+  alphas <- Q*seq(from = n, to = 1, by = -1)/n
+  p.values <- 2*pt(q = abs.res.sorted/scale.robust, df = n - 4, lower.tail = FALSE)
   
-  indices.FDR <- which(p.values < alpha.vec)
+  indices.FDR <- which(p.values < alphas)
   
   if(length(indices.FDR) == 0) {
     
@@ -52,11 +60,11 @@ for(i in 1:n.error.case) {
     
   } else {
     
-    indices.outlier <- indices.sort[seq(from = min(indices.FDR), to = n, by = 1)]
+    indices.outlier <- indices.sorted[seq(from = min(indices.FDR), to = n, by = 1)]
     
   }
   
-  ggplot.list[[i]] <- plot(dr4pl.robust, indices.outlier)
+  ggplot.list[[i]] <- plot(dr4pl.robust, indices.outlier = indices.outlier)
   
 }
 
@@ -64,3 +72,5 @@ grid.arrange(ggplot.list[[1]], ggplot.list[[2]], ggplot.list[[3]], ggplot.list[[
              nrow = 2, ncol = 2)
 
 dev.off()
+
+setwd(wd)
