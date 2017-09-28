@@ -1,0 +1,272 @@
+acidiq
+pct = 0 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.2964097 347.2765 -2.544494  0.03455694
+par.drra   0.2964091 347.2740 -2.544529  0.03455744
+
+pct = 17 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.3281496 339.7416 -2.040901  0.02854800
+par.drra   0.3281505 339.7446 -2.041127  0.02855195
+
+pct = 33 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.3083836 440.4810 -2.867246  0.05711915
+par.drra   0.3083814 440.5145 -2.867122  0.05711613
+
+pct = 50 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.2946343 543.7426 -2.361542  0.02658538
+par.drra   0.2946365 543.7412 -2.361421  0.02658371
+
+pct = 67 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.3138275 486.7348 -1.841043  0.01951691
+par.drra   0.3138329 486.7713 -1.840711  0.01949923
+
+pct = 83 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.3036545 417.4483 -1.533653  0.01250670
+par.drra   0.3036448 417.3948 -1.534065  0.01253347
+
+pct = 100 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.2805869 408.6765 -1.437897  0.01485248
+par.drra   0.2805870 408.6734 -1.437919  0.01485360
+
+algae
+         Lower limit     IC50     Slope Upper limit
+par.drm     105.4836 6.061749 -1.272799   -1.455504
+par.drra    105.4838 6.061659 -1.272795   -1.455325
+
+etmotc
+pct1 = 0 
+         Lower limit     IC50      Slope Upper limit
+par.drm    0.8214670 12.61031 -0.4136231  -0.1913945
+par.drra   0.8233142 12.73919 -0.4110910  -0.1952164
+
+pct1 = 17 
+         Lower limit     IC50      Slope  Upper limit
+par.drm    0.7183525 8.156961 -0.6333201 -0.003446805
+par.drra   0.7183902 8.157658 -0.6332102 -0.003500835
+
+pct1 = 33 
+         Lower limit     IC50      Slope Upper limit
+par.drm    0.7247728 9.568696 -0.5841966 -0.01955572
+par.drra   0.7248197 9.570262 -0.5840712 -0.01963315
+
+pct1 = 50 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.6968312 8.781905 -0.695601  0.03736221
+par.drra   0.6969130 8.781948 -0.695341  0.03727003
+
+pct1 = 67 
+         Lower limit     IC50      Slope Upper limit
+par.drm    0.6768970 8.363846 -0.8172138  0.08676860
+par.drra   0.6769217 8.363249 -0.8170899  0.08675339
+
+pct1 = 83 
+         Lower limit     IC50      Slope Upper limit
+par.drm    0.6738458 9.597569 -0.8975970   0.1097101
+par.drra   0.6738518 9.597756 -0.8975481   0.1097001
+
+pct1 = 100 
+         Lower limit     IC50      Slope Upper limit
+par.drm    0.6876187 13.08168 -0.7003718   0.1660051
+par.drra   0.6876339 13.08331 -0.7002819   0.1659698
+
+G.aparine
+         Lower limit     IC50     Slope Upper limit
+par.drm     984.0928 75.59996 -1.638252    330.1269
+par.drra    984.0953 75.60442 -1.638153    330.1254
+
+glylmet
+pct = 0 
+         Lower limit     IC50     Slope Upper limit
+par.drm     1.220962 174034.0 -1.775683   0.2595576
+par.drra    1.220960 174035.7 -1.775725   0.2595504
+
+pct = 17 
+         Lower limit     IC50     Slope Upper limit
+par.drm     1.517968 153448.8 -1.428055   0.1813129
+par.drra    1.517951 153438.7 -1.428217   0.1813742
+
+pct = 33 
+         Lower limit     IC50     Slope Upper limit
+par.drm     1.619281 118712.0 -1.429121  0.04122253
+par.drra    1.619234 118699.6 -1.429461  0.04136262
+
+pct = 50 
+         Lower limit     IC50      Slope Upper limit
+par.drm     1.700413 169195.2 -0.9542201  -0.2216287
+par.drra    1.703226 171126.9 -0.9450917  -0.2330926
+
+pct = 67 
+         Lower limit      IC50      Slope Upper limit
+par.drm     1.785367  601028.4 -0.5994285   -1.224013
+par.drra    1.931083 6081508.0 -0.4189659   -4.072428
+
+pct = 83 
+         Lower limit     IC50     Slope Upper limit
+par.drm     1.636804 150765.6 -1.903994  0.04883181
+par.drra    1.638080 152146.0 -1.876152  0.03854576
+
+pct = 100 
+         Lower limit     IC50     Slope Upper limit
+par.drm      1.65611 112331.3 -1.839493   0.1213808
+par.drra     1.65644 112336.6 -1.837366   0.1209659
+
+heartrate
+         Lower limit     IC50     Slope Upper limit
+par.drm     336.5827 75.42268 -23.67757    143.4659
+par.drra    336.5840 75.42244 -23.67811    143.4681
+
+leaflength
+         Lower limit     IC50      Slope Upper limit
+par.drm     16.78716 27.95534 -0.8938142    1.169314
+par.drra    16.78956 26.25804 -0.9144446    1.407271
+
+lepidium
+         Lower limit     IC50     Slope Upper limit
+par.drm     10.78512 3.657666 -1.928572    3.360528
+par.drra    10.78540 3.658545 -1.927593    3.359016
+
+lettuce
+         Lower limit     IC50     Slope Upper limit
+par.drm     1.101071 8.607125 -1.383314    0.372180
+par.drra    1.101073 8.607382 -1.383259    0.372167
+
+mecter
+pct = 0 
+         Lower limit     IC50     Slope  Upper limit
+par.drm    0.3202475 12651.18 -1.193160 0.0004048659
+par.drra   0.3202486 12651.16 -1.193128 0.0004031155
+
+pct = 25 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.2589937 42674.80 -1.046752  -0.1136185
+par.drra   0.2589596 42580.53 -1.047976  -0.1132140
+
+pct = 50 
+         Lower limit     IC50     Slope  Upper limit
+par.drm    0.3214769 19784.93 -1.228364 -0.002805052
+par.drra   0.3211602 19638.56 -1.238619 -0.001398105
+
+pct = 75 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.3237418 24795.77 -1.106971 -0.03042416
+par.drra   0.3237386 24795.29 -1.107022 -0.03041659
+
+pct = 100 
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.2663111 18425.36 -1.728383 -0.03230620
+par.drra   0.2662779 18422.14 -1.729981 -0.03222326
+
+M.bahia
+         Lower limit     IC50     Slope Upper limit
+par.drm    0.6328958 1.716670 -3.672932   0.2469125
+par.drra   0.6328945 1.716626 -3.673102   0.2469180
+
+nasturtium
+         Lower limit      IC50       Slope Upper limit
+par.drm     896.5907 1.5092370   -1.396781    22.73447
+par.drra    875.2124 0.7505491 -818.306598   285.67073
+
+O.mykiss
+         Lower limit       IC50     Slope Upper limit
+par.drm     2.766059   67.19881 -2.252008     -1.0145
+par.drra    2.771673 1532.69122 -1.840658   -716.4368
+
+P.promelas
+         Lower limit      IC50      Slope Upper limit
+par.drm    0.7095943  3321.725 -0.8888058  -0.7692774
+par.drra   0.7109658 50452.205 -0.8062525  -9.1555293
+
+ryegrass
+         Lower limit     IC50     Slope Upper limit
+par.drm     7.792958 3.057955 -2.982219   0.4814132
+par.drra    7.792964 3.057944 -2.982241   0.4814043
+
+S.alba
+Herbicide = Bentazone 
+         Lower limit     IC50     Slope Upper limit
+par.drm     3.806283 29.26479 -5.125377   0.6817517
+par.drra    3.806293 29.26445 -5.125179   0.6817421
+
+Herbicide = Glyphosate 
+         Lower limit     IC50     Slope Upper limit
+par.drm     3.875867 62.04807 -2.716151   0.8918332
+par.drra    3.875859 62.04875 -2.716241   0.8918216
+
+S.capricornutum
+         Lower limit     IC50     Slope Upper limit
+par.drm     127.5216 13.21481 -2.065956    2.681191
+par.drra    127.5218 13.21490 -2.065957    2.680713
+
+secalonic
+         Lower limit       IC50     Slope Upper limit
+par.drm     5.529750 0.08035473 -2.654209  0.09178520
+par.drra    5.529753 0.08035422 -2.654212  0.09179488
+
+spinach
+CURVE = 1 
+         Lower limit     IC50      Slope Upper limit
+par.drm     1.879547 1.794714 -0.5195691 -0.01652210
+par.drra    1.879555 1.794967 -0.5195169 -0.01659701
+
+CURVE = 2 
+         Lower limit      IC50      Slope Upper limit
+par.drm    0.9459974 0.9455529 -0.8007851   0.1325874
+par.drra   0.9459978 0.9455706 -0.8007834   0.1325857
+
+CURVE = 3 
+         Lower limit     IC50      Slope Upper limit
+par.drm     1.090329 1.372824 -0.6819268   0.1464201
+par.drra    1.090321 1.373101 -0.6818991   0.1463956
+
+CURVE = 4 
+         Lower limit      IC50     Slope Upper limit
+par.drm     2.153579 0.1973262 -1.844797  0.07955065
+par.drra    2.153578 0.1973275 -1.844782  0.07954694
+
+CURVE = 5 
+         Lower limit      IC50    Slope  Upper limit
+par.drm     1.805159 0.2095791 -1.66870 -0.001903064
+par.drra    1.806280 0.2107978 -1.65075 -0.009076263
+
+terbuthylazin
+         Lower limit     IC50     Slope  Upper limit
+par.drm    0.3069460 189.1444 -1.247372 0.0008029292
+par.drra   0.3069321 189.1052 -1.247752 0.0008616473
+
+vinclozolin
+exper = 10509 
+         Lower limit      IC50        Slope Upper limit
+par.drm    1003.6987 0.1996370    -1.494032    128.2826
+par.drra    913.0019 0.1999981 -1087.604700    224.5011
+
+exper = 10821 
+         Lower limit       IC50         Slope Upper limit
+par.drm     1185.840 0.05262506    -0.8568212    131.9067
+par.drra    1052.994 0.04997875 -2691.0102370    309.3358
+
+exper = 10828 
+         Lower limit       IC50         Slope Upper limit
+par.drm     2821.361 0.08486092    -0.6368152    393.4105
+par.drra    2259.044 0.09998400 -4259.8339274    926.4030
+
+exper = 10904 
+         Lower limit         IC50         Slope Upper limit
+par.drm     2695.594 2.009562e-02    -0.5587285    345.5548
+par.drra    1067.119 1.156816e+03 -5284.1113027   1348.5926
+
+exper = 11023 
+         Lower limit      IC50         Slope Upper limit
+par.drm     1412.843 0.0833998    -0.8032376    216.3616
+par.drra    1155.329 0.0999949 -5354.2307742    416.7933
+
+exper = 11106 
+         Lower limit         IC50         Slope Upper limit
+par.drm    2648.4191 1.722722e-02 -5.223041e-01    240.7139
+par.drra    932.8736 1.225004e+03 -1.385231e+04   1834.6334
+
