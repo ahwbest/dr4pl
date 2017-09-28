@@ -23,7 +23,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     
     stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
   }
-
+ 
   ### Set the upper and lower asymptotes
   y.range <- diff(range(y))
   
@@ -74,12 +74,12 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
         i.row <- i.row + 1
       }
     }
-    
-    theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ]
+   
+    theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ] # This restricts approximation to decline curves only
 
     if(nrow(theta.mat) == 0) {
       
-      stop("The logistic method is not applicable for the inupt data. Please try
+      stop("The logistic method is not applicable for the input data. Please try
             Mead's method instead.")
     }
 
@@ -119,7 +119,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       mu.1 <- lm.init.coef[1]
       mu.2 <- lm.init.coef[2]
       
-      if((mu.1 < 0)||(mu.2 < 0)) {
+      if((mu.1 < 0)||(mu.2 < 0)) {  # This restircts approximation to decline curves only
         
         next
       }
@@ -133,7 +133,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     theta.mat[, 4] <- theta.mat[, 4] + y.lower.bd
 
     colnames(theta.mat) <- c("Theta1", "Theta2", "Theta3", "Theta4")
-    theta.mat <- theta.mat[theta.mat[, 3] != 0, ]
+    theta.mat <- theta.mat[theta.mat[, 3] != 0, ] 
     
     if(nrow(theta.mat) == 0) {
       

@@ -14,8 +14,6 @@
 form 'response ~ dose' or as a data frame with response values in first
 column and dose values in second column.}
 
-\item{constrained}{Boolean for whether or not this function is constrained.}
-
 \item{data}{A data frame containing variables in the model.}
 
 \item{grad}{The gradient function that returns gradient values of the loss
@@ -33,10 +31,10 @@ If it is NULL, a default "logistic" regression method will be used. Assign
 name is directly applied to the \code{constrOptim} function provided in the
 "base" package of R.}
 
-\item{method.robust}{The robust estimation method to be used to fit a model.
-- NULL: Sum of squares loss
-- absolute: Absolute deviation loss
-- Huber: Huber's loss
+\item{method.robust}{Parameter to select error function for the robust estimation method to be used to fit a model. 
+- NULL: Sum of squares loss 
+- absolute: Absolute deviation loss 
+- Huber: Huber's loss 
 - Tukey: Tukey's biweight loss}
 
 \item{...}{Further arguments to be passed to \code{constrOptim}.}

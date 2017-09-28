@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{summary.dr4pl}
 \alias{summary.dr4pl}
-\title{Print the dr4pl object summary.}
+\title{summary}
 \usage{
 \method{summary}{dr4pl}(object, ...)
 }

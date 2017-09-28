@@ -3,31 +3,23 @@
 \docType{package}
 \name{dr4pl}
 \alias{dr4pl}
-\alias{coef.dr4pl}
 \alias{dr4pl-package}
-\alias{dr4pl}
 \alias{dr4pl.default}
 \title{Dose response data analysis using the 4 Parameter Logistic model}
 \usage{
-\method{coef}{dr4pl}(object, ...)
-
 dr4pl(...)
 
 \method{dr4pl}{default}(dose, response, constrained = FALSE,
   grad = GradientSquaredLoss, init.parm = NULL, method.init = "logistic",
   method.optim = if (is.null(grad)) "Nelder-Mead" else "BFGS",
   method.robust = NULL, ...)
-}
-\arguments{
-\item{object}{A 'dr4pl' object}
 
-\item{...}{arguments passed to coef}
+\arguments{
+\item{...}{Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment}
 
 \item{dose}{Dose}
 
 \item{response}{Response}
-
-\item{constrained}{Boolean for whether or not this function is constrained.}
 
 \item{grad}{The gradient function that returns gradient values of the loss
 function specified by \code{method.robust}. If this parameter is NULL, then
@@ -44,21 +36,17 @@ If it is NULL, a default "logistic" regression method will be used. Assign
 name is directly applied to the \code{constrOptim} function provided in the
 "base" package of R.}
 
-\item{method.robust}{The robust estimation method to be used to fit a model.
-- NULL: Sum of squares loss
-- absolute: Absolute deviation loss
-- Huber: Huber's loss
+\item{method.robust}{Parameter to select error function for the robust estimation method to be used to fit a model. 
+- NULL: Sum of squares loss 
+- absolute: Absolute deviation loss 
+- Huber: Huber's loss 
 - Tukey: Tukey's biweight loss}
 
 \item{...}{Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment}
 }
-\value{
-A vector of parameters
-}
+
 \description{
 Main functions related to fitting
-
-Coefficient of a `dr4pl' object
 
 Fit the 4 parameter logistic model to the data using the function `dr4plEst'
 }
@@ -71,6 +59,21 @@ Last updated: 09/19/2016
 response variable
 }}
 
+\examples{
+  drm <- dr4pl(dose = sample_data_1$Dose, response = sample_data_1$Response, method.init = "logistic")
+  plot(drm)
+
+  #Assign method.init = "Mead" to use Mead's method of estimation. 
+  # Use method.robust to select desired error function
+  drm <- dr4pl(sample_data_1$Response~sample_data_1$Dose, method.init = "Mead", method.robust = "Tukey" )
+  plot(drm)
+
+  #compatable with ggplot
+  library(ggplot2)
+  a <- dr4pl(drc_error_2$Response~drc_error_2$Dose, method.init = "Mead", method.robust = "absolute" )
+  b <- plot(a)
+  b + scale_x_log10(breaks = c(.00135, .0135, .135, 1.35, 13.5))
+}
 \author{
 Hyowon An, Lineberger Comprehensive Cancer Center
 }
