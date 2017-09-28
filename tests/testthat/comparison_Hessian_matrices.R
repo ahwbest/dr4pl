@@ -19,6 +19,8 @@ CompareHessianMatrices <- function(data.input,
     colnames(data.whole) <- c("Dose", "Response")
     
     data.part <- data.whole
+    x <- data.part$Dose
+    y <- data.part$Response
     
     ### Dose response model obtained by the logistic method
     obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
@@ -26,8 +28,7 @@ CompareHessianMatrices <- function(data.input,
                                 method.init = "logistic")
     hessian.cO <- obj.dr4pl.logistic$hessian
     hessian.dr4pl <- Hessian(obj.dr4pl.logistic$parameters, x, y)
-    c(hessian.cO, hessian.dr4pl)
-    
+
   } else {
     
     data.whole <- subset(x = data.input, select = c(var.ref, var.dose, var.response))
@@ -43,6 +44,16 @@ CompareHessianMatrices <- function(data.input,
       data.part <- subset(x = data.whole, 
                           select = c(Dose, Response),
                           subset = Ref == levels.ref[i])
+      
+      x <- data.part$Dose
+      y <- data.part$Response
+      
+      ### Dose response model obtained by the logistic method
+      obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
+                                  data = data.part,
+                                  method.init = "logistic")
+      hessian.cO <- obj.dr4pl.logistic$hessian
+      hessian.dr4pl <- Hessian(obj.dr4pl.logistic$parameters, x, y)
 
     }
     
@@ -70,6 +81,7 @@ CompareHessianMatricesDRC <- function() {
                          var.response = "rgr1")
   
   CompareHessianMatrices(data.input = G.aparine,
+                         var.ref = "treatment",
                          var.dose = "dose",
                          var.response = "drymatter")
   
