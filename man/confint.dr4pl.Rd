@@ -2,14 +2,23 @@
 % Please edit documentation in R/main.R
 \name{confint.dr4pl}
 \alias{confint.dr4pl}
+\alias{confint.dr4pl}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
+\method{confint}{dr4pl}(object, parm, level, ...)
+
 \method{confint}{dr4pl}(object, parm, level, ...)
 }
 \arguments{
 \item{object}{An object of the dr4pl class.}
+
+\item{object}{An object of the dr4pl class.}
 }
 \value{
+A matrix of the confidence intervals in which each row represents a
+  parameter and each column represents the lower and upper bounds of the
+  confidence intervals of the corresponding parameters.
+
 A matrix of the confidence intervals in which each row represents a
   parameter and each column represents the lower and upper bounds of the
   confidence intervals of the corresponding parameters.
@@ -17,8 +26,18 @@ A matrix of the confidence intervals in which each row represents a
 \description{
 Compute the confidence intervals of parameter estimates of a fitted
   model.
+
+Compute the confidence intervals of parameter estimates of a fitted
+  model.
 }
 \details{
+This function computes the confidence intervals of the parameters of the
+  4PL model based on the second order approximation to the Hessian matrix of the
+  loss function of the model. Refer to Subsection 5.2.2 of 
+  Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
+  Probability and Mathematical Statistics: Probability and Mathematical
+  Statistics. John Wiley & Sons, Inc., New York.
+
 This function computes the confidence intervals of the parameters of the
   4PL model based on the second order approximation to the Hessian matrix of the
   loss function of the model. Refer to Subsection 5.2.2 of 
@@ -31,7 +50,13 @@ This function computes the confidence intervals of the parameters of the
 
   confint(obj.dr4pl)
 
+  obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
+
+  confint(obj.dr4pl)
+
 }
 \author{
+Hyowon An, Justin T. Landis and Aubrey G. Bailey
+
 Hyowon An, Justin T. Landis and Aubrey G. Bailey
 }

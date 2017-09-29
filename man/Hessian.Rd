@@ -14,7 +14,7 @@ Hessian(theta, x, y)
 \item{y}{Response}
 }
 \value{
-A hessian matrix
+Hessian matrix of the sum-of-squares loss function.
 }
 \description{
 Compute the Hessian matrix of the sum-of-squares loss function

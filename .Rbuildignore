@@ -8,3 +8,7 @@
 ^test_ignore_also\.Rmd$
 ^comparison_intialization_methods\.Rout$
 ^R\/OutlierTest\.R$
+^R2106_drugRigel20170914\.R$
+^case1\.txt$
+^figures$
+^MichaelisMententest\.Rmd$
