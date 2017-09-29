@@ -631,6 +631,7 @@ summary.dr4pl <- function(object, ...) {
   res
 }
 
+<<<<<<< HEAD
 #' @description Compute the confidence intervals of parameter estimates of a fitted
 #'   model.
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
@@ -690,6 +691,8 @@ coef.dr4pl <- function(object, ...) {
   
 }
 
+=======
+>>>>>>> b7cd14833e624a6eb53d04b09e831232853f99d7
 #' These are a handful of experimentally derived datasets from the wet-laboratory.
 #' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
 #' @title sample_data_1
