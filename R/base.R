@@ -10,17 +10,22 @@ library(tensor)
 #' @export
 MeanResponse <- function(x, theta) {
 
+  theta.1 <- theta[1]
+  theta.2 <- theta[2]
+  theta.3 <- theta[3]
+  theta.4 <- theta[4]
+  
   if(any(is.na(theta))) {
     
     stop("One of the parameter values is NA.")
   }
   
-  if(theta[2] < 0) {
+  if(theta.2 < 0) {
 
     stop("The IC50 parameter estimates become negative during the optimization process.")
   }
 
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
+  f <- theta.1 + (theta.4 - theta.1)/(1 + (x/theta.2)^theta.3)
 
   return(f)
 }
@@ -142,7 +147,6 @@ DerivativeF <- function(theta, x) {
   theta.4 <- theta[4]
   
   eta <- (x/theta.2)^theta.3
-  f <- MeanResponse(x, theta)
   
   ### Compute derivatives
   deriv.f.theta.1 <- 1 - 1/(1 + eta)
@@ -186,6 +190,7 @@ DerivativeF <- function(theta, x) {
 #' @return Gradient values of the sum-of-squares loss function.
 GradientSquaredLoss <- function(theta, x, y) {
 
+  f <- MeanResponse(x, theta)  # Mean response values
   n <- length(x)  # Number of data observations
   
   return(-2*(y - f)%*%DerivativeF(theta, x)/n)
@@ -230,20 +235,29 @@ Hessian <- function(theta, x, y) {
   second.deriv.f[2, 4, ] <- theta.3/theta.2*eta/(1 + eta)^2
 
   second.deriv.f[3, 3, ] <- (theta.4 - theta.1)/(theta.3^2*(1 + eta)^3)*
-                            (eta*(1 = eta)*log(eta) - theta.3*(1 + eta) -
-                               eta*(1 - eta)*log(eta)^2)
+                            (eta*(1 + eta)*log(eta) - theta.3*(1 + eta) -
+                             eta*(1 - eta)*log(eta)^2)
   second.deriv.f[3, 4, ] <- -log(x/theta[2])*eta/(1 + eta)^2
 
   second.deriv.f[4, 4, ] <- 0
 
-  second.deriv.f <- (second.deriv.f + t(second.deriv.f))/2
+  second.deriv.f <- (second.deriv.f + aperm(second.deriv.f, c(2, 1, 3)))/2
+  
+  # Substitue limits for second derivatives when dose levels are zero
+  if(theta.3 < 0) {
+    
+    second.deriv.f[, , x == 0] <- 0
+    
+  }
   
   deriv.f <- DerivativeF(theta, x)
-  residual <- Residual(theta, x, y)
+  residuals <- Residual(theta, x, y)
   
-  hessian <- 2*t(deriv.f)%*%deriv.f - 2*tensor(second.deriv.f, residual, 3, 1)
+  hessian <- (2*t(deriv.f)%*%deriv.f -
+              2*tensor(A = second.deriv.f, B = residuals, alongA = 3, alongB = 1))/n
 
   return(hessian)
+  
 }
 
 #' Compute residuals.
