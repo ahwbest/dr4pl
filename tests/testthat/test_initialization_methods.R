@@ -201,7 +201,7 @@ TestInitializationMethods <- function() {
 ### Test
 #
 context("Test whether running `dr4pl' on the data sets of `drc' using different
-        initialization methods does not draw any error.")
+        initialization methods does not draw any error")
 
 test_that("The number of times that the logistic method outperforms Mead's method
            on the `drc' data sets should remain the same.", {

@@ -102,56 +102,77 @@ dr4plEst <- function(dose, response,
     }
         
     # Fit a dose-response model. The Hill bounds are currently not returned.
-    drr <- constrOptim(theta = theta.init,
-                       f = err.fcn,
-                       grad = grad,
-                       ui = constr.matr,
-                       ci = constr.vec,
-                       method = method.optim,
-                       hessian = TRUE,
-                       x = x,
-                       y = y)
+    cO.dr4pl <- constrOptim(theta = theta.init,
+                            f = err.fcn,
+                            grad = grad,
+                            ui = constr.matr,
+                            ci = constr.vec,
+                            method = method.optim,
+                            hessian = TRUE,
+                            x = x,
+                            y = y)
     
-    error <- drr$value
-    hessian <- drr$hessian
-    theta <- drr$par
+    error <- cO.dr4pl$value
+    hessian <- cO.dr4pl$hessian
+    theta <- cO.dr4pl$par
 
   } else {  # When initial parameter values are not given.
 
-    # Set initial values of parameters.
+    ### Obtain initial values of parameters
     theta.init <- FindInitialParms(x, y, method.init, method.robust)
     names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
 
-    constr.matr <- matrix(rbind(c(0, 1, 0, 0), c(0, 0, -1, 0)),
-                          nrow = 2,
-                          ncol = 4)
-    constr.vec <- c(0, 0)
+    ### Compute confidence intervals of the true parameters
+    deriv.f <- DerivativeF(theta.init, x)
+    residuals <- Residual(theta.init, x, y)
+    
+    C.hat.inv <- solve(t(deriv.f)%*%deriv.f)
+    
+    s <- sqrt(sum(residuals^2)/(n - 4))
+    
+    q.t <- qt(0.9999, df = n - 4)
+    std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
+    ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)  # Confidence intervals
+    
+    bounds.theta.2 <- ci[2, ]
+    bounds.theta.3 <- ci[3, ]
+    
+    constr.mat <- matrix(rbind(c(0, 1, 0, 0),
+                               c(0, 1, 0, 0),
+                               c(0, -1, 0, 0),
+                               c(0, 0, -1, 0),
+                               c(0, 0, 1, 0),
+                               c(0, 0, -1, 0)),
+                         nrow = 6,
+                         ncol = 4)
+    constr.vec <- c(0, bounds.theta.2[1], -bounds.theta.2[2],
+                    0, bounds.theta.3[1], -bounds.theta.3[2])
 
-    if(any(constr.matr%*%theta.init<constr.vec)) {
+    if(any(constr.mat%*%theta.init<constr.vec)) {
       
       stop("Initial parameter values are not in the interior of the feasible region.")
       
     }
     
     # Fit a dose-response model. The Hill bounds are currently not returned.
-    drr <- constrOptim(theta = theta.init,
-                       f = err.fcn,
-                       grad = grad,
-                       ui = constr.matr,
-                       ci = constr.vec,
-                       method = method.optim,
-                       hessian = TRUE,
-                       x = x,
-                       y = y)
+    cO.dr4pl <- constrOptim(theta = theta.init,
+                            f = err.fcn,
+                            grad = grad,
+                            ui = constr.mat,
+                            ci = constr.vec,
+                            method = method.optim,
+                            hessian = TRUE,
+                            x = x,
+                            y = y)
     
-    error <- drr$value
-    hessian <- drr$hessian
-    theta <- drr$par
+    error <- cO.dr4pl$value
+    hessian <- cO.dr4pl$hessian
+    theta <- cO.dr4pl$par
     
   }
 
   ### For the case when boundaries are hit.
-  if(all(constr.matr%*%theta == constr.vec)) {
+  if(all(constr.mat%*%theta == constr.vec)) {
     
     convergence <- FALSE
     
@@ -227,28 +248,25 @@ dr4pl.default <- function(dose, response,
   methods.init <- c("logistic", "Mead")
   
   ### Check errors in functions arguments.
+  if(!is.numeric(dose)||!is.numeric(response)) {
+    
+    stop("Both doses and responses should be numeric.")
+  }
   if(length(dose) == 0 || length(response) == 0 || length(dose) != length(response)) {
     
     stop("The same numbers of dose and response values should be supplied.")
-    
   }
-
   if(!is.element(method.init, methods.init)) {
     
     stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
-    
   }
 
-  dose <- as.numeric(dose)
-  response <- as.numeric(response)
-
   obj.dr4pl <- dr4plEst(dose = dose, response = response,
-                       grad = GradientSquaredLoss,
-                      init.parm = init.parm,
-                      method.init = method.init,
-                      method.optim = method.optim,
-                      method.robust = method.robust,
-                      trace = trace)
+                        grad = GradientSquaredLoss,
+                        init.parm = init.parm,
+                        method.init = method.init,
+                        method.optim = method.optim,
+                        method.robust = method.robust)
 
   ### When convergence failure happens.
   if(obj.dr4pl$convergence == FALSE) {
@@ -453,14 +471,35 @@ dr4plEst <- function(dose, response,
     
   } else {  # When initial parameter values are not given.
     
-    # Set initial values of parameters.
+    ### Obtain initial values of parameters.
     theta.init <- FindInitialParms(x, y, method.init, method.robust)
     names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
     
-    constr.matr <- matrix(rbind(c(0, 1, 0, 0), c(0, 0, -1, 0)),
+    ### Compute confidence intervals of the true parameters
+    deriv.f <- DerivativeF(theta.init, x)
+    residuals <- Residual(theta.init, x, y)
+    
+    C.hat.inv <- solve(t(deriv.f)%*%deriv.f)
+
+    s <- sqrt(sum(residuals^2)/(n - 4))
+    
+    q.t <- qt(0.9999, df = n - 4)
+    std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
+    ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)  # Confidence intervals
+
+    bounds.theta.2 <- ci[2, ]
+    bounds.theta.3 <- ci[3, ]
+    
+    constr.matr <- matrix(rbind(c(0, 1, 0, 0), 
+                                c(0, 1, 0, 0),
+                                c(0, -1, 0, 0),
+                                c(0, 0, -1, 0),
+                                c(0, 0, 1, 0),
+                                c(0, 0, 1, 0)),
                           nrow = 2,
                           ncol = 4)
-    constr.vec <- c(0, 0)
+    constr.vec <- c(0, bounds.theta.2[1], -bounds.theta.2[2],
+                    0, bounds.theta.3[1], -bounds.theta.3[2])
     
     if(any(constr.matr%*%theta.init<constr.vec)) {
       
@@ -679,7 +718,7 @@ confint.dr4pl <- function(object, parm, level, ...) {
   theta <- object$parameters
   hessian <- object$hessian
   
-  n <- length(y)  # Number of observations in data
+  n <- object$sample.size  # Number of observations in data
   f <- MeanResponse(x, theta)
   
   C.hat.inv <- solve(hessian/2)
