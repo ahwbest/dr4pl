@@ -69,7 +69,6 @@ confint.dr4pl <- function(object, parm, level, ...) {
 }
 
 dr4plEst <- function(dose, response,
-                     constrained = constrained,
                      grad,
                      init.parm,
                      method.init,
@@ -218,13 +217,12 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'   b + scale_x_log10(breaks = c(.00135, .0135, .135, 1.35, 13.5))
 #' @export
 dr4pl.default <- function(dose, response,
-                         grad = GradientFunction,
-                         init.parm = NULL,
-                         method.init = "logistic",
-                         method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
-                         method.robust = NULL,
-                         trace = 0,
-                         ...) {
+                          grad = GradientSquaredLoss,
+                          init.parm = NULL,
+                          method.init = "logistic",
+                          method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
+                          method.robust = NULL,
+                          ...) {
 
   methods.init <- c("logistic", "Mead")
   
@@ -244,8 +242,8 @@ dr4pl.default <- function(dose, response,
   dose <- as.numeric(dose)
   response <- as.numeric(response)
 
-  dr4pl.obj <- dr4plEst(dose = dose, response = response,
-                       grad = GradientFunction,
+  obj.dr4pl <- dr4plEst(dose = dose, response = response,
+                       grad = GradientSquaredLoss,
                       init.parm = init.parm,
                       method.init = method.init,
                       method.optim = method.optim,
@@ -275,7 +273,6 @@ dr4pl.default <- function(dose, response,
     
     obj.dr4pl <- dr4plEst(dose = dose, 
                           response = response,
-                          constrained = constrained,
                           grad = GradientSquaredLoss,
                           init.parm = init.parm,
                           method.init = method.init,
@@ -380,7 +377,7 @@ dr4pl.default <- function(dose, response,
 #' @export
 dr4pl.formula <- function(formula,
                           data = list(),
-                          grad = GradientFunction,
+                          grad = GradientSquaredLoss,
                           init.parm = NULL,
                           method.init = "logistic",
                           method.optim = if(is.null(grad)) "Nelder-Mead" else "BFGS",
@@ -695,7 +692,6 @@ confint.dr4pl <- function(object, parm, level, ...) {
   return(ci)
 }
 
-
 # add more description
 #' @description Coefficient of a `dr4pl' object
 #' @title coef
@@ -709,7 +705,6 @@ coef.dr4pl <- function(object, ...) {
   object$parameters
   
 }
-
 
 #' These are a handful of experimentally derived datasets from the wet-laboratory.
 #' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
