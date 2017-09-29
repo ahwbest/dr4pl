@@ -12,16 +12,22 @@
 FindInitialParms <- function(x, y, method.init, method.robust) {
 
   methods.init <- c("logistic", "Mead")  # Vector of available initialization methods
+  methods.robust <- c("absolute", "Huber", "Tukey")
   
   ### Check whether function arguments are appropriate.
   if(length(x) == 0 || length(y) == 0 || length(x) != length(y)) {
 
     stop("The same numbers of dose and response values should be supplied.")
   }
-  
+  if(!(is.null(method.robust)||is.element(method.robust, methods.robust))) {
+    
+    stop("The robust estimation method should be one of NULL, \"absolute\",
+         \"Huber\" or \"Tukey\".")
+    
+  }
   if(!is.element(method.init, methods.init)) {
     
-    stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
+    stop("The initialization method name should be one of \"logistic\" and \"Mead\".")
   }
  
   ### Set the upper and lower asymptotes
@@ -98,7 +104,7 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
   } else if(method.init == "Mead") {
     
     log.x <- log10(x)
-    # y.zero.low <- y
+
     y.lower.bd <- y.min
     y.zero.low <- y - y.lower.bd
 
@@ -119,7 +125,8 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       mu.1 <- lm.init.coef[1]
       mu.2 <- lm.init.coef[2]
       
-      if((mu.1 < 0)||(mu.2 < 0)) {  # This restircts approximation to decline curves only
+      # This restircts approximation to decline curves only
+      if((mu.1 < 0)||(mu.2 < 0)) {
         
         next
       }
@@ -127,13 +134,14 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
       theta.mat[i, 1] <- 1/mu.1
       theta.mat[i, 2] <- (mu.1/mu.2)^(1/log10(mu.3))
       theta.mat[i, 3] <- -log10(mu.3)
+      
     }
 
     theta.mat[, 1] <- theta.mat[, 1] + y.lower.bd
     theta.mat[, 4] <- theta.mat[, 4] + y.lower.bd
 
     colnames(theta.mat) <- c("Theta1", "Theta2", "Theta3", "Theta4")
-    theta.mat <- theta.mat[theta.mat[, 3] != 0, ] 
+    theta.mat <- theta.mat[theta.mat[, 3] != 0, ]
     
     if(nrow(theta.mat) == 0) {
       

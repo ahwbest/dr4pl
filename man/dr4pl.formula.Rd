@@ -4,10 +4,9 @@
 \alias{dr4pl.formula}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
-\method{dr4pl}{formula}(formula, constrained = FALSE, data = list(),
-  grad = GradientSquaredLoss, init.parm = NULL, method.init = "logistic",
-  method.optim = if (is.null(grad)) "Nelder-Mead" else "BFGS",
-  method.robust = NULL, ...)
+\method{dr4pl}{formula}(formula, data = list(), grad = GradientSquaredLoss,
+  init.parm = NULL, method.init = "logistic", method.optim = if
+  (is.null(grad)) "Nelder-Mead" else "BFGS", method.robust = NULL, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be fit. Either of the
