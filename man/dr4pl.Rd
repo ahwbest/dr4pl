@@ -3,14 +3,10 @@
 \docType{package}
 \name{dr4pl}
 \alias{dr4pl}
-\alias{confint.dr4pl}
 \alias{dr4pl-package}
-\alias{dr4pl}
 \alias{dr4pl.default}
 \title{Dose response data analysis using the 4 Parameter Logistic model}
 \usage{
-\method{confint}{dr4pl}(object, parm, level = 0.05, ...)
-
 dr4pl(...)
 
 \method{dr4pl}{default}(dose, response, grad = GradientSquaredLoss,
@@ -18,14 +14,7 @@ dr4pl(...)
   (is.null(grad)) "Nelder-Mead" else "BFGS", method.robust = NULL, ...)
 }
 \arguments{
-\item{object}{An object of the dr4pl class.}
-
-\item{parm}{parameter of the dr4pl class. This argument may be 
-ignored when object is assigned a dr4pl class.}
-
-\item{level}{Sigifigance level of the confidence intervals}
-
-\item{...}{additional argument(s) for methods}
+\item{...}{Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment}
 
 \item{dose}{Dose}
 
@@ -51,31 +40,14 @@ name is directly applied to the \code{constrOptim} function provided in the
 - absolute: Absolute deviation loss 
 - Huber: Huber's loss 
 - Tukey: Tukey's biweight loss}
-
-\item{...}{Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment}
-}
-\value{
-A matrix of the confidence intervals in which each row represents a
-  parameter and each column represents the lower and upper bounds of the
-  confidence intervals of the corresponding parameters.
 }
 \description{
 Main functions related to fitting
-
-Compute the confidence intervals of parameter estimates of a fitted
-  model.
 
 Fit the 4 parameter logistic model to the data using the function `dr4plEst'
 }
 \details{
 Last updated: 09/19/2016
-
-This function computes the confidence intervals of the parameters of the
-  4PL model based on the second order approximation to the Hessian matrix of the
-  loss function of the model. Refer to Subsection 5.2.2 of 
-  Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-  Probability and Mathematical Statistics: Probability and Mathematical
-  Statistics. John Wiley & Sons, Inc., New York.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -84,10 +56,6 @@ response variable
 }}
 
 \examples{
-  obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
-
-  confint(obj.dr4pl)
-
   a <- dr4pl(dose = sample_data_1$Dose, 
                response = sample_data_1$Response, 
                method.init = "logistic")
@@ -112,6 +80,4 @@ response variable
 }
 \author{
 Hyowon An, Lineberger Comprehensive Cancer Center
-
-Hyowon An, Justin T. Landis and Aubrey G. Bailey
 }
