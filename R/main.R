@@ -12,128 +12,6 @@
 
 # Begin Program
 
-dr4plEst <- function(dose, response,
-                     grad,
-                     init.parm,
-                     method.init,
-                     method.optim,
-                     method.robust) {
-
-  convergence <- TRUE
-  
-  x <- dose  # Vector of dose values
-  y <- response  # Vector of responses
-  n <- length(x)  # Number of observations
-
-  # Choose the loss function depending on the robust estimation method
-  err.fcn <- ErrFcn(method.robust)
-
-  if(!is.null(init.parm)) {  # When initial parameter estimates are given
-
-    # Use given initial parameter estimates
-    theta.init <- init.parm
-    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
-
-    constr.matr <- matrix(rbind(c(0, 1, 0, 0), c(0, 0, -1, 0)),
-                          nrow = 2,
-                          ncol = 4)
-    constr.vec <- c(0, 0)
-
-    if(any(constr.matr%*%theta.init<constr.vec)) {
-      
-      stop("Initial parameter values are not in the interior of the feasible region.")
-      
-    }
-        
-    # Fit a dose-response model. The Hill bounds are currently not returned.
-    cO.dr4pl <- constrOptim(theta = theta.init,
-                            f = err.fcn,
-                            grad = grad,
-                            ui = constr.matr,
-                            ci = constr.vec,
-                            method = method.optim,
-                            hessian = TRUE,
-                            x = x,
-                            y = y)
-    
-    error <- cO.dr4pl$value
-    hessian <- cO.dr4pl$hessian
-    theta <- cO.dr4pl$par
-
-  } else {  # When initial parameter values are not given.
-
-    ### Obtain initial values of parameters
-    theta.init <- FindInitialParms(x, y, method.init, method.robust)
-    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
-
-    ### Compute confidence intervals of the true parameters
-    deriv.f <- DerivativeF(theta.init, x)
-    residuals <- Residual(theta.init, x, y)
-    
-    C.hat.inv <- solve(t(deriv.f)%*%deriv.f)
-    
-    s <- sqrt(sum(residuals^2)/(n - 4))
-    
-    q.t <- qt(0.9999, df = n - 4)
-    std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-    ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)  # Confidence intervals
-    
-    bounds.theta.2 <- ci[2, ]
-    bounds.theta.3 <- ci[3, ]
-    
-    constr.mat <- matrix(rbind(c(0, 1, 0, 0),
-                               c(0, 1, 0, 0),
-                               c(0, -1, 0, 0),
-                               c(0, 0, -1, 0),
-                               c(0, 0, 1, 0),
-                               c(0, 0, -1, 0)),
-                         nrow = 6,
-                         ncol = 4)
-    constr.vec <- c(0, bounds.theta.2[1], -bounds.theta.2[2],
-                    0, bounds.theta.3[1], -bounds.theta.3[2])
-
-    if(any(constr.mat%*%theta.init<constr.vec)) {
-      
-      stop("Initial parameter values are not in the interior of the feasible region.")
-      
-    }
-    
-    # Fit a dose-response model. The Hill bounds are currently not returned.
-    cO.dr4pl <- constrOptim(theta = theta.init,
-                            f = err.fcn,
-                            grad = grad,
-                            ui = constr.mat,
-                            ci = constr.vec,
-                            method = method.optim,
-                            hessian = TRUE,
-                            x = x,
-                            y = y)
-    
-    error <- cO.dr4pl$value
-    hessian <- cO.dr4pl$hessian
-    theta <- cO.dr4pl$par
-    
-  }
-
-  ### For the case when boundaries are hit.
-  if(all(constr.mat%*%theta == constr.vec)) {
-    
-    convergence <- FALSE
-    
-  }
-  
-  data.dr4pl <- data.frame(Dose = dose, Response = response)
-
-  return(list(convergence = convergence,
-              data = data.dr4pl,
-              dose = x,
-              response = y,
-              sample.size = n,
-              parameters = theta,
-              error.value = error,
-              hessian = hessian))
-}
-
 #' @description Fit the 4 parameter logistic model to the data using the function `dr4plEst'
 #' 
 #' @param ... Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment
@@ -633,7 +511,6 @@ plot.dr4pl <- function(x,
                        text.x = "Dose",
                        text.y = "Response",
                        indices.outlier = NULL,
-                       text.title = "Dose response plot",
                        ...) {
 
   ### Check errors in functions arguments.
