@@ -4,15 +4,19 @@
 \alias{plot.dr4pl}
 \title{plot}
 \usage{
-\method{plot}{dr4pl}(x, indices.outlier = NULL,
-  text.title = "Dose response plot", ...)
+\method{plot}{dr4pl}(x, text.title = "Dose response plot", text.x = "Dose",
+  text.y = "Response", indices.outlier = NULL, ...)
 }
 \arguments{
 \item{x}{`dr4pl' object whose mean response function should be plotted.}
 
-\item{indices.outlier}{Indices of outliers in data.}
+\item{text.title}{Character string for the title of a plot, Default set to "Dose response plot".}
 
-\item{text.title}{Character string for the title of a plot.}
+\item{text.x}{Character string for the x-axis of the plot, Default set to "Dose".}
+
+\item{text.y}{Character string for the y-axis of the plot, Default set to "Response".}
+
+\item{indices.outlier}{Pass a vector indicating all indices which are outliers in the data.}
 
 \item{...}{All arguments that can normally be passed to ggplot.}
 }
@@ -26,10 +30,37 @@ ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
 
 plot(ryegrass.dr4pl)
 
-#Able to further edit plots
+##Able to further edit plots
 library(ggplot2)
-ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1, text.title = "Sample Data Plot")
+ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, 
+                               data = sample_data_1, 
+                               text.title = "Sample Data Plot")
 
 a <- plot(ryegrass.dr4pl) 
 a + geom_point(color = "green", size = 5)
+
+##Bring attention to outliers using parameter indices.outlier.
+
+a <- dr4pl(Response ~ Dose, 
+           data = drc_error_3, 
+           method.init = "Mead", 
+           method.robust = "absolute" )
+plot(a, indices.outlier = c(90, 101))
+
+##Change the plot title default with parameter text.title
+
+ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, 
+                               data = sample_data_1)
+plot(ryegrass.dr4pl, text.title = "My New Dose Response plot")
+
+##Change the labels of the x and y axis to your need
+
+library(drc)  #example requires decontaminants dataset from drc package.
+d <- subset(decontaminants, group \%in\% "hpc")
+e <- dr4pl(count~conc, data = d)
+plot(e, 
+     text.title = "hpc Decontaminants Plot", 
+     text.x = "Concentration", 
+     text.y = "Count")
+
 }

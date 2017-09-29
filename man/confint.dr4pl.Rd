@@ -12,6 +12,13 @@
 \arguments{
 \item{object}{An object of the dr4pl class.}
 
+\item{parm}{parameter of the dr4pl class. This argument may be 
+ignored when object is assigned a dr4pl class.}
+
+\item{level}{Sigifigance level of the confidence intervals}
+
+\item{...}{additional argument(s) for methods}
+
 \item{object}{An object of the dr4pl class.}
 }
 \value{
