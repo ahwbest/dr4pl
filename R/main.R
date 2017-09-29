@@ -11,63 +11,6 @@
 
 
 # Begin Program
-#' @description Coefficient of a `dr4pl' object
-#' @name coef.dr4pl
-#' @param object A 'dr4pl' object
-#' @param ... arguments passed to coef
-#'
-#' @return A vector of parameters
-#' @export
-coef.dr4pl <- function(object, ...) {
-  
-  object$parameters
-  
-}
-
-#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
-#' 
-#' @description Compute the confidence intervals of parameter estimates of a fitted
-#'   model.
-#'   
-#' @param object An object of the dr4pl class.
-#' 
-#' @return A matrix of the confidence intervals in which each row represents a
-#'   parameter and each column represents the lower and upper bounds of the
-#'   confidence intervals of the corresponding parameters.
-#'   
-#' @details This function computes the confidence intervals of the parameters of the
-#'   4PL model based on the second order approximation to the Hessian matrix of the
-#'   loss function of the model. Refer to Subsection 5.2.2 of 
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
-#'   
-#' @examples
-#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
-#'
-#'   confint(obj.dr4pl)
-#' 
-#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
-#' @export
-confint.dr4pl <- function(object, parm, level, ...) {
-  
-  x <- object$data$Dose
-  y <- object$data$Response
-  theta <- object$parameters
-  hessian <- object$hessian
-  
-  n <- length(y)  # Number of observations in data
-  f <- MeanResponse(x, theta)
-
-  C.hat.inv <- solve(hessian/2)
-  s <- sqrt(sum((y - f)^2)/(n - 4))
-  
-  q.t <- qt(0.975, df = n - 4)
-  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
-  
-  return(ci)
-}
 
 dr4plEst <- function(dose, response,
                      grad,
@@ -725,7 +668,7 @@ confint.dr4pl <- function(object, parm, level, ...) {
   return(ci)
 }
 
-# add more description
+
 #' @description Coefficient of a `dr4pl' object
 #' @title coef
 #' @name coef.dr4pl
