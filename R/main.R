@@ -12,105 +12,67 @@
 
 # Begin Program
 
-dr4plEst <- function(dose, response,
-                     grad,
-                     init.parm,
-                     method.init,
-                     method.optim,
-                     method.robust) {
 
-  convergence <- TRUE
+#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
+#' @name confint.dr4pl
+#' @description Compute the confidence intervals of parameter estimates of a fitted
+#'   model.
+#'   
+#' @param object An object of the dr4pl class.
+#' @param parm parameter of the dr4pl class. This argument may be 
+#' ignored when object is assigned a dr4pl class.
+#' @param level Sigifigance level of the confidence intervals
+#' @param ...  additional argument(s) for methods
+#' @return A matrix of the confidence intervals in which each row represents a
+#'   parameter and each column represents the lower and upper bounds of the
+#'   confidence intervals of the corresponding parameters.
+#'   
+#' @details This function computes the confidence intervals of the parameters of the
+#'   4PL model based on the second order approximation to the Hessian matrix of the
+#'   loss function of the model. Refer to Subsection 5.2.2 of 
+#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
+#'   Probability and Mathematical Statistics: Probability and Mathematical
+#'   Statistics. John Wiley & Sons, Inc., New York.
+#'   
+#' @examples
+#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
+#'
+#'   confint(obj.dr4pl)
+#' 
+#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
+#' @export
+confint.dr4pl <- function(object, parm, level = 0.05, ...) {
   
-  x <- dose  # Vector of dose values
-  y <- response  # Vector of responses
-  n <- length(x)  # Number of observations
-
-  # Choose the loss function depending on the robust estimation method
-  err.fcn <- ErrFcn(method.robust)
-
-  if(!is.null(init.parm)) {  # When initial parameter estimates are given
-
-    # Use given initial parameter estimates
-    theta.init <- init.parm
-    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
-
-    constr.matr <- matrix(rbind(c(0, 1, 0, 0), c(0, 0, -1, 0)),
-                          nrow = 2,
-                          ncol = 4)
-    constr.vec <- c(0, 0)
-
-    if(any(constr.matr%*%theta.init<constr.vec)) {
-      
-      stop("Initial parameter values are not in the interior of the feasible region.")
-      
-    }
-        
-    # Fit a dose-response model. The Hill bounds are currently not returned.
-    drr <- constrOptim(theta = theta.init,
-                       f = err.fcn,
-                       grad = grad,
-                       ui = constr.matr,
-                       ci = constr.vec,
-                       method = method.optim,
-                       hessian = TRUE,
-                       x = x,
-                       y = y)
-    
-    error <- drr$value
-    hessian <- drr$hessian
-    theta <- drr$par
-
-  } else {  # When initial parameter values are not given.
-
-    # Set initial values of parameters.
-    theta.init <- FindInitialParms(x, y, method.init, method.robust)
-    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
-
-    constr.matr <- matrix(rbind(c(0, 1, 0, 0), c(0, 0, -1, 0)),
-                          nrow = 2,
-                          ncol = 4)
-    constr.vec <- c(0, 0)
-
-    if(any(constr.matr%*%theta.init<constr.vec)) {
-      
-      stop("Initial parameter values are not in the interior of the feasible region.")
-      
-    }
-    
-    # Fit a dose-response model. The Hill bounds are currently not returned.
-    drr <- constrOptim(theta = theta.init,
-                       f = err.fcn,
-                       grad = grad,
-                       ui = constr.matr,
-                       ci = constr.vec,
-                       method = method.optim,
-                       hessian = TRUE,
-                       x = x,
-                       y = y)
-    
-    error <- drr$value
-    hessian <- drr$hessian
-    theta <- drr$par
-    
-  }
-
-  ### For the case when boundaries are hit.
-  if(all(constr.matr%*%theta == constr.vec)) {
-    
-    convergence <- FALSE
-    
-  }
+  x <- object$data$Dose
+  y <- object$data$Response
+  theta <- object$parameters
+  hessian <- object$hessian
   
-  data.dr4pl <- data.frame(Dose = dose, Response = response)
+  n <- length(y)  # Number of observations in data
+  f <- MeanResponse(x, theta)
+  
+  C.hat.inv <- solve(hessian/2)
+  s <- sqrt(sum((y - f)^2)/(n - 4))
+  
+  q.t <- qt(1 - level/2, df = n - 4)
+  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
+  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
+  
+  return(ci)
+}
 
-  return(list(convergence = convergence,
-              data = data.dr4pl,
-              dose = x,
-              response = y,
-              sample.size = n,
-              parameters = theta,
-              error.value = error,
-              hessian = hessian))
+
+#' @description Coefficient of a `dr4pl' object
+#' @title coef
+#' @name coef.dr4pl
+#' @param object A 'dr4pl' object
+#' @param ... arguments passed to coef
+#' @return A vector of parameters
+#' @export
+coef.dr4pl <- function(object, ...) {
+  
+  object$parameters
+  
 }
 
 #' @description Fit the 4 parameter logistic model to the data using the function `dr4plEst'
@@ -140,25 +102,30 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'      - absolute: Absolute deviation loss 
 #'      - Huber: Huber's loss 
 #'      - Tukey: Tukey's biweight loss
-#' @param trace Nonnegative number indicating the level of detailedness of output
-#'   generated by \code{constrOptim}. As its value increases, more detailed output is
-#'   printed.
 #'   
 #'  
 #' @examples 
-#'   drm <- dr4pl(dose = sample_data_1$Dose, response = sample_data_1$Response, method.init = "logistic")
-#'   plot(drm)
+#'   a <- dr4pl(dose = sample_data_1$Dose, 
+#'                response = sample_data_1$Response, 
+#'                method.init = "logistic")
+#'   plot(a)
 #'
 #'   ##Assign method.init = "Mead" to use Mead's method of estimation. 
 #'   # Use method.robust to select desired error function
-#'   drm <- dr4pl(sample_data_1$Response~sample_data_1$Dose, method.init = "Mead", method.robust = "Tukey" )
-#'   plot(drm)
+#'   b <- dr4pl(Response~Dose, 
+#'                data = sample_data_1,
+#'                method.init = "Mead", 
+#'                method.robust = "Tukey" )
+#'   plot(b)
 #' 
 #'   ##compatable with ggplot
 #'   library(ggplot2)
-#'   a <- dr4pl(drc_error_2$Response~drc_error_2$Dose, method.init = "Mead", method.robust = "absolute" )
-#'   b <- plot(a)
-#'   b + scale_x_log10(breaks = c(.00135, .0135, .135, 1.35, 13.5))
+#'   c <- dr4pl(Response~Dose, 
+#'              data = drc_error_2,
+#'              method.init = "Mead", 
+#'              method.robust = "absolute" )
+#'   d <- plot(c)
+#'   d + scale_x_log10(breaks = c(.00135, .0135, .135, 1.35, 13.5))
 #' @export
 dr4pl.default <- function(dose, response,
                           grad = GradientSquaredLoss,
@@ -191,8 +158,7 @@ dr4pl.default <- function(dose, response,
                       init.parm = init.parm,
                       method.init = method.init,
                       method.optim = method.optim,
-                      method.robust = method.robust,
-                      trace = trace)
+                      method.robust = method.robust)
 
   ### When convergence failure happens.
   if(obj.dr4pl$convergence == FALSE) {
@@ -352,8 +318,7 @@ dr4plEst <- function(dose, response,
                      init.parm,
                      method.init,
                      method.optim,
-                     method.robust,
-                     trace = 0) {
+                     method.robust) {
   
   convergence <- TRUE
   
@@ -487,19 +452,25 @@ dr4plEst <- function(dose, response,
 #' 
 #' ##Able to further edit plots
 #' library(ggplot2)
-#' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1, text.title = "Sample Data Plot")
+#' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, 
+#'                                data = sample_data_1, 
+#'                                text.title = "Sample Data Plot")
 #'
 #' a <- plot(ryegrass.dr4pl) 
 #' a + geom_point(color = "green", size = 5)
 #' 
 #' ##Bring attention to outliers using parameter indices.outlier.
 #' 
-#' a <- dr4pl(Response~Dose, data = drc_error_3, method.init = "Mead", method.robust = "absolute" )
+#' a <- dr4pl(Response ~ Dose, 
+#'            data = drc_error_3, 
+#'            method.init = "Mead", 
+#'            method.robust = "absolute" )
 #' plot(a, indices.outlier = c(90, 101))
 #' 
 #' ##Change the plot title default with parameter text.title
 #' 
-#' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
+#' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, 
+#'                                data = sample_data_1)
 #' plot(ryegrass.dr4pl, text.title = "My New Dose Response plot")
 #' 
 #' ##Change the labels of the x and y axis to your need
@@ -507,7 +478,10 @@ dr4plEst <- function(dose, response,
 #' library(drc)  #example requires decontaminants dataset from drc package.
 #' d <- subset(decontaminants, group %in% "hpc")
 #' e <- dr4pl(count~conc, data = d)
-#' plot(e, text.title = "hpc Decontaminants Plot", text.x = "Concentration", text.y = "Count")
+#' plot(e, 
+#'      text.title = "hpc Decontaminants Plot", 
+#'      text.x = "Concentration", 
+#'      text.y = "Count")
 #' 
 #' @export
 plot.dr4pl <- function(x,
@@ -621,65 +595,6 @@ summary.dr4pl <- function(object, ...) {
 
   class(res) <- "summary.dr4pl"
   res
-}
-
-#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
-#' @name confint.dr4pl
-#' @description Compute the confidence intervals of parameter estimates of a fitted
-#'   model.
-#'   
-#' @param object An object of the dr4pl class.
-#' 
-#' @return A matrix of the confidence intervals in which each row represents a
-#'   parameter and each column represents the lower and upper bounds of the
-#'   confidence intervals of the corresponding parameters.
-#'   
-#' @details This function computes the confidence intervals of the parameters of the
-#'   4PL model based on the second order approximation to the Hessian matrix of the
-#'   loss function of the model. Refer to Subsection 5.2.2 of 
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
-#'   
-#' @examples
-#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
-#'
-#'   confint(obj.dr4pl)
-#' 
-#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
-#' @export
-confint.dr4pl <- function(object, parm, level, ...) {
-  
-  x <- object$data$Dose
-  y <- object$data$Response
-  theta <- object$parameters
-  hessian <- object$hessian
-  
-  n <- length(y)  # Number of observations in data
-  f <- MeanResponse(x, theta)
-  
-  C.hat.inv <- solve(hessian/2)
-  s <- sqrt(sum((y - f)^2)/(n - 4))
-  
-  q.t <- qt(0.975, df = n - 4)
-  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
-  
-  return(ci)
-}
-
-
-#' @description Coefficient of a `dr4pl' object
-#' @title coef
-#' @name coef.dr4pl
-#' @param object A 'dr4pl' object
-#' @param ... arguments passed to coef
-#' @return A vector of parameters
-#' @export
-coef.dr4pl <- function(object, ...) {
-  
-  object$parameters
-  
 }
 
 #' These are a handful of experimentally derived datasets from the wet-laboratory.

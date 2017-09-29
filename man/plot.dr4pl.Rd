@@ -32,19 +32,25 @@ plot(ryegrass.dr4pl)
 
 ##Able to further edit plots
 library(ggplot2)
-ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1, text.title = "Sample Data Plot")
+ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, 
+                               data = sample_data_1, 
+                               text.title = "Sample Data Plot")
 
 a <- plot(ryegrass.dr4pl) 
 a + geom_point(color = "green", size = 5)
 
 ##Bring attention to outliers using parameter indices.outlier.
 
-a <- dr4pl(Response~Dose, data = drc_error_3, method.init = "Mead", method.robust = "absolute" )
+a <- dr4pl(Response ~ Dose, 
+           data = drc_error_3, 
+           method.init = "Mead", 
+           method.robust = "absolute" )
 plot(a, indices.outlier = c(90, 101))
 
 ##Change the plot title default with parameter text.title
 
-ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
+ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, 
+                               data = sample_data_1)
 plot(ryegrass.dr4pl, text.title = "My New Dose Response plot")
 
 ##Change the labels of the x and y axis to your need
@@ -52,6 +58,9 @@ plot(ryegrass.dr4pl, text.title = "My New Dose Response plot")
 library(drc)  #example requires decontaminants dataset from drc package.
 d <- subset(decontaminants, group \%in\% "hpc")
 e <- dr4pl(count~conc, data = d)
-plot(e, text.title = "hpc Decontaminants Plot", text.x = "Concentration", text.y = "Count")
+plot(e, 
+     text.title = "hpc Decontaminants Plot", 
+     text.x = "Concentration", 
+     text.y = "Count")
 
 }
