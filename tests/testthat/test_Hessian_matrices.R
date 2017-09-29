@@ -91,6 +91,7 @@ CompareHessianMatricesDRC <- function() {
                                                 var.response = "rgr")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
+<<<<<<< HEAD:tests/testthat/test_Hessian_matrices.R
   CompareHessianMatrices(data.input = algae,
                          var.dose = "conc",
                          var.response = "vol")
@@ -117,6 +118,28 @@ CompareHessianMatricesDRC <- function() {
   CompareHessianMatrices(data.input = heartrate,
                          var.dose = "pressure",
                          var.response = "rate")
+=======
+                         CompareHessianMatrices(data.input = algae,
+                                                var.dose = "conc",
+                                                var.response = "vol")
+  
+  ind.no.diff.hessian <- ind.no.diff.hessian&
+                         CompareHessianMatrices(data.input = etmotc,
+                                                var.ref = "pct1",
+                                                var.dose = "dose1",
+                                                var.response = "rgr1")
+  
+  ind.no.diff.hessian <- ind.no.diff.hessian&
+                         CompareHessianMatrices(data.input = G.aparine,
+                                                var.ref = "treatment",
+                                                var.dose = "dose",
+                                                var.response = "drymatter")
+  
+  ind.no.diff.hessian <- ind.no.diff.hessian&
+                         CompareHessianMatrices(data.input = heartrate,
+                                                var.dose = "pressure",
+                                                var.response = "rate")
+>>>>>>> 922723f2fa3f6d135916c0085973f63167ea0f57:tests/testthat/test_Hessian_matrices.R
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
   CompareHessianMatrices(data.input = leaflength,
@@ -205,7 +228,7 @@ CompareHessianMatricesDRC <- function() {
 #
 context("Test whether the Hessian matrix computed by the function \`Hessian\` coincides
         with the Hessian matrix returned by the function \`constrOptim\` on the data
-        sets of the R package \`drc\`.")
+        sets of the R package \`drc\`")
 
 test_that("The Hessian matrices returned by the built-in function `constrOptim'
            and the function `Hessian' should be the same.", {
