@@ -4,9 +4,9 @@
 \alias{dr4pl.formula}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
-\method{dr4pl}{formula}(formula, data = list(), grad = GradientSquaredLoss,
-  init.parm = NULL, method.init = "logistic", method.optim = if
-  (is.null(grad)) "Nelder-Mead" else "BFGS", method.robust = NULL, ...)
+\method{dr4pl}{formula}(formula, data = list(), init.parm = NULL,
+  method.init = "logistic", method.optim = "Nelder-Mead",
+  method.robust = NULL, ...)
 }
 \arguments{
 \item{formula}{A symbolic description of the model to be fit. Either of the
@@ -14,11 +14,6 @@ form 'response ~ dose' or as a data frame with response values in first
 column and dose values in second column.}
 
 \item{data}{A data frame containing variables in the model.}
-
-\item{grad}{The gradient function that returns gradient values of the loss
-function specified by \code{method.robust}. If this parameter is NULL, then
-the gradient function for the usual sum-of-squares loss functions will be
-used.}
 
 \item{init.parm}{A vector of initial parameters to be optimized in the model.}
 

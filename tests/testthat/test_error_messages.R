@@ -10,7 +10,7 @@ library(testthat)
 context("Test whether all the error messages of the R package are correctly drawn
         when there are some errors in data or code")
 
-test_that("Error messages are correctly drawn.", {
+test_that("Error messages are correctly drawn", {
 
   x <- 1:10  # Doses
   theta <- c(100, -1, -1, 0)  # Parameters of the 4PL model
@@ -37,11 +37,11 @@ test_that("Error messages are correctly drawn.", {
   expect_error(FindInitialParms(x, y, "abc", "absolute"))
   
   ### The title text of the plot function should be of the character type.
-  expect_error(plot(dr4pl.test, text.title = 123.45))
+  expect_error(plot(dr4pl.test, text.title = 143.45))
 })
 
 test_that("Test whether the conventional R packages for dose-response modelling such
-          as `drc' and `nplr' fail in error data sets.", {
+          as `drc' and `nplr' fail in error data sets", {
             
             expect_error(drm(Response ~ Dose, data = drc_error_1,
                              fct = LL.4()))

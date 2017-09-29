@@ -91,10 +91,9 @@ CompareHessianMatricesDRC <- function() {
                                                 var.response = "rgr")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-<<<<<<< HEAD:tests/testthat/test_Hessian_matrices.R
-  CompareHessianMatrices(data.input = algae,
-                         var.dose = "conc",
-                         var.response = "vol")
+                          CompareHessianMatrices(data.input = algae,
+                                                 var.dose = "conc",
+                                                 var.response = "vol")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
   CompareHessianMatrices(data.input = etmotc,
@@ -118,29 +117,7 @@ CompareHessianMatricesDRC <- function() {
   CompareHessianMatrices(data.input = heartrate,
                          var.dose = "pressure",
                          var.response = "rate")
-=======
-                         CompareHessianMatrices(data.input = algae,
-                                                var.dose = "conc",
-                                                var.response = "vol")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-                         CompareHessianMatrices(data.input = etmotc,
-                                                var.ref = "pct1",
-                                                var.dose = "dose1",
-                                                var.response = "rgr1")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-                         CompareHessianMatrices(data.input = G.aparine,
-                                                var.ref = "treatment",
-                                                var.dose = "dose",
-                                                var.response = "drymatter")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-                         CompareHessianMatrices(data.input = heartrate,
-                                                var.dose = "pressure",
-                                                var.response = "rate")
->>>>>>> 922723f2fa3f6d135916c0085973f63167ea0f57:tests/testthat/test_Hessian_matrices.R
-  
+
   ind.no.diff.hessian <- ind.no.diff.hessian&
   CompareHessianMatrices(data.input = leaflength,
                          var.dose = "Dose",
