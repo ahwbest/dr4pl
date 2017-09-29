@@ -170,7 +170,7 @@ dr4plEst <- function(dose, response,
     
   }
 
-  ### For the case when boundaries are hit.
+  ### For the case when boundaries are hit
   if(all(constr.mat%*%theta == constr.vec)) {
     
     convergence <- FALSE
