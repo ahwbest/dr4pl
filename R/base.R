@@ -1,5 +1,4 @@
 
-library(tensor)
 
 #' Compute predicted responses.
 #'
@@ -189,6 +188,7 @@ DerivativeF <- function(theta, x) {
   
   return(cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
 }
+
 
 #' Compute gradient values of the sum-of-squares loss function.
 #'

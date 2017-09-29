@@ -18,4 +18,5 @@ Imports:
     drc,
     RColorBrewer,
     testthat,
-    robustbase
+    robustbase,
+    tensor
