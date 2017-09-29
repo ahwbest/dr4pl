@@ -44,12 +44,12 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'   drm <- dr4pl(dose = sample_data_1$Dose, response = sample_data_1$Response, method.init = "logistic")
 #'   plot(drm)
 #'
-#'   #Assign method.init = "Mead" to use Mead's method of estimation. 
+#'   ##Assign method.init = "Mead" to use Mead's method of estimation. 
 #'   # Use method.robust to select desired error function
 #'   drm <- dr4pl(sample_data_1$Response~sample_data_1$Dose, method.init = "Mead", method.robust = "Tukey" )
 #'   plot(drm)
 #' 
-#'   #compatable with ggplot
+#'   ##compatable with ggplot
 #'   library(ggplot2)
 #'   a <- dr4pl(drc_error_2$Response~drc_error_2$Dose, method.init = "Mead", method.robust = "absolute" )
 #'   b <- plot(a)
@@ -307,7 +307,7 @@ dr4plEst <- function(dose, response,
        error.value = error,
        hessian = hessian)
 }
-# add more Description
+
 #' @description Default plotting function for a `dr4pl' object. Plot displays 
 #' decreasing dr4pl curve as well as measured points. Default points are 
 #' blue and size 5.
