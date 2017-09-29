@@ -8,7 +8,6 @@
 #' @import graphics
 #' @import ggplot2
 
-
 # Begin Program
 #' @description Coefficient of a `dr4pl' object
 #' @name coef.dr4pl
