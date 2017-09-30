@@ -4,17 +4,16 @@
 \alias{confint.dr4pl}
 \title{Fit a 4 parameter logistic (4PL) model to dose-response data.}
 \usage{
-\method{confint}{dr4pl}(object, parm, level = 0.05, ...)
+\method{confint}{dr4pl}(object, parm, level, ...)
 }
 \arguments{
-\item{object}{An object of the dr4pl class.}
+\item{object}{An object of the dr4pl class}
 
-\item{parm}{parameter of the dr4pl class. This argument may be 
-ignored when object is assigned a dr4pl class.}
+\item{parm}{Parameters of the 4PL model}
 
-\item{level}{Sigifigance level of the confidence intervals}
+\item{level}{Confidence level}
 
-\item{...}{additional argument(s) for methods}
+\item{...}{Other parameters to be passed}
 }
 \value{
 A matrix of the confidence intervals in which each row represents a
@@ -28,15 +27,16 @@ Compute the confidence intervals of parameter estimates of a fitted
 \details{
 This function computes the confidence intervals of the parameters of the
   4PL model based on the second order approximation to the Hessian matrix of the
-  loss function of the model. Refer to Subsection 5.2.2 of 
+  loss function of the model. Please refer to Subsection 5.2.2 of 
   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
   Probability and Mathematical Statistics: Probability and Mathematical
   Statistics. John Wiley & Sons, Inc., New York.
 }
 \examples{
   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
+  parm <- obj.dr4pl$parameters
 
-  confint(obj.dr4pl)
+  confint(obj.dr4pl, parm = parm, level = 0.95)
 
 }
 \author{

@@ -406,71 +406,9 @@ dr4plEst <- function(dose, response,
        hessian = hessian)
 }
 
-#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
-#' @name confint.dr4pl
-#' @description Compute the confidence intervals of parameter estimates of a fitted
-#'   model.
-#' @param object An object of the dr4pl class.
-#' @param parm parameter of the dr4pl class. This argument may be 
-#'   ignored when object is assigned a dr4pl class.
-#' @param level Sigifigance level of the confidence intervals
-#' @param ...  additional argument(s) for methods
-#' @return A matrix of the confidence intervals in which each row represents a
-#'   parameter and each column represents the lower and upper bounds of the
-#'   confidence intervals of the corresponding parameters.
-#'   
-#' @details This function computes the confidence intervals of the parameters of the
-#'   4PL model based on the second order approximation to the Hessian matrix of the
-#'   loss function of the model. Refer to Subsection 5.2.2 of 
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
-#'   
-#' @examples
-#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
-#'
-#'   confint(obj.dr4pl)
-#' 
-#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
-#' @export
-confint.dr4pl <- function(object, parm, level = 0.05, ...) {
-  
-  x <- object$data$Dose
-  y <- object$data$Response
-  theta <- object$parameters
-  hessian <- object$hessian
-  
-  n <- length(y)  # Number of observations in data
-  f <- MeanResponse(x, theta)
-  
-  C.hat.inv <- solve(hessian/2)
-  s <- sqrt(sum((y - f)^2)/(n - 4))
-  
-  q.t <- qt(1 - level/2, df = n - 4)
-  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
-  
-  return(ci)
-}
-
-
-#' @description Coefficient of a `dr4pl' object
-#' @title coef
-#' @name coef.dr4pl
-#' @param object A 'dr4pl' object
-#' @param ... arguments passed to coef
-#' @return A vector of parameters
-#' @export
-coef.dr4pl <- function(object, ...) {
-  
-  object$parameters
-  
-}
-
-
 #' @description Default plotting function for a `dr4pl' object. Plot displays 
-#' decreasing dr4pl curve as well as measured points. Default points are 
-#' blue and size 5.
+#'   decreasing dr4pl curve as well as measured points. Default points are 
+#'   blue and size 5.
 #' @title plot
 #' @name plot.dr4pl
 #' @param x `dr4pl' object whose mean response function should be plotted.
@@ -631,13 +569,46 @@ summary.dr4pl <- function(object, ...) {
   res
 }
 
-<<<<<<< HEAD
+#' @description Perform the goodness-of-fit (gof) test for the 4PL model when there
+#'   are at least two replicates for each dose level.
+#' @title Perform the goodness-of-fit (gof) test for the 4PL model.
+#' @name gof.dr4pl
+#'   
+#' @param object An object of the dr4pl class.
+#' 
+#' @return The test statistic value, its p-value and the corresponding degrees of
+#'   freedom.
+#'   
+#' @details Perform the goodness-of-fit (gof) test for the 4PL model in which the
+#'   mean response actually follws the 4 Parameter Logistic model. There should
+#'   be at least two replicates at each dose level. The test statistic follows the
+#'   Chi squared distributions with the (n - 4) degrees of freedom where n is the
+#'   number of observations and 4 is the number of parameters in the 4PL model. For
+#'   detailed explanation of the method, please refer to Subsection 2.1.5 of
+#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
+#'   Probability and Mathematical Statistics: Probability and Mathematical
+#'   Statistics. John Wiley & Sons, Inc., New York.
+#'   
+#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
+#' @export
+gof.dr4pl <- function(object) {
+  
+  x <- object$data$Dose
+  y <- object$data$Response
+  
+  return(NULL)
+  
+}
+
 #' @description Compute the confidence intervals of parameter estimates of a fitted
 #'   model.
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
 #' @name confint.dr4pl
 #'   
-#' @param object An object of the dr4pl class.
+#' @param object An object of the dr4pl class
+#' @param parm Parameters of the 4PL model
+#' @param level Confidence level
+#' @param ... Other parameters to be passed
 #' 
 #' @return A matrix of the confidence intervals in which each row represents a
 #'   parameter and each column represents the lower and upper bounds of the
@@ -645,15 +616,16 @@ summary.dr4pl <- function(object, ...) {
 #'   
 #' @details This function computes the confidence intervals of the parameters of the
 #'   4PL model based on the second order approximation to the Hessian matrix of the
-#'   loss function of the model. Refer to Subsection 5.2.2 of 
+#'   loss function of the model. Please refer to Subsection 5.2.2 of 
 #'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
 #'   Probability and Mathematical Statistics: Probability and Mathematical
 #'   Statistics. John Wiley & Sons, Inc., New York.
 #'   
 #' @examples
 #'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
+#'   parm <- obj.dr4pl$parameters
 #'
-#'   confint(obj.dr4pl)
+#'   confint(obj.dr4pl, parm = parm, level = 0.95)
 #' 
 #' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
 #' @export
@@ -670,7 +642,7 @@ confint.dr4pl <- function(object, parm, level, ...) {
   C.hat.inv <- solve(hessian/2)
   s <- sqrt(sum((y - f)^2)/(n - 4))
   
-  q.t <- qt(0.975, df = n - 4)
+  q.t <- qt(1 - (1 - level)/2, df = n - 4)
   std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
   ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
   
@@ -691,8 +663,6 @@ coef.dr4pl <- function(object, ...) {
   
 }
 
-=======
->>>>>>> b7cd14833e624a6eb53d04b09e831232853f99d7
 #' These are a handful of experimentally derived datasets from the wet-laboratory.
 #' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
 #' @title sample_data_1

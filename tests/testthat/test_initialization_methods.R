@@ -47,7 +47,7 @@ CompareInitializationMethods <- function(data.input,
     result.table <- rbind(c(parms.logistic, loss.logistic), c(parms.Mead, loss.Mead))
     colnames(result.table) <- c("Upper limit", "IC50", "Slope", "Lower limit", "Loss")
 
-    print(result.table)
+    #print(result.table)
     
   } else {
     
@@ -86,7 +86,7 @@ CompareInitializationMethods <- function(data.input,
       result.table <- rbind(c(parms.logistic, loss.logistic), c(parms.Mead, loss.Mead))
       colnames(result.table) <- c("Upper limit", "IC50", "Slope", "Lower limit", "Loss")
 
-      print(result.table)
+      #print(result.table)
     }
 
     n.comparisons <- length(levels.ref)
@@ -97,7 +97,7 @@ CompareInitializationMethods <- function(data.input,
 
 TestInitializationMethods <- function() {
   
-  sink("comparison_intialization_methods.Rout")
+  #sink("comparison_intialization_methods.Rout")
   
   results <- c(0, 0, 0)
   
@@ -192,7 +192,7 @@ TestInitializationMethods <- function() {
                                                     var.dose = "conc",
                                                     var.response = "effect")
   
-  sink()
+  #sink()
   
   return(results)
 }
