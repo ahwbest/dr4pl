@@ -9,21 +9,16 @@
 \usage{
 dr4pl(...)
 
-\method{dr4pl}{default}(dose, response, grad = GradientSquaredLoss,
-  init.parm = NULL, method.init = "logistic", method.optim = if
-  (is.null(grad)) "Nelder-Mead" else "BFGS", method.robust = NULL, ...)
+\method{dr4pl}{default}(dose, response, init.parm = NULL,
+  method.init = "logistic", method.optim = "Nelder-Mead",
+  method.robust = NULL, ...)
 }
 \arguments{
 \item{...}{Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment}
 
-\item{dose}{Dose}
+\item{dose}{Vector of dose levels}
 
-\item{response}{Response}
-
-\item{grad}{The gradient function that returns gradient values of the loss
-function specified by \code{method.robust}. If this parameter is NULL, then
-the gradient function for the usual sum-of-squares loss functions will be
-used.}
+\item{response}{Vector of responses}
 
 \item{init.parm}{A vector of initial parameters to be optimized in the model.}
 

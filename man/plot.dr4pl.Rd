@@ -22,8 +22,8 @@
 }
 \description{
 Default plotting function for a `dr4pl' object. Plot displays 
-decreasing dr4pl curve as well as measured points. Default points are 
-blue and size 5.
+  decreasing dr4pl curve as well as measured points. Default points are 
+  blue and size 5.
 }
 \examples{
 ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)

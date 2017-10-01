@@ -37,7 +37,7 @@ CompareHessianMatrices <- function(data.input,
     ind.no.diff.hessian <- ind.no.diff.hessian&
                            (norm(hessian.cO - hessian.dr4pl, type = "1")/
                             norm(hessian.dr4pl, type = "1")<=
-                            0.011)
+                            0.01)
     
   } else {
     
@@ -68,7 +68,7 @@ CompareHessianMatrices <- function(data.input,
       ind.no.diff.hessian <- ind.no.diff.hessian&
                              (norm(hessian.cO - hessian.dr4pl, type = "1")/
                               norm(hessian.dr4pl, type = "1")<=
-                              0.011)
+                              0.01)
 
     }
     
@@ -91,134 +91,99 @@ CompareHessianMatricesDRC <- function() {
                                                 var.response = "rgr")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-<<<<<<< HEAD:tests/testthat/test_Hessian_matrices.R
-  CompareHessianMatrices(data.input = algae,
-                         var.dose = "conc",
-                         var.response = "vol")
+                          CompareHessianMatrices(data.input = algae,
+                                                 var.dose = "conc",
+                                                 var.response = "vol")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = etmotc,
-                         var.ref = "pct1",
-                         var.dose = "dose1",
-                         var.response = "rgr1")
+                          CompareHessianMatrices(data.input = etmotc,
+                                                 var.ref = "pct1",
+                                                 var.dose = "dose1",
+                                                 var.response = "rgr1")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = G.aparine,
-                         var.ref = "treatment",
-                         var.dose = "dose",
-                         var.response = "drymatter")
+                          CompareHessianMatrices(data.input = heartrate,
+                                                 var.dose = "pressure",
+                                                 var.response = "rate")
+
+  ind.no.diff.hessian <- ind.no.diff.hessian&
+                          CompareHessianMatrices(data.input = leaflength,
+                                                 var.dose = "Dose",
+                                                 var.response = "DW")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = glymet,
-                         var.ref = "pct",
-                         var.dose = "dose",
-                         var.response = "rgr")
+                          CompareHessianMatrices(data.input = lepidium,
+                                                 var.dose = "conc",
+                                                 var.response = "weight")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = heartrate,
-                         var.dose = "pressure",
-                         var.response = "rate")
-=======
-                         CompareHessianMatrices(data.input = algae,
-                                                var.dose = "conc",
-                                                var.response = "vol")
+                          CompareHessianMatrices(data.input = lettuce,
+                                                 var.dose = "conc",
+                                                 var.response = "weight")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-                         CompareHessianMatrices(data.input = etmotc,
-                                                var.ref = "pct1",
-                                                var.dose = "dose1",
-                                                var.response = "rgr1")
+                          CompareHessianMatrices(data.input = mecter,
+                                                 var.ref = "pct",
+                                                 var.dose = "dose",
+                                                 var.response = "rgr")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-                         CompareHessianMatrices(data.input = G.aparine,
-                                                var.ref = "treatment",
-                                                var.dose = "dose",
-                                                var.response = "drymatter")
+                          CompareHessianMatrices(data.input = M.bahia,
+                                                 var.dose = "conc",
+                                                 var.response = "dryweight")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-                         CompareHessianMatrices(data.input = heartrate,
-                                                var.dose = "pressure",
-                                                var.response = "rate")
->>>>>>> 922723f2fa3f6d135916c0085973f63167ea0f57:tests/testthat/test_Hessian_matrices.R
+                          CompareHessianMatrices(data.input = nasturtium,
+                                                 var.dose = "conc",
+                                                 var.response = "weight")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = leaflength,
-                         var.dose = "Dose",
-                         var.response = "DW")
+                          CompareHessianMatrices(data.input = O.mykiss,
+                                                 var.dose = "conc",
+                                                 var.response = "weight")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = lepidium,
-                         var.dose = "conc",
-                         var.response = "weight")
+                          CompareHessianMatrices(data.input = P.promelas,
+                                                 var.dose = "conc",
+                                                 var.response = "dryweight")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = lettuce,
-                         var.dose = "conc",
-                         var.response = "weight")
+                          CompareHessianMatrices(data.input = ryegrass,
+                                                 var.dose = "conc",
+                                                 var.response = "rootl")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = mecter,
-                         var.ref = "pct",
-                         var.dose = "dose",
-                         var.response = "rgr")
+                          CompareHessianMatrices(data.input = S.alba,
+                                                 var.ref = "Herbicide",
+                                                 var.dose = "Dose",
+                                                 var.response = "DryMatter")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = M.bahia,
-                         var.dose = "conc",
-                         var.response = "dryweight")
+                          CompareHessianMatrices(data.input = S.capricornutum,
+                                                 var.dose = "conc",
+                                                 var.response = "count")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = nasturtium,
-                         var.dose = "conc",
-                         var.response = "weight")
+                          CompareHessianMatrices(data.input = secalonic,
+                                                 var.dose = "dose",
+                                                 var.response = "rootl")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = O.mykiss,
-                         var.dose = "conc",
-                         var.response = "weight")
+                          CompareHessianMatrices(data.input = spinach,
+                                                 var.ref = "CURVE",
+                                                 var.dose = "DOSE",
+                                                 var.response = "SLOPE")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = P.promelas,
-                         var.dose = "conc",
-                         var.response = "dryweight")
+                          CompareHessianMatrices(data.input = terbuthylazin,
+                                                 var.dose = "dose",
+                                                 var.response = "rgr")
   
   ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = ryegrass,
-                         var.dose = "conc",
-                         var.response = "rootl")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = S.alba,
-                         var.ref = "Herbicide",
-                         var.dose = "Dose",
-                         var.response = "DryMatter")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = S.capricornutum,
-                         var.dose = "conc",
-                         var.response = "count")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = secalonic,
-                         var.dose = "dose",
-                         var.response = "rootl")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = spinach,
-                         var.ref = "CURVE",
-                         var.dose = "DOSE",
-                         var.response = "SLOPE")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = terbuthylazin,
-                         var.dose = "dose",
-                         var.response = "rgr")
-  
-  ind.no.diff.hessian <- ind.no.diff.hessian&
-  CompareHessianMatrices(data.input = vinclozolin,
-                         var.ref = "exper",
-                         var.dose = "conc",
-                         var.response = "effect")
+                          CompareHessianMatrices(data.input = vinclozolin,
+                                                 var.ref = "exper",
+                                                 var.dose = "conc",
+                                                 var.response = "effect")
   
   return(ind.no.diff.hessian)
 }
@@ -233,5 +198,5 @@ context("Test whether the Hessian matrix computed by the function \`Hessian\` co
 test_that("The Hessian matrices returned by the built-in function `constrOptim'
            and the function `Hessian' should be the same.", {
              
-  expect_true(CompareHessianMatricesDRC)
+  expect_true(CompareHessianMatricesDRC())
 })
