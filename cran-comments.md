@@ -14,4 +14,4 @@ output: html_document
 There was no Erros, Warnings, or Notes.
     
 ## Downstream dependencies
-I have also run revdep_check() for a R CMD check on downstream dependencies. There are currently no known ERRORs or Warnings.
+There are currently no downstream dependencies for this package.
