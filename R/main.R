@@ -46,7 +46,7 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'   ##Assign method.init = "Mead" to use Mead's method of estimation. 
 #'   # Use method.robust to select desired error function
 #'   b <- dr4pl(Response~Dose, 
-#'                data = sample_data_1,
+#'                data = sample_data_4,
 #'                method.init = "Mead", 
 #'                method.robust = "Tukey" )
 #'   plot(b)
