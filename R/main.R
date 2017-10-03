@@ -23,8 +23,14 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'   
 #' @param dose Vector of dose levels
 #' @param response Vector of responses
-#' @param init.parm A vector of initial parameters to be optimized in the model.
-#' @param method.init The method of obtaining initial values of the parameters.
+#' @param init.parm Vector of initial parameters to be optimized in the model.
+#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
+#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
+#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
+#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
+#'   process.
+#' @param method.init Method of obtaining initial values of the parameters.
 #'   If it is NULL, a default "logistic" regression method will be used. Assign
 #'   "Mead" to use Mead's method.
 #' @param method.optim The method of optimization of the parameters. This method
@@ -164,11 +170,17 @@ dr4pl.default <- function(dose,
 #' @description A general 4PL model fitting function for analysis of
 #'   dose-response relation.
 #'
-#' @param  formula A symbolic description of the model to be fit. Either of the
+#' @param  formula Symbolic description of the model to be fit. Either of the
 #'   form 'response ~ dose' or as a data frame with response values in first
 #'   column and dose values in second column.
-#' @param data A data frame containing variables in the model.
-#' @param init.parm A vector of initial parameters to be optimized in the model.
+#' @param data Data frame containing variables in the model.
+#' @param init.parm Vector of initial parameters to be optimized in the model.
+#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
+#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
+#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
+#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
+#'   process.
 #' @param method.init The method of obtaining initial values of the parameters.
 #'   If it is NULL, a default "logistic" regression method will be used. Assign
 #'   "Mead" to use Mead's method.
@@ -217,6 +229,7 @@ dr4pl.default <- function(dose,
 dr4pl.formula <- function(formula,
                           data = list(),
                           init.parm = NULL,
+                          decline = "auto",
                           method.init = "logistic",
                           method.optim = "Nelder-Mead",
                           method.robust = NULL,
@@ -229,6 +242,7 @@ dr4pl.formula <- function(formula,
   est <- dr4pl.default(dose = dose,
                        response = response,
                        init.parm = init.parm,
+                       decline = decline,
                        method.init = method.init,
                        method.optim = method.optim,
                        method.robust = method.robust,
@@ -252,6 +266,12 @@ dr4pl.formula <- function(formula,
 #' @param response Vector of responses
 #' @param init.parm Vector of initial parameters of the 4PL model supplied by a
 #'   user.
+#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
+#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
+#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
+#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
+#'   process.
 #' @param method.init Method of obtaining initial values of the parameters.
 #'   Should be one of "logistic" for the logistic method or "Mead" for the Mead
 #'   method. The default option is the logistic method.
@@ -265,6 +285,7 @@ dr4pl.formula <- function(formula,
 #'      - Tukey: Tukey's biweight loss
 dr4plEst <- function(dose, response,
                      init.parm,
+                     decline,
                      method.init,
                      method.optim,
                      method.robust) {
@@ -321,18 +342,39 @@ dr4plEst <- function(dose, response,
     deriv.f <- DerivativeF(theta.init, x)
     residuals <- Residual(theta.init, x, y)
     
-    C.hat.inv <- solve(t(deriv.f)%*%deriv.f)
+    C.hat.inv <- try(solve(t(deriv.f)%*%deriv.f), silent = TRUE)  # Inverse matrix
 
+    if(inherits(C.hat.inv, "try-error")) {
+      
+      C.hat.Chol <- try(chol(t(deriv.f)%*%deriv.f, silent = TRUE))  # Cholesky decomposition
+      
+      if(inherits(C.hat.Chol, "try-error")) {
+        
+        C.hat.Chol <- try(chol(0.99*t(deriv.f)%*%deriv.f + 0.01*diag(dim(deriv.f)[2])))
+        
+        if(inherits(C.hat.Chol, "try-error")) {
+         
+           C.hat.Chol <- NULL
+        }
+      }
+    }
+    
+    if(!is.null(C.hat.Chol)) {
+      
+      C.hat.inv <- chol2inv(C.hat.Chol)
+    }
+    
     s <- sqrt(sum(residuals^2)/(n - 4))
     
     q.t <- qt(0.9999, df = n - 4)
     std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
     ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)  # Confidence intervals
 
+    ### Bounds on the IC50 and slope parameters are determined by confidence intervals
     bounds.theta.2 <- ci[2, ]
     bounds.theta.3 <- ci[3, ]
     
-    constr.matr <- matrix(rbind(c(0, 1, 0, 0), 
+    constr.mat <- matrix(rbind(c(0, 1, 0, 0), 
                                 c(0, 1, 0, 0),
                                 c(0, -1, 0, 0),
                                 c(0, 0, -1, 0),
@@ -343,17 +385,31 @@ dr4plEst <- function(dose, response,
     constr.vec <- c(0, bounds.theta.2[1], -bounds.theta.2[2],
                     0, bounds.theta.3[1], -bounds.theta.3[2])
     
-    if(any(constr.matr%*%theta.init<constr.vec)) {
-      
-      stop("Initial parameter values are not in the interior of the feasible region.")
+    ### Sometimes the lower bound of the IC50 parameter is negative. In this case,
+    ### we just set the lower bounds of the IC50 parameter as zero.
+    if(bounds.theta.2[1]<0) {
+    
+      constr.mat <- constr.mat[-2, ]
+      constr.vec <- constr.vec[-2]
       
     }
+    
+    if(any(constr.mat%*%theta.init<constr.vec)) {
+      
+      stop("Initial parameter values are not in the interior of the feasible region.")
+    }
+    
+    constr.mat <- matrix(rbind(c(0, 1, 0, 0),
+                               c(0, 0, -1, 0)),
+                         nrow = 2,
+                         ncol = 4)
+    constr.vec <- c(0, 0)
     
     # Fit a dose-response model. The Hill bounds are currently not returned.
     cO.dr4pl <- constrOptim(theta = theta.init,
                             f = err.fcn,
                             grad = grad,
-                            ui = constr.matr,
+                            ui = constr.mat,
                             ci = constr.vec,
                             method = method.optim,
                             hessian = TRUE,
@@ -367,30 +423,9 @@ dr4plEst <- function(dose, response,
   }
   
   ### If boundaries are hit
-  if(all(constr.matr%*%theta == constr.vec)) {
+  if(all(constr.mat%*%theta == constr.vec)) {
     
     convergence <- FALSE
-    
-    # err.fcn <- ErrFcn("absolute")
-    # 
-    # drr.robust <- constrOptim(theta = theta.init,
-    #                           f = err.fcn,
-    #                           grad = grad,
-    #                           ui = constr.matr,
-    #                           ci = constr.vec,
-    #                           method = method.optim,
-    #                           hessian = TRUE,
-    #                           x = x,
-    #                           y = y)
-    # 
-    # theta <- drr.robust$par
-    # residuals <- Residual(theta, x, y)
-    # robust.scale <- quantile(abs(residuals), 0.6827)*n/(n - 4)
-    # abs.res.sorted <- sort(abs(residuals))
-    # 
-    # Q <- 0.1  # Motulsky and Brown (2006)
-    # alpha.vec <- Q*seq(from = n, to = 1, by = -1)/n
-    # t.stats <- abs.res.sorted/robust.scale
     
   }
   

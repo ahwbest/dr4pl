@@ -39,17 +39,3 @@ test_that("Error messages are correctly drawn", {
   ### The title text of the plot function should be of the character type.
   expect_error(plot(dr4pl.test, text.title = 143.45))
 })
-
-test_that("Test whether the conventional R packages for dose-response modelling such
-          as `drc' and `nplr' fail in error data sets", {
-            
-            expect_error(drm(Response ~ Dose, data = drc_error_1,
-                             fct = LL.4()))
-            expect_error(drm(Response ~ Dose, data = drc_error_2,
-                             fct = LL.4()))
-            expect_error(drm(Response ~ Dose, data = drc_error_3,
-                             fct = LL.4()))
-            expect_error(drm(Response ~ Dose, data = drc_error_4,
-                             fct = LL.4()))
-            
-          })

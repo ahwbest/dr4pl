@@ -21,10 +21,10 @@ MeanResponse <- function(x, theta) {
   
   if(theta.2 < 0) {
 
-    stop("The IC50 parameter estimates become negative during the optimization process.")
+    stop("The IC50 parameter estimate becomes negative during the optimization process.")
   }
 
-  f <- theta.1 + (theta.4 - theta.1)/(1 + (x/theta.2)^theta.3)
+  f <- theta.1 + (theta.4 - theta.1)/(1 + exp(theta.3*(log(x) - log(theta.2))))
 
   return(f)
 }
@@ -199,11 +199,15 @@ DerivativeF <- function(theta, x) {
 #' @return Gradient values of the sum-of-squares loss function.
 GradientSquaredLoss <- function(theta, x, y) {
 
+  if(theta[2] < 0) {
+    
+    stop("The IC50 parameter estimate becomes negative during the optimization process.")
+  }
+  
   f <- MeanResponse(x, theta)  # Mean response values
   n <- length(x)  # Number of data observations
   
   return(-2*(y - f)%*%DerivativeF(theta, x)/n)
-  
 }
 
 #' Compute the Hessian matrix of the sum-of-squares loss function

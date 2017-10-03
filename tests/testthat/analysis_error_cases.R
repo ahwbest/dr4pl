@@ -15,6 +15,23 @@ data.error.list[[3]] <- drc_error_3
 data.error.list[[4]] <- drc_error_4
 
 # -----------------------------------------------------------------------------
+### Check that fitting a 4PL model to error cases using `drc` or `nplr` 
+### draws an error 
+#
+drm(Response ~ Dose, data = drc_error_1,
+    fct = LL.4())
+drm(Response ~ Dose, data = drc_error_2,
+    fct = LL.4())
+drm(Response ~ Dose, data = drc_error_3,
+    fct = LL.4())
+drm(Response ~ Dose, data = drc_error_4,
+    fct = LL.4())
+
+nplr(x = drc_error_1$Dose, y = convertToProp(drc_error_1$Response),
+     LPweight = 0)
+# `nplr` does not draw an error for drc_error_2, drc_error_3 and drc_error_4
+
+# -----------------------------------------------------------------------------
 ### Fit a robust regression model and test outliers
 #
 wd <- getwd()
@@ -75,7 +92,20 @@ dev.off()
 
 setwd(wd)
 
-# -------------------------------------------------------------------------------
-###
+# ----------------------------------------------------------------------------
+### Check whether the Hill bounds are attained for the error cases.
 #
-
+for(i in 1:n.error.case) {
+  
+  data.error <- data.error.list[[i]]
+  x <- data.error$Dose
+  y <- data.error$Response
+  n <- length(y)
+  
+  dr4pl.error <- dr4pl(Response ~ Dose,
+                       data = data.error)
+  
+  theta <- dr4pl.robust$par
+  residuals <- Residual(theta, x, y)
+  
+}
