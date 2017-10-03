@@ -95,7 +95,7 @@ dr4pl.default <- function(dose,
 
 
   ### When convergence failure happens.
-  if(obj.dr4pl$convergence == FALSE) {
+  if(obj.dr4pl$convergence == FALSE) {  
     
     ### Decide the method of robust estimation which is more robust than the method
     ### input by a user.
@@ -268,7 +268,6 @@ dr4plEst <- function(dose, response,
                      method.init,
                      method.optim,
                      method.robust) {
-  
   convergence <- TRUE
   
   x <- dose  # Vector of dose values
@@ -321,7 +320,48 @@ dr4plEst <- function(dose, response,
     deriv.f <- DerivativeF(theta.init, x)
     residuals <- Residual(theta.init, x, y)
     
-    C.hat.inv <- solve(t(deriv.f)%*%deriv.f)
+    
+    C.hat.inv <- tryCatch(  #Need to verify that error is being used.
+      {
+      solve(t(deriv.f)%*%deriv.f)
+      },
+      error = function(cond) {
+        message(cond)
+        
+        if(!is.positive.definite((t(deriv.f)%*%deriv.f))) {
+          message(" Symmetric matrix is not positive definite. Cannot compute inverse matrix")
+          return(NULL)
+        }
+
+        if(is.positive.definite((t(deriv.f)%*%deriv.f))) {
+          test.mat <- (t(deriv.f)%*%deriv.f)
+          i <- 1
+          f <- matrix(c(c(1,0,0,0),
+                        c(0,1,0,0),
+                        c(0,0,1,0),
+                        c(0,0,0,1)), nrow = 4, ncol = 4)
+          test.mat.s <- cbind(test.mat, f)
+          while(i <= 4) {
+            ones <- c(1,1,1,1)
+            ones[i] <- test.mat.s[i,i]
+            test.mat.s <- test.mat.s/ones
+            clm <- test.mat.s[,i]
+            ro <- test.mat.s[i,]
+            m <- matrix(c(ro[1]*clm,ro[2]*clm,ro[3]*clm,ro[4]*clm,ro[5]*clm,ro[6]*clm,ro[7]*clm,ro[8]*clm), nrow = 4, ncol = 8)
+            m[i,] <- 0
+            test.mat.s <- test.mat.s - m
+            i <- i + 1
+          }
+          test.mat.s[,5:8]
+
+        }
+      }
+    )  
+   
+        
+   
+    
+    
 
     s <- sqrt(sum(residuals^2)/(n - 4))
     
