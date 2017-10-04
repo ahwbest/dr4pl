@@ -9,16 +9,11 @@
 #' @export
 MeanResponse <- function(x, theta) {
 
-  theta.1 <- theta[1]
-  theta.2 <- theta[2]
-  theta.3 <- theta[3]
-  theta.4 <- theta[4]
-  
+  ### Check whether function arguments are appropriate
   if(any(is.na(theta))) {
     
     stop("One of the parameter values is NA.")
   }
-  
   if(theta.2 < 0) {
 
     stop("The IC50 parameter estimate becomes negative during the optimization process.")

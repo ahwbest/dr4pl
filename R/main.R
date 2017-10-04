@@ -1,6 +1,6 @@
 #' @name dr4pl
 #' @docType package
-#' @title Dose response data analysis using the 4 Parameter Logistic model
+#' @title Dose-response data analysis using the 4 Parameter Logistic model
 #' @description Main functions related to fitting
 #' @author Hyowon An, Lineberger Comprehensive Cancer Center
 #' @details Last updated: 09/19/2016
@@ -9,7 +9,6 @@
 #' @import ggplot2
 #' @import tensor
 
-
 # Begin Program
 
 #' @description Fit the 4 parameter logistic model to the data using the function `dr4plEst'
@@ -17,153 +16,6 @@
 #' @param ... Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment
 #' @export
 dr4pl <- function(...) UseMethod("dr4pl")
-
-#' @describeIn dr4pl Used in the default case, supplying a single dose and 
-#'   response variable
-#'   
-#' @param dose Vector of dose levels
-#' @param response Vector of responses
-#' @param init.parm Vector of initial parameters to be optimized in the model.
-#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
-#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
-#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
-#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
-#'   process.
-#' @param method.init Method of obtaining initial values of the parameters.
-#'   If it is NULL, a default "logistic" regression method will be used. Assign
-#'   "Mead" to use Mead's method.
-#' @param method.optim The method of optimization of the parameters. This method
-#'   name is directly applied to the \code{constrOptim} function provided in the
-#'   "base" package of R.
-#' @param method.robust Parameter to select error function for the robust estimation method to be used to fit a model. 
-#'      - NULL: Sum of squares loss 
-#'      - absolute: Absolute deviation loss 
-#'      - Huber: Huber's loss 
-#'      - Tukey: Tukey's biweight loss
-#'   
-#'  
-#' @examples 
-#'   a <- dr4pl(dose = sample_data_1$Dose, 
-#'                response = sample_data_1$Response, 
-#'                method.init = "logistic")
-#'   plot(a)
-#'
-#'   ##Assign method.init = "Mead" to use Mead's method of estimation. 
-#'   # Use method.robust to select desired error function
-#'   b <- dr4pl(Response~Dose, 
-#'                data = sample_data_1,
-#'                method.init = "Mead", 
-#'                method.robust = "Tukey" )
-#'   plot(b)
-#' 
-#'   ##compatable with ggplot
-#'   library(ggplot2)
-#'   c <- dr4pl(Response~Dose, 
-#'              data = drc_error_2,
-#'              method.init = "Mead", 
-#'              method.robust = "absolute" )
-#'   d <- plot(c)
-#'   d + scale_x_log10(breaks = c(.00135, .0135, .135, 1.35, 13.5))
-#' @export
-dr4pl.default <- function(dose,
-                          response,
-                          init.parm = NULL,
-                          method.init = "logistic",
-                          method.optim = "Nelder-Mead",
-                          method.robust = NULL,
-                          ...) {
-
-  methods.init <- c("logistic", "Mead")
-  
-  ### Check errors in functions arguments.
-  if(!is.numeric(dose)||!is.numeric(response)) {
-    
-    stop("Both doses and responses should be numeric.")
-  }
-  if(length(dose) == 0 || length(response) == 0 || length(dose) != length(response)) {
-    
-    stop("The same numbers of dose and response values should be supplied.")
-    
-  }
-  if(!is.element(method.init, methods.init)) {
-    
-    stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
-    
-  }
-
-  obj.dr4pl <- dr4plEst(dose = dose,
-                        response = response,
-                        init.parm = init.parm,
-                        method.init = method.init,
-                        method.optim = method.optim,
-                        method.robust = method.robust)
-
-
-  ### When convergence failure happens.
-  if(obj.dr4pl$convergence == FALSE) {
-    
-    ### Decide the method of robust estimation which is more robust than the method
-    ### input by a user.
-    if(is.null(method.robust)) {
-      
-      method.robust.new <- "absolute"
-      
-    } else if(is.element(method.robust, c("absolute", "Huber"))) {
-      
-      method.robust.new <- "Tukey"
-      
-    } else {
-      
-      stop("Convergence failure happened but no resolution could be found.")
-      
-    }
-    
-    n <- length(dose)  # Number of data points
-    
-    obj.dr4pl <- dr4plEst(dose = dose, 
-                          response = response,
-                          init.parm = init.parm,
-                          method.init = method.init,
-                          method.optim = method.optim,
-                          method.robust = method.robust.new)
-    
-    theta <- obj.dr4pl$parameters
-    residuals <- Residual(theta, dose, response)
-    
-    # We use the median absolute deviation (mad) as a robust estimator of scale 
-    # instead of the estimator suggested in Motulsky and Brown (2006)
-    # scale.robust <- quantile(abs(residuals), 0.6827)*n/(n - 4)
-    scale.robust <- mad(residuals)  
-    
-    abs.res.sorted <- sort(abs(residuals), index.return = TRUE)$x
-    indices.sorted <- sort(abs(residuals), index.return = TRUE)$ix
-    
-    Q <- 0.05  # Refer to Motulsky and Brown (2006)
-    alphas <- Q*seq(from = n, to = 1, by = -1)/n
-    p.values <- 2*pt(q = abs.res.sorted/scale.robust, df = n - 4, lower.tail = FALSE)
-    
-    indices.FDR <- which(p.values < alphas)
-    
-    if(length(indices.FDR) == 0) {
-      
-      indices.outlier <- NULL
-      
-    } else {
-      
-      indices.outlier <- indices.sorted[seq(from = min(indices.FDR), to = n, by = 1)]
-      
-    }
-    
-    plot(obj.dr4pl, indices.outlier = indices.outlier)
-
-  }
-  
-  obj.dr4pl$call <- match.call()
-
-  class(obj.dr4pl) <- "dr4pl"
-  return(obj.dr4pl)
-}
 
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
 #'
@@ -234,11 +86,11 @@ dr4pl.formula <- function(formula,
                           method.optim = "Nelder-Mead",
                           method.robust = NULL,
                           ...) {
-
+  
   mf <- model.frame(formula = formula, data = data)
   dose <- model.matrix(attr(mf, "terms"), data = mf)[, 2]
   response <- model.response(mf)
-
+  
   est <- dr4pl.default(dose = dose,
                        response = response,
                        init.parm = init.parm,
@@ -247,12 +99,162 @@ dr4pl.formula <- function(formula,
                        method.optim = method.optim,
                        method.robust = method.robust,
                        ...)
-
+  
   est$call <- match.call()
   est$formula <- formula
   names(est$parameters) <- c("Upper limit", "IC50", "Slope", "Lower limit")
   
   return(est)
+}
+
+#' @describeIn dr4pl Used in the default case, supplying a single dose and 
+#'   response variable
+#'   
+#' @param dose Vector of dose levels
+#' @param response Vector of responses
+#' @param init.parm Vector of initial parameters to be optimized in the model.
+#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
+#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
+#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
+#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
+#'   process.
+#' @param method.init Method of obtaining initial values of the parameters.
+#'   If it is NULL, a default "logistic" regression method will be used. Assign
+#'   "Mead" to use Mead's method.
+#' @param method.optim The method of optimization of the parameters. This method
+#'   name is directly applied to the \code{constrOptim} function provided in the
+#'   "base" package of R.
+#' @param method.robust Parameter to select error function for the robust estimation method to be used to fit a model. 
+#'      - NULL: Sum of squares loss 
+#'      - absolute: Absolute deviation loss 
+#'      - Huber: Huber's loss 
+#'      - Tukey: Tukey's biweight loss
+#'   
+#'  
+#' @examples 
+#'   a <- dr4pl(dose = sample_data_1$Dose, 
+#'                response = sample_data_1$Response, 
+#'                method.init = "logistic")
+#'   plot(a)
+#'
+#'   ##Assign method.init = "Mead" to use Mead's method of estimation. 
+#'   # Use method.robust to select desired error function
+#'   b <- dr4pl(Response~Dose, 
+#'                data = sample_data_1,
+#'                method.init = "Mead", 
+#'                method.robust = "Tukey" )
+#'   plot(b)
+#' 
+#'   ##compatable with ggplot
+#'   library(ggplot2)
+#'   c <- dr4pl(Response~Dose, 
+#'              data = drc_error_2,
+#'              method.init = "Mead", 
+#'              method.robust = "absolute" )
+#'   d <- plot(c)
+#'   d + scale_x_log10(breaks = c(.00135, .0135, .135, 1.35, 13.5))
+#' @export
+dr4pl.default <- function(dose,
+                          response,
+                          init.parm = NULL,
+                          decline = "auto",
+                          method.init = "logistic",
+                          method.optim = "Nelder-Mead",
+                          method.robust = NULL,
+                          ...) {
+
+  methods.init <- c("logistic", "Mead")
+  
+  ### Check errors in functions arguments.
+  if(!is.numeric(dose)||!is.numeric(response)) {
+    
+    stop("Both doses and responses should be numeric.")
+  }
+  if(length(dose) == 0 || length(response) == 0 || length(dose) != length(response)) {
+    
+    stop("The same numbers of dose and response values should be supplied.")
+    
+  }
+  if(!is.element(method.init, methods.init)) {
+    
+    stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
+    
+  }
+
+  obj.dr4pl <- dr4plEst(dose = dose,
+                        response = response,
+                        init.parm = init.parm,
+                        decline = decline,
+                        method.init = method.init,
+                        method.optim = method.optim,
+                        method.robust = method.robust)
+
+
+  ### When convergence failure happens.
+  if(obj.dr4pl$convergence == FALSE) {
+    
+    ### Decide the method of robust estimation which is more robust than the method
+    ### input by a user.
+    if(is.null(method.robust)) {
+      
+      method.robust.new <- "absolute"
+      
+    } else if(is.element(method.robust, c("absolute", "Huber"))) {
+      
+      method.robust.new <- "Tukey"
+      
+    } else {
+      
+      stop("Convergence failure happened but no resolution could be found.")
+      
+    }
+    
+    n <- length(dose)  # Number of data points
+    
+    obj.dr4pl <- dr4plEst(dose = dose, 
+                          response = response,
+                          init.parm = init.parm,
+                          decline = decline,
+                          method.init = method.init,
+                          method.optim = method.optim,
+                          method.robust = method.robust.new)
+    
+    theta <- obj.dr4pl$parameters
+    residuals <- Residual(theta, dose, response)
+    
+    # We use the median absolute deviation (mad) as a robust estimator of scale 
+    # instead of the estimator suggested in Motulsky and Brown (2006)
+    # scale.robust <- quantile(abs(residuals), 0.6827)*n/(n - 4)
+    scale.robust <- mad(residuals)  
+    
+    abs.res.sorted <- sort(abs(residuals), index.return = TRUE)$x
+    indices.sorted <- sort(abs(residuals), index.return = TRUE)$ix
+    
+    Q <- 0.05  # Refer to Motulsky and Brown (2006)
+    alphas <- Q*seq(from = n, to = 1, by = -1)/n
+    p.values <- 2*pt(q = abs.res.sorted/scale.robust, df = n - 4, lower.tail = FALSE)
+    
+    indices.FDR <- which(p.values < alphas)
+    
+    if(length(indices.FDR) == 0) {
+      
+      indices.outlier <- NULL
+      
+    } else {
+      
+      indices.outlier <- indices.sorted[seq(from = min(indices.FDR), to = n, by = 1)]
+      
+    }
+    
+    plot(obj.dr4pl, indices.outlier = indices.outlier)
+
+  }
+  
+  obj.dr4pl$call <- match.call()
+
+  class(obj.dr4pl) <- "dr4pl"
+  return(obj.dr4pl)
 }
 
 #' @description Private function that actually fits the 4PL model to data. If the
@@ -312,6 +314,7 @@ dr4plEst <- function(dose, response,
                           ncol = 4)
     constr.vec <- c(0, 0)
     
+    ### Check whether initial parameter estimates satisfy constraints
     if(any(constr.matr%*%theta.init<constr.vec)) {
       
       stop("Initial parameter values are not in the interior of the feasible region.")
