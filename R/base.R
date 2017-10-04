@@ -14,12 +14,12 @@ MeanResponse <- function(x, theta) {
     
     stop("One of the parameter values is NA.")
   }
-  if(theta.2 < 0) {
+  if(theta[2] < 0) {
 
     stop("The IC50 parameter estimate becomes negative during the optimization process.")
   }
 
-  f <- theta.1 + (theta.4 - theta.1)/(1 + exp(theta.3*(log(x) - log(theta.2))))
+  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
 
   return(f)
 }
