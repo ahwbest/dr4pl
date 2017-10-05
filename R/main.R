@@ -264,6 +264,7 @@ dr4plEst <- function(dose, response,
                      method.init,
                      method.optim,
                      method.robust) {
+  
   convergence <- TRUE
   x <- dose  # Vector of dose values
   y <- response  # Vector of responses
