@@ -15,8 +15,6 @@ test_that("Error messages are correctly drawn", {
   x <- 1:10  # Doses
   theta <- c(100, -1, -1, 0)  # Parameters of the 4PL model
 
-  expect_error(MeanResponse(x, theta), "The IC50 parameter estimates become negative during the optimization process.")
-  
   theta.init.trial <- c(100, -1, -1, 0)
   
   data.test <- data.frame(x = c(0.0001, 0.001, 0.01, 0.1, 1),
@@ -26,7 +24,7 @@ test_that("Error messages are correctly drawn", {
                      data = data.test,
                      init.parm = theta.init.trial,
                      method.init = "logistic"),
-               "Initial parameter values are not in the interior of the feasible region.")
+               "The IC50 parameter should be positive.")
   
   dr4pl.test <- dr4pl(y ~ x,
                       data = data.test,

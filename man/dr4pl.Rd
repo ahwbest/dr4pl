@@ -4,23 +4,37 @@
 \name{dr4pl}
 \alias{dr4pl}
 \alias{dr4pl-package}
+\alias{dr4pl.formula}
 \alias{dr4pl.default}
-\title{Dose response data analysis using the 4 Parameter Logistic model}
+\title{Dose-response data analysis using the 4 Parameter Logistic model}
 \usage{
 dr4pl(...)
 
-\method{dr4pl}{default}(dose, response, init.parm = NULL,
+\method{dr4pl}{formula}(formula, data = list(), init.parm = NULL,
+  decline = "auto", method.init = "logistic",
+  method.optim = "Nelder-Mead", method.robust = NULL, ...)
+
+\method{dr4pl}{default}(dose, response, init.parm = NULL, decline = "auto",
   method.init = "logistic", method.optim = "Nelder-Mead",
   method.robust = NULL, ...)
 }
 \arguments{
-\item{...}{Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment}
+\item{...}{Further arguments to be passed to \code{constrOptim}.}
 
-\item{dose}{Vector of dose levels}
+\item{formula}{Symbolic description of the model to be fit. Either of the
+form 'response ~ dose' or as a data frame with response values in first
+column and dose values in second column.}
 
-\item{response}{Vector of responses}
+\item{data}{Data frame containing variables in the model.}
 
-\item{init.parm}{A vector of initial parameters to be optimized in the model.}
+\item{init.parm}{Vector of initial parameters to be optimized in the model.}
+
+\item{decline}{Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
+that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
+option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
+option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
+process.}
 
 \item{method.init}{The method of obtaining initial values of the parameters.
 If it is NULL, a default "logistic" regression method will be used. Assign
@@ -35,17 +49,48 @@ name is directly applied to the \code{constrOptim} function provided in the
 - absolute: Absolute deviation loss 
 - Huber: Huber's loss 
 - Tukey: Tukey's biweight loss}
+
+\item{dose}{Vector of dose levels}
+
+\item{response}{Vector of responses}
+}
+\value{
+A 'dr4pl' object for which "confint", "gof", "print" and "summary"
+  methods are implemented. For details, see the help page of each method.
+  For example, type \code{?confint.dr4pl} to obtain the confidence intervals
+  of parameters of the 'dr4pl' object.
 }
 \description{
 Main functions related to fitting
-
-Fit the 4 parameter logistic model to the data using the function `dr4plEst'
 }
 \details{
 Last updated: 09/19/2016
+
+This function fits a 4 parameter logistic (4PL) model to dose-response
+  data. A formula of the model is
+  \deqn{\theta[1]+(\theta[4]-\theta[1])/(1+(z/\theta[2])^\theta[3])}
+
+  \code{method.init} specifies an initialization method to get initial parameter
+  estimates based on data. The currently supported initialization methods are
+  'logistic' and 'Mead'. Details of the methods are given in Section
+  'Details'.
+
+  \code{method.optim} specifies an optimization method to be used in
+  "constrOptim" function. The currently supported optimization techniques
+  include "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN" and "Brent". For
+  further details, see the help page of \code{\link[stats]{optim}}.
+
+  \code{method.robust} chooses a robust estimation method among 4 methods.
+  The method of estimation is usually identified by the loss function of the
+  method. This package implements 4 loss functions: sum of squares loss,
+  absolute deviation loss, Huber's loss and Tukey's biweight loss. Each of
+  loss function is explained in detail in the vignette.
 }
 \section{Methods (by class)}{
 \itemize{
+\item \code{formula}: General 4PL model fitting function for analysis of
+dose-response relation.
+
 \item \code{default}: Used in the default case, supplying a single dose and 
 response variable
 }}
@@ -73,6 +118,12 @@ response variable
   d <- plot(c)
   d + scale_x_log10(breaks = c(.00135, .0135, .135, 1.35, 13.5))
 }
+\seealso{
+\code{\link{confint.dr4pl}}, \code{\link{gof.dr4pl}},
+\code{\link{print.dr4pl}}, \code{\link{summary.dr4pl}}
+}
 \author{
 Hyowon An, Lineberger Comprehensive Cancer Center
+
+Hyowon An, Justin T. Landis and Aubrey G. Bailey
 }

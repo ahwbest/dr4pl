@@ -11,15 +11,12 @@
 
 # Begin Program
 
-#' @description Fit the 4 parameter logistic model to the data using the function `dr4plEst'
+#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
 #' 
-#' @param ... Dose Response dataframe to dr4pl object. Use either formula or direct argument assignment
 #' @export
 dr4pl <- function(...) UseMethod("dr4pl")
 
-#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
-#'
-#' @description A general 4PL model fitting function for analysis of
+#' @describeIn dr4pl General 4PL model fitting function for analysis of
 #'   dose-response relation.
 #'
 #' @param  formula Symbolic description of the model to be fit. Either of the
@@ -70,10 +67,7 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'   method. This package implements 4 loss functions: sum of squares loss,
 #'   absolute deviation loss, Huber's loss and Tukey's biweight loss. Each of
 #'   loss function is explained in detail in the vignette.
-#' @examples
-#' ryegrass.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
-#'
-#' ryegrass.dr4pl
+#'   
 #' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
 #' @seealso \code{\link{confint.dr4pl}}, \code{\link{gof.dr4pl}},
 #' \code{\link{print.dr4pl}}, \code{\link{summary.dr4pl}}
@@ -112,26 +106,7 @@ dr4pl.formula <- function(formula,
 #'   
 #' @param dose Vector of dose levels
 #' @param response Vector of responses
-#' @param init.parm Vector of initial parameters to be optimized in the model.
-#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
-#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
-#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
-#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
-#'   process.
-#' @param method.init Method of obtaining initial values of the parameters.
-#'   If it is NULL, a default "logistic" regression method will be used. Assign
-#'   "Mead" to use Mead's method.
-#' @param method.optim The method of optimization of the parameters. This method
-#'   name is directly applied to the \code{constrOptim} function provided in the
-#'   "base" package of R.
-#' @param method.robust Parameter to select error function for the robust estimation method to be used to fit a model. 
-#'      - NULL: Sum of squares loss 
-#'      - absolute: Absolute deviation loss 
-#'      - Huber: Huber's loss 
-#'      - Tukey: Tukey's biweight loss
-#'   
-#'  
+#'
 #' @examples 
 #'   a <- dr4pl(dose = sample_data_1$Dose, 
 #'                response = sample_data_1$Response, 
@@ -166,20 +141,22 @@ dr4pl.default <- function(dose,
 
   methods.init <- c("logistic", "Mead")
   
-  ### Check errors in functions arguments.
+  ### Check errors in functions arguments
   if(!is.numeric(dose)||!is.numeric(response)) {
     
     stop("Both doses and responses should be numeric.")
   }
+  if(any(dose<0)) {
+    
+    stop("Dose levels should be nonnegative.")
+  }
   if(length(dose) == 0 || length(response) == 0 || length(dose) != length(response)) {
     
     stop("The same numbers of dose and response values should be supplied.")
-    
   }
   if(!is.element(method.init, methods.init)) {
     
     stop("The initialization method name should be one of \'logistic\' and \'Mead\'.")
-    
   }
 
   obj.dr4pl <- dr4plEst(dose = dose,
@@ -190,8 +167,7 @@ dr4pl.default <- function(dose,
                         method.optim = method.optim,
                         method.robust = method.robust)
 
-
-  ### When convergence failure happens.
+  ### When convergence failure happens
   if(obj.dr4pl$convergence == FALSE) {
     
     ### Decide the method of robust estimation which is more robust than the method
@@ -199,18 +175,15 @@ dr4pl.default <- function(dose,
     if(is.null(method.robust)) {
       
       method.robust.new <- "absolute"
-      
     } else if(is.element(method.robust, c("absolute", "Huber"))) {
       
       method.robust.new <- "Tukey"
-      
     } else {
       
       stop("Convergence failure happened but no resolution could be found.")
-      
     }
     
-    n <- length(dose)  # Number of data points
+    n <- obj.dr4pl$sample.size  # Number of data points
     
     obj.dr4pl <- dr4plEst(dose = dose, 
                           response = response,
@@ -240,15 +213,12 @@ dr4pl.default <- function(dose,
     if(length(indices.FDR) == 0) {
       
       indices.outlier <- NULL
-      
     } else {
       
       indices.outlier <- indices.sorted[seq(from = min(indices.FDR), to = n, by = 1)]
-      
     }
     
     plot(obj.dr4pl, indices.outlier = indices.outlier)
-
   }
   
   obj.dr4pl$call <- match.call()
@@ -257,11 +227,13 @@ dr4pl.default <- function(dose,
   return(obj.dr4pl)
 }
 
+#' @title Private function to fit the 4PL model to dose-response data
+#' 
 #' @description Private function that actually fits the 4PL model to data. If the
 #'   Hill bounds are attained at the end of optimization processes, then an
 #'   indicator of convergence failure so that \code{\link{dr4pl.default}} can
 #'   look for a remedy for convergence failure.
-#' @title Private function to fit the 4PL model to dose-response data
+#' 
 #' @name dr4plEst
 #' 
 #' @param dose Vector of dose levels
@@ -301,45 +273,49 @@ dr4plEst <- function(dose, response,
   # Choose the loss function depending on the robust estimation method
   err.fcn <- ErrFcn(method.robust)
   # Currently only the gradient function for the squared loss is implemented
-  grad <- GradientSquaredLoss
+  grad <- GradientSquaredLossLogIC50
   
-  if(!is.null(init.parm)) {  # When initial parameter estimates are given
-    
-    # Use given initial parameter estimates
-    theta.init <- init.parm
-    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
-    
-    constr.matr <- matrix(rbind(c(0, 1, 0, 0), c(0, 0, -1, 0)),
-                          nrow = 2,
-                          ncol = 4)
-    constr.vec <- c(0, 0)
-    
-    ### Check whether initial parameter estimates satisfy constraints
-    if(any(constr.matr%*%theta.init<constr.vec)) {
+  ### When initial parameter estimates are given
+  if(!is.null(init.parm)) {
+
+    # Check whether initial parameter estimates satisfy constraints
+    if(init.parm[2] <= 0) {
       
-      stop("Initial parameter values are not in the interior of the feasible region.")
+      stop("The IC50 parameter should be positive.")
     }
+        
+    # Use given initial parameter estimates
+    theta.re.init <- init.parm
+    theta.re.init[2] <- log10(init.parm[2])
     
-    # Fit a dose-response model. The Hill bounds are currently not returned.
-    cO.dr4pl <- constrOptim(theta = theta.init,
-                            f = err.fcn,
-                            grad = grad,
-                            ui = constr.matr,
-                            ci = constr.vec,
-                            method = method.optim,
-                            hessian = TRUE,
-                            x = x,
-                            y = y)
+    names(theta.re.init) <- c("Upper limit", "Log10(IC50)", "Slope", "Lower limit")
     
-    error <- cO.dr4pl$value
-    hessian <- cO.dr4pl$hessian
-    theta <- cO.dr4pl$par
+    # Fit a dose-response model.
+    optim.dr4pl <- optim(par = theta.re.init,
+                         fn = err.fcn,
+                         gr = grad,
+                         method = method.optim,
+                         hessian = TRUE,
+                         x = x,
+                         y = y)
+
+    error <- optim.dr4pl$value
+    hessian <- optim.dr4pl$hessian
+    theta.re <- optim.dr4pl$par
     
-  } else {  # When initial parameter values are not given.
+    theta <- theta.re
+    theta[2] <- 10^theta.re[2]
+    
+  ### When initial parameter values are not given.
+  } else {
     
     ### Obtain initial values of parameters.
     theta.init <- FindInitialParms(x, y, method.init, method.robust)
     names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
+    
+    theta.re.init <- theta.init
+    theta.re.init[2] <- log10(theta.init[2])
+    names(theta.re.init) <- c("Upper limit", "Log(IC50)", "Slope", "Lower limit")
     
     ### Compute confidence intervals of the true parameters
     deriv.f <- DerivativeF(theta.init, x)
@@ -360,11 +336,14 @@ dr4plEst <- function(dose, response,
            C.hat.Chol <- NULL
         }
       }
-    }
-    
-    if(!is.null(C.hat.Chol)) {
       
-      C.hat.inv <- chol2inv(C.hat.Chol)
+      if(!is.null(C.hat.Chol)) {
+        
+        C.hat.inv <- chol2inv(C.hat.Chol)
+      } else {
+        
+        C.hat.inv <- NULL# Proceed with the method of Wang et al. (2010)
+      }
     }
     
     s <- sqrt(sum(residuals^2)/(n - 4))
@@ -373,43 +352,38 @@ dr4plEst <- function(dose, response,
     std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
     ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)  # Confidence intervals
 
-    ### Bounds on the IC50 and slope parameters are determined by confidence intervals
+    ### Perform constrained optimization
     bounds.theta.2 <- ci[2, ]
     bounds.theta.3 <- ci[3, ]
     
-    constr.mat <- matrix(rbind(c(0, 1, 0, 0), 
-                                c(0, 1, 0, 0),
-                                c(0, -1, 0, 0),
-                                c(0, 0, -1, 0),
-                                c(0, 0, 1, 0),
-                                c(0, 0, -1, 0)),
-                          nrow = 6,
-                          ncol = 4)
-    constr.vec <- c(0, bounds.theta.2[1], -bounds.theta.2[2],
-                    0, bounds.theta.3[1], -bounds.theta.3[2])
-    
-    ### Sometimes the lower bound of the IC50 parameter is negative. In this case,
-    ### we just set the lower bounds of the IC50 parameter as zero.
+    # Sometimes the lower bound of the IC50 parameter is negative.
     if(bounds.theta.2[1]<0) {
-    
-      constr.mat <- constr.mat[-2, ]
-      constr.vec <- constr.vec[-2]
       
+      constr.mat <- matrix(rbind(c(0, -1, 0, 0),
+                                 c(0, 0, 1, 0),
+                                 c(0, 0, -1, 0)),
+                           nrow = 3,
+                           ncol = 4)
+      constr.vec <- c(-log10(bounds.theta.2[2]), bounds.theta.3[1], -bounds.theta.3[2])
+
+    } else {
+      
+      constr.mat <- matrix(rbind(c(0, 1, 0, 0),
+                                 c(0, -1, 0, 0),
+                                 c(0, 0, 1, 0),
+                                 c(0, 0, -1, 0)),
+                           nrow = 4,
+                           ncol = 4)
+      constr.vec <- c(log10(bounds.theta.2), bounds.theta.3)
     }
-    
-    if(any(constr.mat%*%theta.init<constr.vec)) {
+
+    if(any(constr.mat%*%theta.re.init<constr.vec)) {
       
       stop("Initial parameter values are not in the interior of the feasible region.")
     }
     
-    constr.mat <- matrix(rbind(c(0, 1, 0, 0),
-                               c(0, 0, -1, 0)),
-                         nrow = 2,
-                         ncol = 4)
-    constr.vec <- c(0, 0)
-    
-    # Fit a dose-response model. The Hill bounds are currently not returned.
-    cO.dr4pl <- constrOptim(theta = theta.init,
+    # Fit the 4PL model
+    cO.dr4pl <- constrOptim(theta = theta.re.init,
                             f = err.fcn,
                             grad = grad,
                             ui = constr.mat,
@@ -421,15 +395,16 @@ dr4plEst <- function(dose, response,
     
     error <- cO.dr4pl$value
     hessian <- cO.dr4pl$hessian
-    theta <- cO.dr4pl$par
+    theta.re <- cO.dr4pl$par
     
+    theta <- theta.re
+    theta[2] <- 10^theta.re[2]
   }
   
   ### If boundaries are hit
-  if(all(constr.mat%*%theta == constr.vec)) {
+  if(any(constr.mat%*%theta.re == constr.vec)) {
     
     convergence <- FALSE
-    
   }
   
   data.dr4pl <- data.frame(Dose = dose, Response = response)
@@ -449,11 +424,15 @@ dr4plEst <- function(dose, response,
 #'   blue and size 5.
 #' @title plot
 #' @name plot.dr4pl
-#' @param x `dr4pl' object whose mean response function should be plotted.
-#' @param text.title Character string for the title of a plot, Default set to "Dose response plot".
-#' @param text.x Character string for the x-axis of the plot, Default set to "Dose".
-#' @param text.y Character string for the y-axis of the plot, Default set to "Response".
-#' @param indices.outlier Pass a vector indicating all indices which are outliers in the data.
+#' @param x `dr4pl' object whose data and mean response function will be plotted.
+#' @param text.title Character string for the title of a plot with a default set to 
+#'   "Dose response plot".
+#' @param text.x Character string for the x-axis of the plot with a default set to 
+#'   "Dose".
+#' @param text.y Character string for the y-axis of the plot with a default set to 
+#'   "Response".
+#' @param indices.outlier Pass a vector indicating all indices which are outliers in 
+#'   the data.
 #' @param ... All arguments that can normally be passed to ggplot.
 #' @examples
 #' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
@@ -501,21 +480,18 @@ plot.dr4pl <- function(x,
                        indices.outlier = NULL,
                        ...) {
 
-  ### Check errors in functions arguments.
+  ### Check whether function arguments are appropriate
   if(!is.character(text.title)) {
     
     stop("Title text should be characters.")
-    
   }
   if(!is.character(text.x)) {
     
     stop("The x-axis label text should be characters.")
-    
   }
   if(!is.character(text.y)) {
     
     stop("The y-axis label text should be characters.")
-    
   }
   
   ### Draw a plot
@@ -525,7 +501,6 @@ plot.dr4pl <- function(x,
   if(!is.null(indices.outlier)) {
     
     color.vec[indices.outlier] <- "red"
-    
   }
   
   a <- ggplot2::ggplot(aes(x = x$data$Dose, y = x$data$Response), data = x$data)
@@ -701,126 +676,3 @@ coef.dr4pl <- function(object, ...) {
   
 }
 
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_1
-#' @name sample_data_1
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_2
-#' @name sample_data_2
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_3
-#' @name sample_data_3
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_4
-#' @name sample_data_4
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_5
-#' @name sample_data_5
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_6
-#' @name sample_data_6
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_7
-#' @name sample_data_7
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_8
-#' @name sample_data_8
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_9
-#' @name sample_data_9
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_10
-#' @name sample_data_10
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_11
-#' @name sample_data_11
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_12
-#' @name sample_data_12
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These may or may not have numerical errors in other dose-response curve-packages, but definitly not using these methods.
-#' @title sample_data_13
-#' @name sample_data_13
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
-#' This data set exemplifies the case of a single extreme outlier of one dose measurement. 
-#' @title Single High Outlier
-#' @name drc_error_1
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
-#' This data set exemplifies the case of multiple outliers as well as a small number of observations per dose measurement.
-#' @title Multiple High Outliers at Different measurements 
-#' @name drc_error_2
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
-#' This data set exemplifies the case of multiple outliers at a single dose measurement as well as the support problem.
-#' @title Support Problem and Outliers at a Single Dose Level
-#' @name drc_error_3
-#' @docType data
-#' @keywords sample_data
-NULL
-#' These are a handful of experimentally derived datasets from the wet-laboratory.
-#' These all have numerical errors in other dose-response curve-packages, but not using these methods.
-#' This data set exemplifies the support problem.
-#' @title Support Problem
-#' @name drc_error_4
-#' @docType data
-#' @keywords sample_data
-NULL

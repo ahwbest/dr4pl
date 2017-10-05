@@ -2,18 +2,18 @@
 % Please edit documentation in R/base.R
 \name{MeanResponse}
 \alias{MeanResponse}
-\title{Compute predicted responses.}
+\title{Compute an estimated mean response}
 \usage{
 MeanResponse(x, theta)
 }
 \arguments{
-\item{x}{Dose}
+\item{x}{Dose levels}
 
-\item{theta}{Parameters}
+\item{theta}{Parameters of the 4PL model}
 }
 \value{
 Predicted response values.
 }
 \description{
-Compute predicted responses.
+Compute an estimated mean response
 }

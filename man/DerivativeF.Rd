@@ -7,9 +7,9 @@
 DerivativeF(theta, x)
 }
 \arguments{
-\item{theta}{Parameters}
+\item{theta}{Parameters of the 4PL model}
 
-\item{x}{Dose}
+\item{x}{Dose levels}
 }
 \value{
 Derivative values of the mean response function.

@@ -95,6 +95,8 @@ setwd(wd)
 # ----------------------------------------------------------------------------
 ### Check whether the Hill bounds are attained for the error cases.
 #
+ggplot.list <- vector("list", 4)
+
 for(i in 1:n.error.case) {
   
   data.error <- data.error.list[[i]]
@@ -104,8 +106,12 @@ for(i in 1:n.error.case) {
   
   dr4pl.error <- dr4pl(Response ~ Dose,
                        data = data.error)
-  
-  theta <- dr4pl.robust$par
-  residuals <- Residual(theta, x, y)
-  
+
+  cat(dr4pl.error$convergence)
+  cat("\n")
+  ggplot.list[[i]] <- plot(dr4pl.error)
+
 }
+
+grid.arrange(ggplot.list[[1]], ggplot.list[[2]], ggplot.list[[3]], ggplot.list[[4]],
+             nrow = 2, ncol = 2)
