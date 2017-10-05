@@ -8,15 +8,19 @@
   text.y = "Response", indices.outlier = NULL, ...)
 }
 \arguments{
-\item{x}{`dr4pl' object whose mean response function should be plotted.}
+\item{x}{`dr4pl' object whose data and mean response function will be plotted.}
 
-\item{text.title}{Character string for the title of a plot, Default set to "Dose response plot".}
+\item{text.title}{Character string for the title of a plot with a default set to 
+"Dose response plot".}
 
-\item{text.x}{Character string for the x-axis of the plot, Default set to "Dose".}
+\item{text.x}{Character string for the x-axis of the plot with a default set to 
+"Dose".}
 
-\item{text.y}{Character string for the y-axis of the plot, Default set to "Response".}
+\item{text.y}{Character string for the y-axis of the plot with a default set to 
+"Response".}
 
-\item{indices.outlier}{Pass a vector indicating all indices which are outliers in the data.}
+\item{indices.outlier}{Pass a vector indicating all indices which are outliers in 
+the data.}
 
 \item{...}{All arguments that can normally be passed to ggplot.}
 }

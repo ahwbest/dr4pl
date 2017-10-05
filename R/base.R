@@ -1,31 +1,47 @@
 
-
-#' Compute predicted responses.
+#' Compute an estimated mean response
 #'
-#' @param x Dose
-#' @param theta Parameters
+#' @param x Dose levels
+#' @param theta Parameters of the 4PL model
 #'
 #' @return Predicted response values.
 #' @export
 MeanResponse <- function(x, theta) {
-  
-  theta.1 <- theta[1]
-  theta.2 <- theta[2]
-  theta.3 <- theta[3]
-  theta.4 <- theta[4]
-  
+
+  ### Check whether function arguments are appropriate
   if(any(is.na(theta))) {
     
     stop("One of the parameter values is NA.")
   }
-  
-  if(theta.2 < 0) {
-
-    stop("The IC50 parameter estimates become negative during the optimization process.")
+  if(theta[2]<=0) {
+    
+    stop("An IC50 estimate should always be positive.")
   }
 
-  f <- theta.1 + (theta.4 - theta.1)/(1 + (x/theta.2)^theta.3)
+  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
 
+  return(f)
+}
+
+#' Compute an estimated mean response with the logarithm IC50 parameter
+#'
+#' @param x Dose levels
+#' @param theta.pr Parameters among which the IC50 parameter is logarithmically
+#'   transformed
+#'
+#' @return Predicted response values.
+#' @export
+MeanResponseLogIC50 <- function(x, theta.pr) {
+  
+  ### Check whether function arguments are appropriate
+  if(any(is.na(theta.pr))) {
+    
+    stop("One of the parameter values is NA.")
+  }
+  
+  f <- theta.pr[1] + (theta.pr[4] - theta.pr[1])/
+                     (1 + 10^(theta.pr[3]*(log10(x) - theta.pr[2])))
+  
   return(f)
 }
 
@@ -43,7 +59,6 @@ SquaredLoss <- function(r) {
 #' @param r Residuals
 #
 #' @return Absolute valued residuals
-#' @export
 AbsoluteLoss <- function(r) {
 
   return(abs(r))
@@ -103,7 +118,6 @@ ErrFcn <- function(method.robust) {
     
     stop("The robust estimation method should be one of NULL, \"absolute\",
          \"Huber\" or \"Tukey\".")
-    
   }
   
   loss.fcn <- c()
@@ -118,20 +132,23 @@ ErrFcn <- function(method.robust) {
     loss.fcn <- TukeyBiweightLoss
   }
 
-  err.fcn <- function(theta, x, y) {
+  err.fcn <- function(theta.re, x, y) {
 
-    if(length(theta) != 4) {
+    ### Check whether function arguments are appropriate.
+    if(length(theta.re) != 4) {
+      
       stop("The number of parameters is not 4.")
     }
-
     if(length(x) != length(y)) {
+      
       stop("The numbers of dose values and response values should be the same.")
     }
 
     n <- length(y)
-    f <- MeanResponse(x, theta)
+    f <- MeanResponseLogIC50(x, theta.re)
 
     if(anyNA(f)) {
+      
       stop("Some of the evaluated function values are NA's.")
     }
 
@@ -143,8 +160,8 @@ ErrFcn <- function(method.robust) {
 
 #' Compute the derivative values of the mean response function.
 #
-#' @param theta Parameters
-#' @param x Dose
+#' @param theta Parameters of the 4PL model
+#' @param x Dose levels
 #
 #' @return Derivative values of the mean response function.
 DerivativeF <- function(theta, x) {
@@ -162,48 +179,79 @@ DerivativeF <- function(theta, x) {
   deriv.f.theta.3 <- -(theta.4 - theta.1)/theta.3*log(eta)*eta/(1 + eta)^2
   deriv.f.theta.4 <- 1/(1 + eta)
   
-  ### Handle the cases when dose values are zeros
+  # Handle the cases when dose values are zeros
   if(theta.3 > 0) {
     
     deriv.f.theta.1[x == 0] <- 0
     deriv.f.theta.2[x == 0] <- 0
     deriv.f.theta.3[x == 0] <- 0
     deriv.f.theta.4[x == 0] <- 1
-    
   } else if(theta.3 == 0) {
     
     deriv.f.theta.1[x == 0] <- 0
     deriv.f.theta.2[x == 0] <- (theta.4 - theta.1)*theta.3/(4*theta.2)
     deriv.f.theta.3[x == 0] <- 0
     deriv.f.theta.4[x == 0] <- 1/2
-    
   } else if(theta.3 < 0) {
     
     deriv.f.theta.1[x == 0] <- 1
     deriv.f.theta.2[x == 0] <- 0
     deriv.f.theta.3[x == 0] <- 0
     deriv.f.theta.4[x == 0] <- 0
-    
   }
   
-  return(cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4))
+  deriv.f.theta <- cbind(deriv.f.theta.1, deriv.f.theta.2, deriv.f.theta.3, deriv.f.theta.4)
+  
+  # Check whether return values are appropriate
+  if(anyNA(deriv.f.theta)) {
+    
+    stop("Some of the derivative values are NA's.")
+  }
+  
+  return(deriv.f.theta)
 }
 
+#' Compute the derivative values of the mean response function with respect to
+#'   reparametrized parameters including the log 10 IC50 parameter.
+#'
+#' @param theta.re Parameters obtained from the original parameters by
+#'   \code{theta.re[2] <- log10(theta[2])}
+#' @param x Dose levels
+#'
+#' @return Derivative values of the mean response function.
+DerivativeFLogIC50 <- function(theta.re, x) {
+
+  theta <- theta.re
+  theta[2] <- 10^theta.re[2]
+  
+  deriv.f.theta <- DerivativeF(theta, x)
+  deriv.f.theta.re <- deriv.f.theta
+  deriv.f.theta.re[, 2] <- log(10)*theta[2]*deriv.f.theta[, 2]
+  
+  # Check whether return values are appropriate
+  if(anyNA(deriv.f.theta.re)) {
+    
+    stop("Some of the derivative values are NA's.")
+  }
+  
+  return(deriv.f.theta.re)
+}
 
 #' Compute gradient values of the sum-of-squares loss function.
 #'
-#' @param theta Parameters
+#' @param theta.re Parameters among which the IC50 parameter is logarithmically
+#'   transformed
 #' @param x Dose
 #' @param y Response
 #'
 #' @return Gradient values of the sum-of-squares loss function.
-GradientSquaredLoss <- function(theta, x, y) {
-  
-  f <- MeanResponse(x, theta)  # Mean response values
+
+GradientSquaredLossLogIC50 <- function(theta.re, x, y) {
+
+  f <- MeanResponseLogIC50(x, theta.re)  # Mean response values
   n <- length(x)  # Number of data observations
   
-  return(-2*(y - f)%*%DerivativeF(theta, x)/n)
-  
+  return(-2*(y - f)%*%DerivativeFLogIC50(theta.re, x)/n)
 }
 
 #' Compute the Hessian matrix of the sum-of-squares loss function
