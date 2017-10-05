@@ -269,7 +269,6 @@ dr4plEst <- function(dose, response,
                      method.optim,
                      method.robust) {
   convergence <- TRUE
-  
   x <- dose  # Vector of dose values
   y <- response  # Vector of responses
   n <- length(x)  # Number of observations
@@ -388,8 +387,10 @@ dr4plEst <- function(dose, response,
       stop("Initial parameter values are not in the interior of the feasible region.")
       
     }
-    
+   
     # Fit a dose-response model. The Hill bounds are currently not returned.
+    
+    
     cO.dr4pl <- constrOptim(theta = theta.init,
                             f = err.fcn,
                             grad = grad,

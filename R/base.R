@@ -8,7 +8,7 @@
 #' @return Predicted response values.
 #' @export
 MeanResponse <- function(x, theta) {
-
+  
   theta.1 <- theta[1]
   theta.2 <- theta[2]
   theta.3 <- theta[3]
@@ -198,7 +198,7 @@ DerivativeF <- function(theta, x) {
 #'
 #' @return Gradient values of the sum-of-squares loss function.
 GradientSquaredLoss <- function(theta, x, y) {
-
+  
   f <- MeanResponse(x, theta)  # Mean response values
   n <- length(x)  # Number of data observations
   
