@@ -2,7 +2,6 @@
 ### Load libraries
 #
 library(drc)
-library(testthat)
 
 # ---------------------------------------------------------------------------
 ### Do simulation and count the number of times that the Hill bounds do not
@@ -15,7 +14,7 @@ n.simul <- 1000
 n.obs.dose <- 5
 n.settings <- 6  # No. of simulation settings
 
-theta.matr <- matrix(c(100, 0.01, -1.25, 0,
+theta.mat <- matrix(c(100, 0.01, -1.25, 0,
                        100, 0.01, -0.75, 0,
                        100, 0.1, -1.25, 0,
                        100, 0.1, -0.75, 0,
@@ -75,18 +74,21 @@ stdev <- 5
 
 n.simul <- 1000
 n.obs.dose <- 5
-n.settings <- 6  # No. of simulation settings
+n.settings <- 9  # No. of simulation settings
 
-theta.mat <- matrix(c(100, 0.01, -1.25, 0,
-                      100, 0.01, -0.75, 0,
-                      100, 0.1, -1.25, 0,
-                      100, 0.1, -0.75, 0,
-                      100, 1, -1.25, 0,
-                      100, 1, -0.75, 0),
+theta.mat <- matrix(c(100, 0.01, -0.5, 0,
+                      100, 0.01, -1, 0,
+                      100, 0.01, -1.5, 0,
+                      100, 0.1, -0.5, 0,
+                      100, 0.1, -1, 0,
+                      100, 0.1, -1.5, 0,
+                      100, 1, -0.5, 0,
+                      100, 1, -1, 0,
+                      100, 1, -1.5, 0),
                     nrow = n.settings,
                     ncol = 4,
                     byrow = TRUE)
-levels.dose <- 10^seq(from = -4, to = 1, by = 1)
+levels.dose <- 10^seq(from = -4, to = 0, by = 1)
 n.doses <- length(levels.dose)
 n.obs <- n.doses*n.obs.dose
 
@@ -102,40 +104,58 @@ for(i in 1:n.simul) {
     y <- MeanResponse(x, theta) + rnorm(length(x), mean = 0, sd = stdev)
     
     theta.init <- FindInitialParms(x, y,
-                                   method.init = "logistic",
+                                   method.init = "Mead",
                                    method.robust = NULL)
+    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
     
-    ### Compute confidence intervals
+    theta.re.init <- theta.init
+    theta.re.init[2] <- log10(theta.init[2])
+    names(theta.re.init) <- c("Upper limit", "Log(IC50)", "Slope", "Lower limit")
+    
+    ### Compute confidence intervals of the true parameters
     deriv.f <- DerivativeF(theta.init, x)
     residuals <- Residual(theta.init, x, y)
     
-    C.hat.inv <- tryCatch({
-      
-      solve(t(deriv.f)%*%deriv.f)
-      
-    }, error = function(e) {
-      
-      return(NULL)
-      
-    })
+    C.hat.inv <- try(solve(t(deriv.f)%*%deriv.f), silent = TRUE)  # Inverse matrix
     
-    if(is.null(C.hat.inv)) {
+    if(inherits(C.hat.inv, "try-error")) {
       
-      next
+      C.hat.Chol <- try(chol(t(deriv.f)%*%deriv.f, silent = TRUE))  # Cholesky decomposition
       
+      if(inherits(C.hat.Chol, "try-error")) {
+        
+        C.hat.Chol <- try(chol(0.99*t(deriv.f)%*%deriv.f + 0.01*diag(dim(deriv.f)[2])))
+        
+        if(inherits(C.hat.Chol, "try-error")) {
+          
+          C.hat.Chol <- NULL
+        }
+      }
+      
+      if(!is.null(C.hat.Chol)) {
+        
+        C.hat.inv <- chol2inv(C.hat.Chol)
+      } else {
+        
+        C.hat.inv <- NULL# Proceed with the method of Wang et al. (2010)
+      }
     }
     
-    s <- sqrt(sum(residuals^2)/(n - 4))
+    s <- sqrt(sum(residuals^2)/(n.obs - 4))
     
-    q.t <- qt(conf.level, df = n - 4)
+    q.t <- qt(conf.level, df = n.obs - 4)
     std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-    ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)
+    ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)  # Confidence intervals
     
-    result.mat[i, j] <- (theta[2] >= ci[2, 1])&&(theta[2] <= ci[2, 2])&&
-                        (theta[3] >= ci[3, 1])&&(theta[3] <= ci[3, 2])
+    ### Perform constrained optimization
+    bounds.theta.2 <- ci[2, ]
+    bounds.theta.3 <- ci[3, ]
     
+    result.mat[i, j] <- (theta[2] >= bounds.theta.2[1])&&
+                        (theta[2] <= bounds.theta.2[2])&&
+                        (theta[3] >= bounds.theta.3[1])&&
+                        (theta[3] <= bounds.theta.3[2])
   }
-  
 }
 
 results <- rep(0, ncol(result.mat))

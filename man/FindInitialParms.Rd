@@ -7,9 +7,9 @@
 FindInitialParms(x, y, method.init, method.robust)
 }
 \arguments{
-\item{x}{x values}
+\item{x}{Dose levels}
 
-\item{y}{y values}
+\item{y}{Responses}
 
 \item{method.init}{Initialization method}
 
@@ -19,5 +19,5 @@ FindInitialParms(x, y, method.init, method.robust)
 theta.IC50.slope Parameter estimates of the IC50 and slope
 }
 \description{
-Args:
+Find initial values for the 4PL model.
 }
