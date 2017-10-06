@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+  md_document:
+    variant: markdown_github
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -29,9 +31,11 @@ devtools::install_github("ahwbest/dr4pl")
 
 This is a basic example which shows you how to solve a common problem. This example may be used with drc_error_1, drc_error_2, drc_error_3, and drc_error_4:
 
-```{r example_problem}
+```{r example_problem, error=TRUE}
 ## basic example code, datasets
 ## example requires the drc and dr4pl package to be loaded
+library(dr4pl)
+library(drc)
 a <- drc::drm(drc_error_1$Response~drc_error_1$Dose, fct = LL.4())
 summary(a)
 plot(a)
