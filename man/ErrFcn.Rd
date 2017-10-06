@@ -2,7 +2,7 @@
 % Please edit documentation in R/base.R
 \name{ErrFcn}
 \alias{ErrFcn}
-\title{Returns an error function for given robust fitting method}
+\title{Returns an loss function for given robust fitting method}
 \usage{
 ErrFcn(method.robust)
 }
@@ -17,5 +17,5 @@ ErrFcn(method.robust)
 Value of the sum of squared residuals
 }
 \description{
-Returns an error function for given robust fitting method
+Returns an loss function for given robust fitting method
 }

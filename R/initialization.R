@@ -1,9 +1,8 @@
 
 #' Find initial values for the 4PL model.
 #'
-#' Args:
-#' @param x x values
-#' @param y y values
+#' @param x Dose levels
+#' @param y Responses
 #' @param method.init Initialization method
 #' @param method.robust Robust fitting method
 #'

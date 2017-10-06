@@ -4,12 +4,12 @@
 \alias{MeanResponseLogIC50}
 \title{Compute an estimated mean response with the logarithm IC50 parameter}
 \usage{
-MeanResponseLogIC50(x, theta.pr)
+MeanResponseLogIC50(x, theta.re)
 }
 \arguments{
 \item{x}{Dose levels}
 
-\item{theta.pr}{Parameters among which the IC50 parameter is logarithmically
+\item{theta.re}{Parameters among which the IC50 parameter is logarithmically
 transformed}
 }
 \value{

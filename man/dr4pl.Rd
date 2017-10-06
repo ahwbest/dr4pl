@@ -6,7 +6,7 @@
 \alias{dr4pl-package}
 \alias{dr4pl.formula}
 \alias{dr4pl.default}
-\title{Dose-response data analysis using the 4 Parameter Logistic model}
+\title{Fitting the 4 Parameter Logistic (4PL) models to dose-response data.}
 \usage{
 dr4pl(...)
 
@@ -44,7 +44,7 @@ If it is NULL, a default "logistic" regression method will be used. Assign
 name is directly applied to the \code{constrOptim} function provided in the
 "base" package of R.}
 
-\item{method.robust}{Parameter to select error function for the robust estimation method to be used to fit a model. 
+\item{method.robust}{Parameter to select loss function for the robust estimation method to be used to fit a model. 
 - NULL: Sum of squares loss 
 - absolute: Absolute deviation loss 
 - Huber: Huber's loss 
@@ -61,19 +61,21 @@ A 'dr4pl' object for which "confint", "gof", "print" and "summary"
   of parameters of the 'dr4pl' object.
 }
 \description{
-Main functions related to fitting
+This function fits a 4PL model to dose-response data. Users can
+obtain fitted parameter estimates as return values. Using auxiliary functions
+provided by this R package, users can plot a fitted dose-response curve and
+obtain confidence intervals of true parameters. In addition, the goodness-of-fit
+test for model adequacy of the 4PL models can be performed when replicates are
+available for each dose level.
 }
 \details{
-Last updated: 09/19/2016
-
 This function fits a 4 parameter logistic (4PL) model to dose-response
   data. A formula of the model is
   \deqn{\theta[1]+(\theta[4]-\theta[1])/(1+(z/\theta[2])^\theta[3])}
 
   \code{method.init} specifies an initialization method to get initial parameter
   estimates based on data. The currently supported initialization methods are
-  'logistic' and 'Mead'. Details of the methods are given in Section
-  'Details'.
+  'logistic' and 'Mead'. For further details, see the vignette.
 
   \code{method.optim} specifies an optimization method to be used in
   "constrOptim" function. The currently supported optimization techniques
@@ -102,7 +104,7 @@ response variable
   plot(a)
 
   ##Assign method.init = "Mead" to use Mead's method of estimation. 
-  # Use method.robust to select desired error function
+  # Use method.robust to select desired loss function
   b <- dr4pl(Response~Dose, 
                data = sample_data_4,
                method.init = "Mead", 
@@ -123,7 +125,9 @@ response variable
 \code{\link{print.dr4pl}}, \code{\link{summary.dr4pl}}
 }
 \author{
-Hyowon An, Lineberger Comprehensive Cancer Center
+Hyowon An, \email{ahwbest@gmail.com}
 
-Hyowon An, Justin T. Landis and Aubrey G. Bailey
+Justin T. Landis,
+
+Aubrey G. Bailey, \email{aubreybailey@gmail.com}
 }

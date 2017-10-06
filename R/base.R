@@ -26,21 +26,21 @@ MeanResponse <- function(x, theta) {
 #' Compute an estimated mean response with the logarithm IC50 parameter
 #'
 #' @param x Dose levels
-#' @param theta.pr Parameters among which the IC50 parameter is logarithmically
+#' @param theta.re Parameters among which the IC50 parameter is logarithmically
 #'   transformed
 #'
 #' @return Predicted response values.
 #' @export
-MeanResponseLogIC50 <- function(x, theta.pr) {
+MeanResponseLogIC50 <- function(x, theta.re) {
   
   ### Check whether function arguments are appropriate
-  if(any(is.na(theta.pr))) {
+  if(any(is.na(theta.re))) {
     
     stop("One of the parameter values is NA.")
   }
   
-  f <- theta.pr[1] + (theta.pr[4] - theta.pr[1])/
-                     (1 + 10^(theta.pr[3]*(log10(x) - theta.pr[2])))
+  f <- theta.re[1] + (theta.re[4] - theta.re[1])/
+                     (1 + 10^(theta.re[3]*(log10(x) - theta.re[2])))
   
   return(f)
 }
@@ -101,7 +101,7 @@ TukeyBiweightLoss <- function(r) {
   return(ret.val)
 }
 
-#' Returns an error function for given robust fitting method
+#' Returns an loss function for given robust fitting method
 #
 #' @param method.robust NULL, absolute, Huber, or Tukey
 #'      - NULL: Sum of squares loss
