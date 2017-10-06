@@ -24,27 +24,27 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'   dose-response relation.
 #'
 #' @param  formula Symbolic description of the model to be fit. Either of the
-#'   form 'response ~ dose' or as a data frame with response values in first
-#'   column and dose values in second column.
+#' form 'response ~ dose' or as a data frame with response values in first
+#' column and dose values in second column.
 #' @param data Data frame containing variables in the model.
 #' @param init.parm Vector of initial parameters to be optimized in the model.
 #' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
-#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
-#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
-#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
-#'   process.
-#' @param method.init The method of obtaining initial values of the parameters.
-#'   If it is NULL, a default "logistic" regression method will be used. Assign
-#'   "Mead" to use Mead's method.
-#' @param method.optim The method of optimization of the parameters. This method
-#'   name is directly applied to the \code{constrOptim} function provided in the
-#'   "base" package of R.
+#' or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
+#' that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
+#' option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
+#' option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
+#' process.
+#' @param method.init Method of obtaining initial values of the parameters.
+#' If it is NULL, a default "logistic" regression method will be used. Assign
+#' "Mead" to use Mead's method.
+#' @param method.optim Method of optimization of the loss function specified by
+#' \code{method.robust}. This function argument is directly passed to the function
+#' \code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.
 #' @param method.robust Parameter to select loss function for the robust estimation method to be used to fit a model. 
-#'      - NULL: Sum of squares loss 
-#'      - absolute: Absolute deviation loss 
-#'      - Huber: Huber's loss 
-#'      - Tukey: Tukey's biweight loss
+#' - NULL: Sum of squares loss 
+#' - absolute: Absolute deviation loss 
+#' - Huber: Huber's loss 
+#' - Tukey: Tukey's biweight loss
 #' @param ... Further arguments to be passed to \code{constrOptim}.
 #' 
 #' @return A 'dr4pl' object for which "confint", "gof", "print" and "summary"
@@ -145,6 +145,7 @@ dr4pl.default <- function(dose,
                           ...) {
 
   types.method.init <- c("logistic", "Mead")
+  types.method.optim <- 
   types.decline <- c("auto", "decline", "growth")
   
   ### Check errors in functions arguments

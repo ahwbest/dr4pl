@@ -12,6 +12,8 @@ Fit4PLVariousOptions <- function(data.input,
                                  var.response,
                                  var.ref = NULL) {
 
+  methods.init <- 
+  
   data.input <- na.omit(data.input)
 
   if(length(var.ref) == 0) {
