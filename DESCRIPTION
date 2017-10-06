@@ -1,7 +1,7 @@
 Package: dr4pl
 Type: Package
 Title: Dose Response Data Analysis using the 4 Parameter Logistic Model
-Version: 0.1.0
+Version: 1.0.0
 Depends: R (>= 2.10)
 Author: Hyowon An
 Maintainer: Hyowon An <ahwbest@gmail.com>
