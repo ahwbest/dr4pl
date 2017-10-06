@@ -8,6 +8,8 @@ output: html_document
 
 ##Test environments
 * local OS X El Capitan, R 3.4.1
+* CentOS 7, R 3.4.1
+* Windows 10, R 3.4.1
 
 
 ## R CMD check results
