@@ -2,7 +2,7 @@
 % Please edit documentation in R/auxiliary.R
 \name{coef.dr4pl}
 \alias{coef.dr4pl}
-\title{coef}
+\title{Obtain coefficients of a 4PL model}
 \usage{
 \method{coef}{dr4pl}(object, ...)
 }
@@ -15,5 +15,6 @@
 A vector of parameters
 }
 \description{
-Coefficient of a `dr4pl' object
+This function obtains the coefficients of a 4PL model. The four
+parameters, the upper asymptote, IC50, slope and lower asymptote,
 }

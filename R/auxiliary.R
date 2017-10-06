@@ -136,9 +136,9 @@ gof.dr4pl <- function(object) {
   return(obj.gof.dr4pl)
 }
 
-#' @title plot
+#' @title Make a plot of a 4PL model curve and data
 #' 
-#' @description Default plotting function for a `dr4pl' object. Plot displays 
+#' @description This function plot displays 
 #'   decreasing dr4pl curve as well as measured points. Default points are 
 #'   blue and size 5.
 #'   
