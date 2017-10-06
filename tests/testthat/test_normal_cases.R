@@ -21,25 +21,12 @@ Fit4PLVariousOptions <- function(data.input,
     
     data.part <- data.whole
     
-    ### Dose response model obtained by the logistic method
     obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
                                 data = data.part,
                                 method.init = "logistic")
-    loss.logistic <- signif(obj.dr4pl.logistic$error.value, 4)
-    parms.logistic <- obj.dr4pl.logistic$parameters
-    
-    ### Dose response model obtained by the Mead method
     obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
                           data = data.part,
                           method.init = "Mead")
-    loss.Mead <- signif(obj.dr4pl.Mead$error.value, 4)
-    parms.Mead <- obj.dr4pl.Mead$parameters
-    
-    result.table <- rbind(c(parms.logistic, loss.logistic), c(parms.Mead, loss.Mead))
-    colnames(result.table) <- c("Upper limit", "IC50", "Slope", "Lower limit", "Loss")
-
-    #print(result.table)
-    
   } else {
     
     data.whole <- subset(x = data.input, select = c(var.ref, var.dose, var.response))
@@ -56,22 +43,12 @@ Fit4PLVariousOptions <- function(data.input,
                           select = c(Dose, Response),
                           subset = Ref == levels.ref[i])
 
-      ### Dose response model obtained by the logistic method
       obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
                                   data = data.part,
                                   method.init = "logistic")
-      loss.logistic <- signif(obj.dr4pl.logistic$error.value, 4)
-      parms.logistic <- obj.dr4pl.logistic$parameters
-
-      ### Dose response model obtained by the Mead method
       obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
                               data = data.part,
                               method.init = "Mead")
-      loss.Mead <- signif(obj.dr4pl.Mead$error.value, 4)
-      parms.Mead <- obj.dr4pl.Mead$parameters
-
-      result.table <- rbind(c(parms.logistic, loss.logistic), c(parms.Mead, loss.Mead))
-      colnames(result.table) <- c("Upper limit", "IC50", "Slope", "Lower limit", "Loss")
     }
   }
 }

@@ -4,15 +4,16 @@
 \alias{IC}
 \title{Obtain Inhibitory Concentrations (IC) of a dose-response curve}
 \usage{
-IC(object, levels.percent)
+IC(object, inhib.percent)
 }
 \arguments{
 \item{object}{Object of the class `dr4pl` for which the IC values are obtained}
 
-\item{levels.percent}{Percentage of the level at which thc IC is obtained}
+\item{inhib.percent}{Inhibited percentages at which thc IC values are obtained}
 }
 \value{
-IC values at the percentage levels provided by the argument \code{percent}
+IC values at the inhibited percentages provided by the argument 
+\code{inhib.percent}
 }
 \description{
 This function obtains estimates of the IC's of a dose-response 
@@ -25,6 +26,6 @@ data.test <- data.frame(x = c(0.0001, 0.001, 0.01, 0.1, 1),
                         y = c(10, 9, 5, 1, 0))
 dr4pl.test <- dr4pl(y ~ x,
                     data = data.test)
-IC(dr4pl.test, levels.percent = c(10, 90))
+IC(dr4pl.test, inhib.percent = c(10, 90))
 
 }

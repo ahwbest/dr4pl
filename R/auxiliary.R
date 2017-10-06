@@ -149,17 +149,18 @@ gof.dr4pl <- function(object) {
 #' @name IC
 #' 
 #' @param object Object of the class `dr4pl` for which the IC values are obtained
-#' @param levels.percent Percentage of the level at which thc IC is obtained
+#' @param inhib.percent Inhibited percentages at which thc IC values are obtained
 #' @examples 
 #' data.test <- data.frame(x = c(0.0001, 0.001, 0.01, 0.1, 1),
 #'                         y = c(10, 9, 5, 1, 0))
 #' dr4pl.test <- dr4pl(y ~ x,
 #'                     data = data.test)
-#' IC(dr4pl.test, levels.percent = c(10, 90))
+#' IC(dr4pl.test, inhib.percent = c(10, 90))
 #' 
-#' @return IC values at the percentage levels provided by the argument \code{percent}
+#' @return IC values at the inhibited percentages provided by the argument 
+#' \code{inhib.percent}
 #' @export
-IC <- function(object, levels.percent) {
+IC <- function(object, inhib.percent) {
   
   ### Check whether function arguments are appropriate
   if(class(object) != "dr4pl") {
@@ -167,14 +168,18 @@ IC <- function(object, levels.percent) {
     stop("The object for which the IC values are obtained should be of the class
          \"dr4pl\".")
   }
-  if(any(levels.percent <= 0|levels.percent >= 100)) {
+  if(any(inhib.percent <= 0|inhib.percent >= 100)) {
     
-    stop("Percentage levels at which the Ic values are obtained should be between
-         0 and 100.")
+    stop("Inhibited percentages should be between 0 and 100.")
   }
   
-  # theta <- object$parameters
-  # IC.vec <- theta[2]*((theta[4] - )/())
+  theta <- object$parameters
+  # Inhibited responses corresponding to inhibited percentages
+  inhib.resp <- (inhib.percent*theta[1] + (100 - inhib.percent)*theta[4])/100
+  IC.vec <- theta[2]*((theta[4] - inhib.resp)/(inhib.resp - theta[1]))^(1/theta[3])
+  names(IC.vec) <- paste("InhibPercent:", inhib.percent, sep = "")
+  
+  return(IC.vec)
 }
 
 #' @title Make a plot of a 4PL model curve and data
