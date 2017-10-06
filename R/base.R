@@ -245,6 +245,7 @@ DerivativeFLogIC50 <- function(theta.re, x) {
 #' @param y Response
 #'
 #' @return Gradient values of the sum-of-squares loss function.
+
 GradientSquaredLossLogIC50 <- function(theta.re, x, y) {
 
   f <- MeanResponseLogIC50(x, theta.re)  # Mean response values
