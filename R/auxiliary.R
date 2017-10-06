@@ -1,4 +1,70 @@
 
+#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
+#' 
+#' @description Compute the confidence intervals of parameter estimates of a fitted
+#'   model.
+#'   
+#' @name confint.dr4pl
+#'   
+#' @param object An object of the dr4pl class
+#' @param parm Parameters of the 4PL model
+#' @param level Confidence level
+#' @param ... Other parameters to be passed
+#' 
+#' @return A matrix of the confidence intervals in which each row represents a
+#'   parameter and each column represents the lower and upper bounds of the
+#'   confidence intervals of the corresponding parameters.
+#'   
+#' @details This function computes the confidence intervals of the parameters of the
+#'   4PL model based on the second order approximation to the Hessian matrix of the
+#'   loss function of the model. Please refer to Subsection 5.2.2 of 
+#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
+#'   Probability and Mathematical Statistics: Probability and Mathematical
+#'   Statistics. John Wiley & Sons, Inc., New York.
+#'   
+#' @examples
+#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
+#'   parm <- obj.dr4pl$parameters
+#'
+#'   confint(obj.dr4pl, parm = parm, level = 0.95)
+#' 
+#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
+#' @export
+confint.dr4pl <- function(object, parm, level, ...) {
+  
+  x <- object$data$Dose
+  y <- object$data$Response
+  theta <- object$parameters
+  hessian <- object$hessian
+  
+  n <- object$sample.size  # Number of observations in data
+  f <- MeanResponse(x, theta)
+  
+  C.hat.inv <- solve(hessian/2)
+  s <- sqrt(sum((y - f)^2)/(n - 4))
+  
+  q.t <- qt(1 - (1 - level)/2, df = n - 4)
+  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
+  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
+  
+  return(ci)
+}
+
+#' @title Obtain coefficients of a 4PL model
+#' 
+#' @description This function obtains the coefficients of a 4PL model. The four
+#' parameters, the upper asymptote, IC50, slope and lower asymptote, 
+#' 
+#' @name coef.dr4pl
+#' @param object A 'dr4pl' object
+#' @param ... arguments passed to coef
+#' @return A vector of parameters
+#' @export
+coef.dr4pl <- function(object, ...) {
+  
+  object$parameters
+}
+
 #' @title plot
 #' 
 #' @description Default plotting function for a `dr4pl' object. Plot displays 
@@ -57,7 +123,7 @@
 #' 
 #' @export
 plot.dr4pl <- function(x,
-                       text.title = "Dose response plot",
+                       text.title = "Dose-response plot",
                        text.x = "Dose",
                        text.y = "Response",
                        indices.outlier = NULL,
@@ -238,67 +304,4 @@ gof.dr4pl <- function(object) {
   class(obj.gof.dr4pl) <- "gof.dr4pl"
   
   return(obj.gof.dr4pl)
-}
-
-#' @description Compute the confidence intervals of parameter estimates of a fitted
-#'   model.
-#' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
-#' @name confint.dr4pl
-#'   
-#' @param object An object of the dr4pl class
-#' @param parm Parameters of the 4PL model
-#' @param level Confidence level
-#' @param ... Other parameters to be passed
-#' 
-#' @return A matrix of the confidence intervals in which each row represents a
-#'   parameter and each column represents the lower and upper bounds of the
-#'   confidence intervals of the corresponding parameters.
-#'   
-#' @details This function computes the confidence intervals of the parameters of the
-#'   4PL model based on the second order approximation to the Hessian matrix of the
-#'   loss function of the model. Please refer to Subsection 5.2.2 of 
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
-#'   
-#' @examples
-#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
-#'   parm <- obj.dr4pl$parameters
-#'
-#'   confint(obj.dr4pl, parm = parm, level = 0.95)
-#' 
-#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
-#' @export
-confint.dr4pl <- function(object, parm, level, ...) {
-  
-  x <- object$data$Dose
-  y <- object$data$Response
-  theta <- object$parameters
-  hessian <- object$hessian
-  
-  n <- object$sample.size  # Number of observations in data
-  f <- MeanResponse(x, theta)
-  
-  C.hat.inv <- solve(hessian/2)
-  s <- sqrt(sum((y - f)^2)/(n - 4))
-  
-  q.t <- qt(1 - (1 - level)/2, df = n - 4)
-  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
-  
-  return(ci)
-}
-
-# add more description
-#' @description Coefficient of a `dr4pl' object
-#' @title coef
-#' @name coef.dr4pl
-#' @param object A 'dr4pl' object
-#' @param ... arguments passed to coef
-#' @return A vector of parameters
-#' @export
-coef.dr4pl <- function(object, ...) {
-  
-  object$parameters
-  
 }
