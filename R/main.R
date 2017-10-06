@@ -121,7 +121,7 @@ dr4pl.formula <- function(formula,
 #'   ##Assign method.init = "Mead" to use Mead's method of estimation. 
 #'   # Use method.robust to select desired loss function
 #'   b <- dr4pl(Response~Dose, 
-#'                data = sample_data_1,
+#'                data = sample_data_4,
 #'                method.init = "Mead", 
 #'                method.robust = "Tukey" )
 #'   plot(b)
@@ -177,8 +177,9 @@ dr4pl.default <- function(dose,
                         method.optim = method.optim,
                         method.robust = method.robust)
 
-  ### When convergence failure happens
-  if(obj.dr4pl$convergence == FALSE) {
+  ### When convergence failure happens.
+  if(obj.dr4pl$convergence == FALSE) {  
+
     
     ### Decide the method of robust estimation which is more robust than the method
     ### input by a user.
@@ -275,7 +276,6 @@ dr4plEst <- function(dose, response,
                      method.robust) {
   
   convergence <- TRUE
-  
   x <- dose  # Vector of dose values
   y <- response  # Vector of responses
   n <- length(x)  # Number of observations
@@ -331,6 +331,8 @@ dr4plEst <- function(dose, response,
     deriv.f <- DerivativeF(theta.init, x)
     residuals <- Residual(theta.init, x, y)
     
+
+
     C.hat.inv <- try(solve(t(deriv.f)%*%deriv.f), silent = TRUE)  # Inverse matrix
 
     if(inherits(C.hat.inv, "try-error")) {
@@ -393,7 +395,7 @@ dr4plEst <- function(dose, response,
       
       stop("Initial parameter values are not in the interior of the feasible region.")
     }
-    
+
     # Fit the 4PL model
     cO.dr4pl <- constrOptim(theta = theta.re.init,
                             f = err.fcn,
