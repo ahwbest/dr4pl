@@ -15,6 +15,7 @@
 A vector of parameters
 }
 \description{
-This function obtains the coefficients of a 4PL model. The four
-parameters, the upper asymptote, IC50, slope and lower asymptote,
+This function obtains the coefficients of a 4PL model. Estimates
+of the four parameters, the upper asymptote, IC50, slope and lower asymptote,
+are returned.
 }

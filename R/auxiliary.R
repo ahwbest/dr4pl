@@ -158,6 +158,7 @@ gof.dr4pl <- function(object) {
 #' IC(dr4pl.test, levels.percent = c(10, 90))
 #' 
 #' @return IC values at the percentage levels provided by the argument \code{percent}
+#' @export
 IC <- function(object, levels.percent) {
   
   ### Check whether function arguments are appropriate
@@ -175,7 +176,6 @@ IC <- function(object, levels.percent) {
   # theta <- object$parameters
   # IC.vec <- theta[2]*((theta[4] - )/())
 }
-
 
 #' @title Make a plot of a 4PL model curve and data
 #' 
