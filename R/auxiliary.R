@@ -52,8 +52,9 @@ confint.dr4pl <- function(object, parm, level, ...) {
 
 #' @title Obtain coefficients of a 4PL model
 #' 
-#' @description This function obtains the coefficients of a 4PL model. The four
-#' parameters, the upper asymptote, IC50, slope and lower asymptote, 
+#' @description This function obtains the coefficients of a 4PL model. Estimates
+#' of the four parameters, the upper asymptote, IC50, slope and lower asymptote,
+#' are returned.
 #' 
 #' @name coef.dr4pl
 #' @param object A 'dr4pl' object
@@ -65,9 +66,11 @@ coef.dr4pl <- function(object, ...) {
   object$parameters
 }
 
+#' @title Perform the goodness-of-fit (gof) test for the 4PL model.
+#' 
 #' @description Perform the goodness-of-fit (gof) test for the 4PL model when there
 #'   are at least two replicates for each dose level.
-#' @title Perform the goodness-of-fit (gof) test for the 4PL model.
+#'   
 #' @name gof.dr4pl
 #'   
 #' @param object An object of the dr4pl class.
@@ -136,11 +139,50 @@ gof.dr4pl <- function(object) {
   return(obj.gof.dr4pl)
 }
 
+#' @title Obtain Inhibitory Concentrations (IC) of a dose-response curve
+#' 
+#' @description This function obtains estimates of the IC's of a dose-response 
+#' curve. Typically the IC50 parameter is of interest, but sometimes IC10 or IC90
+#' are important aspects of a dose-response curve. By controlling the function
+#' argument, a user can obtain the IC's at various levels.
+#' 
+#' @name IC
+#' 
+#' @param object Object of the class `dr4pl` for which the IC values are obtained
+#' @param levels.percent Percentage of the level at which thc IC is obtained
+#' @examples 
+#' data.test <- data.frame(x = c(0.0001, 0.001, 0.01, 0.1, 1),
+#'                         y = c(10, 9, 5, 1, 0))
+#' dr4pl.test <- dr4pl(y ~ x,
+#'                     data = data.test)
+#' IC(dr4pl.test, levels.percent = c(10, 90))
+#' 
+#' @return IC values at the percentage levels provided by the argument \code{percent}
+IC <- function(object, levels.percent) {
+  
+  ### Check whether function arguments are appropriate
+  if(class(object) != "dr4pl") {
+    
+    stop("The object for which the IC values are obtained should be of the class
+         \"dr4pl\".")
+  }
+  if(any(levels.percent <= 0|levels.percent >= 100)) {
+    
+    stop("Percentage levels at which the Ic values are obtained should be between
+         0 and 100.")
+  }
+  
+  # theta <- object$parameters
+  # IC.vec <- theta[2]*((theta[4] - )/())
+}
+
+
 #' @title Make a plot of a 4PL model curve and data
 #' 
-#' @description This function plot displays 
-#'   decreasing dr4pl curve as well as measured points. Default points are 
-#'   blue and size 5.
+#' @description This function displays a dose-response curve and data. As a default,
+#' the x-axis represents dose levels in log 10 scale and the y-axis represents
+#' responses. The black solid line represents a dose-response curve. The blue filled
+#' circles represent data points and red triangles represent outliers.
 #'   
 #' @name plot.dr4pl
 #' 
@@ -308,4 +350,3 @@ summary.dr4pl <- function(object, ...) {
   class(res) <- "summary.dr4pl"
   res
 }
-
