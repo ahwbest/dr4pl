@@ -65,6 +65,77 @@ coef.dr4pl <- function(object, ...) {
   object$parameters
 }
 
+#' @description Perform the goodness-of-fit (gof) test for the 4PL model when there
+#'   are at least two replicates for each dose level.
+#' @title Perform the goodness-of-fit (gof) test for the 4PL model.
+#' @name gof.dr4pl
+#'   
+#' @param object An object of the dr4pl class.
+#' 
+#' @return Object of class `gof.dr4pl' which consists of .
+#'   
+#' @details Perform the goodness-of-fit (gof) test for the 4PL model in which the
+#'   mean response actually follws the 4 Parameter Logistic model. There should
+#'   be at least two replicates at each dose level. The test statistic follows the
+#'   Chi squared distributions with the (n - 4) degrees of freedom where n is the
+#'   number of observations and 4 is the number of parameters in the 4PL model. For
+#'   detailed explanation of the method, please refer to Subsection 2.1.5 of
+#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
+#'   Probability and Mathematical Statistics: Probability and Mathematical
+#'   Statistics. John Wiley & Sons, Inc., New York.
+#'
+#' @export
+gof.dr4pl <- function(object) {
+  
+  x <- object$data$Dose  # Dose levels
+  y <- object$data$Response  # Responses
+  
+  J.i <- table(x)  # Numbers of observations at all dose levels
+  n <- length(unique(x))  # Number of dose levels
+  N <- object$sample.size  # Total number of observations
+  p <- 4  # Number of parameters of the 4PL model is 4
+  # Numbers of observations per dose level
+  n.obs.per.dose <- tapply(X = y, INDEX = x, FUN = length)
+  
+  # Check whether function arguments are appropriate
+  if(n <= 4) {
+    
+    stop("The number of dose levels should be larger than four to perform the
+         goodness-of-fit test for the 4PL model.")
+  }
+  if(any(n.obs.per.dose <= 1)) {
+    
+    stop("There should be more than one observation for each dose level to perform
+         the goodness-of-fit test.")
+  }
+  
+  levels.x.sorted <- sort(unique(x))
+  
+  x.sorted <- sort(x)
+  indices.x.sorted <- sort(x, index.return = TRUE)$ix
+  y.sorted <- y[indices.x.sorted]
+  
+  y.bar <- tapply(X = y.sorted, INDEX = x.sorted, FUN = mean)
+  y.fitted <- MeanResponse(levels.x.sorted, object$parameters)
+  
+  
+  y.bar.rep <- rep(y.bar, times = n.obs.per.dose)
+  
+  gof.numer <- J.i%*%(y.bar - y.fitted)^2/(n - p)
+  gof.denom <- sum((y.sorted - y.bar.rep)^2)/(N - n)
+  
+  gof.stat <- gof.numer/gof.denom
+  gof.pval <- pf(gof.stat, df1 = n - p, df2 = N - n, lower.tail = FALSE)
+  gof.df <- c(n - p, N - n)
+  
+  obj.gof.dr4pl <- list(gof.stat, gof.pval, gof.df)
+  names(obj.gof.dr4pl) <- c("Statistic", "pValue", "DegreesOfFreedom")
+  
+  class(obj.gof.dr4pl) <- "gof.dr4pl"
+  
+  return(obj.gof.dr4pl)
+}
+
 #' @title plot
 #' 
 #' @description Default plotting function for a `dr4pl' object. Plot displays 
@@ -146,10 +217,12 @@ plot.dr4pl <- function(x,
   ### Draw a plot
   n <- x$sample.size
   color.vec <- rep("blue", n)
+  shape.vec <- rep(19, n)
   
   if(!is.null(indices.outlier)) {
     
     color.vec[indices.outlier] <- "red"
+    shape.vec[indices.outlier] <- 17
   }
   
   a <- ggplot2::ggplot(aes(x = x$data$Dose, y = x$data$Response), data = x$data)
@@ -158,7 +231,8 @@ plot.dr4pl <- function(x,
                                   args = list(theta = x$parameters),
                                   size = 1.2)
   
-  a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec)
+  a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec,
+                               shape = shape.vec)
   
   a <- a + ggplot2::labs(title = text.title,
                          x = text.x,
@@ -235,73 +309,3 @@ summary.dr4pl <- function(object, ...) {
   res
 }
 
-#' @description Perform the goodness-of-fit (gof) test for the 4PL model when there
-#'   are at least two replicates for each dose level.
-#' @title Perform the goodness-of-fit (gof) test for the 4PL model.
-#' @name gof.dr4pl
-#'   
-#' @param object An object of the dr4pl class.
-#' 
-#' @return Object of class `gof.dr4pl' which consists of .
-#'   
-#' @details Perform the goodness-of-fit (gof) test for the 4PL model in which the
-#'   mean response actually follws the 4 Parameter Logistic model. There should
-#'   be at least two replicates at each dose level. The test statistic follows the
-#'   Chi squared distributions with the (n - 4) degrees of freedom where n is the
-#'   number of observations and 4 is the number of parameters in the 4PL model. For
-#'   detailed explanation of the method, please refer to Subsection 2.1.5 of
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
-#'
-#' @export
-gof.dr4pl <- function(object) {
-  
-  x <- object$data$Dose  # Dose levels
-  y <- object$data$Response  # Responses
-  
-  J.i <- table(x)  # Numbers of observations at all dose levels
-  n <- length(unique(x))  # Number of dose levels
-  N <- object$sample.size  # Total number of observations
-  p <- 4  # Number of parameters of the 4PL model is 4
-  # Numbers of observations per dose level
-  n.obs.per.dose <- tapply(X = y, INDEX = x, FUN = length)
-  
-  # Check whether function arguments are appropriate
-  if(n <= 4) {
-    
-    stop("The number of dose levels should be larger than four to perform the
-         goodness-of-fit test for the 4PL model.")
-  }
-  if(any(n.obs.per.dose <= 1)) {
-    
-    stop("There should be more than one observation for each dose level to perform
-         the goodness-of-fit test.")
-  }
-  
-  levels.x.sorted <- sort(unique(x))
-  
-  x.sorted <- sort(x)
-  indices.x.sorted <- sort(x, index.return = TRUE)$ix
-  y.sorted <- y[indices.x.sorted]
-  
-  y.bar <- tapply(X = y.sorted, INDEX = x.sorted, FUN = mean)
-  y.fitted <- MeanResponse(levels.x.sorted, object$parameters)
-  
-  
-  y.bar.rep <- rep(y.bar, times = n.obs.per.dose)
-
-  gof.numer <- J.i%*%(y.bar - y.fitted)^2/(n - p)
-  gof.denom <- sum((y.sorted - y.bar.rep)^2)/(N - n)
-  
-  gof.stat <- gof.numer/gof.denom
-  gof.pval <- pf(gof.stat, df1 = n - p, df2 = N - n, lower.tail = FALSE)
-  gof.df <- c(n - p, N - n)
-  
-  obj.gof.dr4pl <- list(gof.stat, gof.pval, gof.df)
-  names(obj.gof.dr4pl) <- c("Statistic", "pValue", "DegreesOfFreedom")
-  
-  class(obj.gof.dr4pl) <- "gof.dr4pl"
-  
-  return(obj.gof.dr4pl)
-}
