@@ -203,6 +203,7 @@ dr4pl.default <- function(dose,
     
     n <- obj.dr4pl$sample.size  # Number of data points
     
+    # Fit a 4PL model to data
     obj.dr4pl <- dr4plEst(dose = dose, 
                           response = response,
                           init.parm = init.parm,
@@ -311,17 +312,25 @@ dr4plEst <- function(dose, response,
     # `decline`.
     if(decline == "decline") {
       
-      constr.mat <- matrix(c(0, 0, -1, 0),
-                           nrow = 1,
-                           ncol = 4)
+      constr.mat <- matrix(c(0, 0, -1, 0), nrow = 1, ncol = 4)
+      constr.vec <- 0
     } else if(decline == "growth") {
       
-      constr.mat <- matrix(c(0, 0, 1, 0),
-                           nrow = 1,
-                           ncol = 4)
+      constr.mat <- matrix(c(0, 0, 1, 0), nrow = 1, ncol = 4)
+      constr.vec <- 0
     }
     
-    constr.vec <- 0
+    if(decline == "auto") {
+      
+      optim.dr4pl <- optim(par = theta.re.init,
+                           fn = err.fcn,
+                           gr = GradientSquaredLossLogIC50,
+                method = method.optim,
+                hessian = TRUE)
+    } else {
+      
+      constrOptim
+    }
     
     
     

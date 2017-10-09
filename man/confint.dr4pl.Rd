@@ -39,6 +39,3 @@ This function computes the confidence intervals of the parameters of the
   confint(obj.dr4pl, parm = parm, level = 0.95)
 
 }
-\author{
-Hyowon An, Justin T. Landis and Aubrey G. Bailey
-}

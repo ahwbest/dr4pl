@@ -84,7 +84,7 @@ This function fits a 4 parameter logistic (4PL) model to dose-response
 
   \code{method.robust} chooses a robust estimation method among 4 methods.
   The method of estimation is usually identified by the loss function of the
-  method. This package implements 4 loss functions: sum of squares loss,
+  method. This package supports 4 types of loss functions: sum-of-squares loss,
   absolute deviation loss, Huber's loss and Tukey's biweight loss. Each of
   loss function is explained in detail in the vignette.
 }
@@ -127,7 +127,7 @@ response variable
 \author{
 Hyowon An, \email{ahwbest@gmail.com}
 
-Justin T. Landis,
+Justin T. Landis, \email{jtlandis314@gmail.com}
 
 Aubrey G. Bailey, \email{aubreybailey@gmail.com}
 }
