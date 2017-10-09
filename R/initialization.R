@@ -1,12 +1,18 @@
 
 #' Find initial values for the 4PL model.
 #'
-#' @param x Dose levels
-#' @param y Responses
-#' @param method.init Initialization method
-#' @param method.robust Robust fitting method
+#' @param x Vector of dose levels
+#' @param y Vector of responses
+#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+#' or growth curve \eqn{\theta[3]>0}. See \code{\link{dr4pl}} for detailed 
+#' explanation.
+#' @param method.init Method of obtaining initial values of the parameters. See
+#' \code{\link{dr4pl}} for detailed explanation.
+#' @param method.robust Parameter to select loss function for the robust estimation 
+#' method to be used to fit a model. See \code{\link{dr4pl}} for detailed
+#' explanation.
 #'
-#' @return theta.IC50.slope Parameter estimates of the IC50 and slope
+#' @return Initial parameter estimates of a 4PL model in the order of 
 #' @export
 FindInitialParms <- function(x, y, method.init, method.robust) {
 
