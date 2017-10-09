@@ -12,9 +12,10 @@ Fit4PLVariousOptions <- function(data.input,
                                  var.response,
                                  var.ref = NULL) {
 
-  methods.init <- 
+  types.method.init <- c("logistic", "Mead")
+  types.method.optim <- c("Nelder-Mead", "BFGS", "CG", "SANN")
   
-  data.input <- na.omit(data.input)
+  data.input <- na.omit(data.input)  # Omit NA values from data
 
   if(length(var.ref) == 0) {
     
@@ -23,12 +24,17 @@ Fit4PLVariousOptions <- function(data.input,
     
     data.part <- data.whole
     
-    obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
-                                data = data.part,
-                                method.init = "logistic")
-    obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
-                          data = data.part,
-                          method.init = "Mead")
+    for(method.init in types.method.init) {
+      
+      for(method.optim in types.method.optim) {
+        
+        dr4pl(Response ~ Dose,
+              data = data.part,
+              method.init = method.init,
+              method.optim = method.optim)
+      }
+    }
+
   } else {
     
     data.whole <- subset(x = data.input, select = c(var.ref, var.dose, var.response))
@@ -45,12 +51,16 @@ Fit4PLVariousOptions <- function(data.input,
                           select = c(Dose, Response),
                           subset = Ref == levels.ref[i])
 
-      obj.dr4pl.logistic <- dr4pl(Response ~ Dose,
-                                  data = data.part,
-                                  method.init = "logistic")
-      obj.dr4pl.Mead <- dr4pl(Response ~ Dose,
-                              data = data.part,
-                              method.init = "Mead")
+      for(method.init in types.method.init) {
+        
+        for(method.optim in types.method.optim) {
+          
+          dr4pl(Response ~ Dose,
+                data = data.part,
+                method.init = method.init,
+                method.optim = method.optim)
+        }
+      }
     }
   }
 }

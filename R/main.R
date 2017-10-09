@@ -67,12 +67,12 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'
 #'   \code{method.robust} chooses a robust estimation method among 4 methods.
 #'   The method of estimation is usually identified by the loss function of the
-#'   method. This package implements 4 loss functions: sum of squares loss,
+#'   method. This package supports 4 types of loss functions: sum-of-squares loss,
 #'   absolute deviation loss, Huber's loss and Tukey's biweight loss. Each of
 #'   loss function is explained in detail in the vignette.
 #'   
 #' @author Hyowon An, \email{ahwbest@gmail.com}
-#' @author Justin T. Landis, 
+#' @author Justin T. Landis, \email{jtlandis314@gmail.com}
 #' @author Aubrey G. Bailey, \email{aubreybailey@gmail.com}
 #' @seealso \code{\link{confint.dr4pl}}, \code{\link{gof.dr4pl}},
 #' \code{\link{print.dr4pl}}, \code{\link{summary.dr4pl}}
@@ -145,7 +145,7 @@ dr4pl.default <- function(dose,
                           ...) {
 
   types.method.init <- c("logistic", "Mead")
-  types.method.optim <- 
+  types.method.optim <- c("Nelder-Mead", "BFGS", "CG", "SANN")
   types.decline <- c("auto", "decline", "growth")
   
   ### Check errors in functions arguments
@@ -165,11 +165,17 @@ dr4pl.default <- function(dose,
     
     stop("The initialization method name should be one of \"logistic\" and \"Mead\".")
   }
+  if(!is.element(method.optim, types.method.optim)) {
+    
+    stop("The optimization method name should be one of \"Nelder-Mead\", \"BFGS\",
+         \"CG\", \"L-BFGS-B\" and \"SANN\".")
+  }
   if(!is.element(decline, types.decline)) {
     
-    stop("The type of the \"decline\" parameter should be one of \"auto\",\"decline\" and \"growth\".")
+    stop("The type of the \"decline\" parameter should be one of \"auto\", \"decline\" and \"growth\".")
   }
 
+  # Fit a 4PL model
   obj.dr4pl <- dr4plEst(dose = dose,
                         response = response,
                         init.parm = init.parm,
@@ -294,22 +300,31 @@ dr4plEst <- function(dose, response,
       
       stop("The IC50 parameter should be positive.")
     }
-        
+    
     # Use given initial parameter estimates
     theta.re.init <- init.parm
     theta.re.init[2] <- log10(init.parm[2])
     
     names(theta.re.init) <- c("Upper limit", "Log10(IC50)", "Slope", "Lower limit")
     
-    # Fit a dose-response model.
-    optim.dr4pl <- optim(par = theta.re.init,
-                         fn = err.fcn,
-                         gr = grad,
-                         method = method.optim,
-                         hessian = TRUE,
-                         x = x,
-                         y = y)
-
+    # Impose a constraint on the slope parameter based on the function argument
+    # `decline`.
+    if(decline == "decline") {
+      
+      constr.mat <- matrix(c(0, 0, -1, 0),
+                           nrow = 1,
+                           ncol = 4)
+    } else if(decline == "growth") {
+      
+      constr.mat <- matrix(c(0, 0, 1, 0),
+                           nrow = 1,
+                           ncol = 4)
+    }
+    
+    constr.vec <- 0
+    
+    
+    
     loss <- optim.dr4pl$value
     hessian <- optim.dr4pl$hessian
     theta.re <- optim.dr4pl$par

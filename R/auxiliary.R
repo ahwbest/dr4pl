@@ -28,7 +28,6 @@
 #'
 #'   confint(obj.dr4pl, parm = parm, level = 0.95)
 #' 
-#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
 #' @export
 confint.dr4pl <- function(object, parm, level, ...) {
   
