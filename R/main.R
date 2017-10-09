@@ -8,7 +8,7 @@
 #' @import stats
 #' @import tensor
 
-#' @title Fitting the 4 Parameter Logistic (4PL) models to dose-response data.
+#' @title Fitting 4 Parameter Logistic (4PL) models to dose-response data.
 #' 
 #' @description This function fits a 4PL model to dose-response data. Users can
 #' obtain fitted parameter estimates as return values. Using auxiliary functions
@@ -40,7 +40,8 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #' @param method.optim Method of optimization of the loss function specified by
 #' \code{method.robust}. This function argument is directly passed to the function
 #' \code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.
-#' @param method.robust Parameter to select loss function for the robust estimation method to be used to fit a model. 
+#' @param method.robust Parameter to select loss function for the robust estimation 
+#' method to be used to fit a model. 
 #' - NULL: Sum of squares loss 
 #' - absolute: Absolute deviation loss 
 #' - Huber: Huber's loss 
@@ -203,6 +204,7 @@ dr4pl.default <- function(dose,
     
     n <- obj.dr4pl$sample.size  # Number of data points
     
+    # Fit a 4PL model to data
     obj.dr4pl <- dr4plEst(dose = dose, 
                           response = response,
                           init.parm = init.parm,
@@ -311,19 +313,36 @@ dr4plEst <- function(dose, response,
     # `decline`.
     if(decline == "decline") {
       
-      constr.mat <- matrix(c(0, 0, -1, 0),
-                           nrow = 1,
-                           ncol = 4)
+      constr.mat <- matrix(c(0, 0, -1, 0), nrow = 1, ncol = 4)
+      constr.vec <- 0
     } else if(decline == "growth") {
       
-      constr.mat <- matrix(c(0, 0, 1, 0),
-                           nrow = 1,
-                           ncol = 4)
+      constr.mat <- matrix(c(0, 0, 1, 0), nrow = 1, ncol = 4)
+      constr.vec <- 0
     }
     
-    constr.vec <- 0
-    
-    
+    # Fit a 4PL model to data
+    if(decline == "auto") {
+      
+      optim.dr4pl <- optim(par = theta.re.init,
+                           fn = err.fcn,
+                           gr = GradientSquaredLossLogIC50,
+                           method = method.optim,
+                           hessian = TRUE,
+                           x = x,
+                           y = y)
+    } else {
+      
+      optim.dr4pl <- constrOptim(theta = theta.re.init,
+                                 f = err.fcn,
+                                 grad = grad,
+                                 ui = constr.mat,
+                                 ci = constr.vec,
+                                 method = method.optim,
+                                 hessian = TRUE,
+                                 x = x,
+                                 y = y)
+    }
     
     loss <- optim.dr4pl$value
     hessian <- optim.dr4pl$hessian
@@ -336,7 +355,7 @@ dr4plEst <- function(dose, response,
   } else {
     
     ### Obtain initial values of parameters.
-    theta.init <- FindInitialParms(x, y, method.init, method.robust)
+    theta.init <- FindInitialParms(x, y, decline, method.init, method.robust)
     names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
     
     theta.re.init <- theta.init
@@ -347,8 +366,6 @@ dr4plEst <- function(dose, response,
     deriv.f <- DerivativeF(theta.init, x)
     residuals <- Residual(theta.init, x, y)
     
-
-
     C.hat.inv <- try(solve(t(deriv.f)%*%deriv.f), silent = TRUE)  # Inverse matrix
 
     if(inherits(C.hat.inv, "try-error")) {
@@ -406,6 +423,18 @@ dr4plEst <- function(dose, response,
       constr.vec <- c(log10(bounds.theta.2[1]), -log10(bounds.theta.2[2]),
                       bounds.theta.3[1], -bounds.theta.3[2])
     }
+    
+    # Impose a constraint on the slope parameter based on the function argument
+    # `decline`.
+    if(decline == "decline") {
+      
+      constr.mat <- rbind(constr.mat, matrix(c(0, 0, -1, 0), nrow = 1, ncol = 4))
+      constr.vec <- c(constr.vec, 0)
+    } else if(decline == "growth") {
+      
+      constr.mat <- rbind(constr.mat, matrix(c(0, 0, 1, 0), nrow = 1, ncol = 4))
+      constr.vec <- c(constr.vec, 0)
+    }
 
     if(any(constr.mat%*%theta.re.init<constr.vec)) {
       
@@ -413,19 +442,19 @@ dr4plEst <- function(dose, response,
     }
 
     # Fit the 4PL model
-    cO.dr4pl <- constrOptim(theta = theta.re.init,
-                            f = err.fcn,
-                            grad = grad,
-                            ui = constr.mat,
-                            ci = constr.vec,
-                            method = method.optim,
-                            hessian = TRUE,
-                            x = x,
-                            y = y)
+    optim.dr4pl <- constrOptim(theta = theta.re.init,
+                               f = err.fcn,
+                               grad = grad,
+                               ui = constr.mat,
+                               ci = constr.vec,
+                               method = method.optim,
+                               hessian = TRUE,
+                               x = x,
+                               y = y)
     
-    loss <- cO.dr4pl$value
-    hessian <- cO.dr4pl$hessian
-    theta.re <- cO.dr4pl$par
+    loss <- optim.dr4pl$value
+    hessian <- optim.dr4pl$hessian
+    theta.re <- optim.dr4pl$par
     
     theta <- theta.re
     theta[2] <- 10^theta.re[2]
