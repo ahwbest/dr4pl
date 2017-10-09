@@ -1,32 +1,43 @@
 
 #' Find initial values for the 4PL model.
 #'
-#' @param x Dose levels
-#' @param y Responses
-#' @param method.init Initialization method
-#' @param method.robust Robust fitting method
+#' @param x Vector of dose levels
+#' @param y Vector of responses
+#' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+#' or growth curve \eqn{\theta[3]>0}. See \code{\link{dr4pl}} for detailed 
+#' explanation.
+#' @param method.init Method of obtaining initial values of the parameters. See
+#' \code{\link{dr4pl}} for detailed explanation.
+#' @param method.robust Parameter to select loss function for the robust estimation 
+#' method to be used to fit a model. See \code{\link{dr4pl}} for detailed
+#' explanation.
 #'
-#' @return theta.IC50.slope Parameter estimates of the IC50 and slope
+#' @return Initial parameter estimates of a 4PL model in the order of 
 #' @export
-FindInitialParms <- function(x, y, method.init, method.robust) {
+FindInitialParms <- function(x, y, decline, method.init, method.robust) {
 
-  methods.init <- c("logistic", "Mead")  # Vector of available initialization methods
-  methods.robust <- c("absolute", "Huber", "Tukey")
-  
+  types.decline <- c("auto", "decline", "growth")
+  types.method.init <- c("logistic", "Mead")
+  types.method.robust <- c("absolute", "Huber", "Tukey")
+
   ### Check whether function arguments are appropriate.
   if(length(x) == 0 || length(y) == 0 || length(x) != length(y)) {
 
     stop("The same numbers of dose and response values should be supplied.")
   }
-  if(!(is.null(method.robust)||is.element(method.robust, methods.robust))) {
+  if(!is.element(decline, types.decline)) {
+    
+    stop("The type of a dose-response curve should be one of \"auto\", \"decline\"
+         and \"growth\".")
+  }
+  if(!is.element(method.init, types.method.init)) {
+    
+    stop("The initialization method name should be one of \"logistic\" and \"Mead\".")
+  }
+  if(!(is.null(method.robust)||is.element(method.robust, types.method.robust))) {
     
     stop("The robust estimation method should be one of NULL, \"absolute\",
          \"Huber\" or \"Tukey\".")
-    
-  }
-  if(!is.element(method.init, methods.init)) {
-    
-    stop("The initialization method name should be one of \"logistic\" and \"Mead\".")
   }
  
   ### Set the upper and lower asymptotes
@@ -42,12 +53,14 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
     
     theta.1.4.grid.size <- 0.025*y.range  # This value is the size of the grid
     
+    # Grid of values of upper and lower asymptotes
     grid <- c(-2*theta.1.4.grid.size, -theta.1.4.grid.size, 0, theta.1.4.grid.size,
               2*theta.1.4.grid.size)
     
     theta.1.grid <- y.max + grid
     theta.4.grid <- y.min + grid
     
+    # Matrix of initial parameter estimates
     theta.mat <- matrix(NA, nrow = length(grid)^2, ncol = 4)
     i.row <- 1
 
@@ -73,14 +86,15 @@ FindInitialParms <- function(x, y, method.init, method.robust) {
         
         beta.hat <- lm.hill$coefficients
         theta.3.init <- beta.hat[2]
-        theta.2.init <- exp(-beta.hat[1]/theta.3.init)
+        theta.2.init <- exp(-beta.hat[1]/beta.hat[2])
         
         theta.mat[i.row, ] <- c(theta.1.init, theta.2.init, theta.3.init, theta.4.init)
         i.row <- i.row + 1
       }
     }
    
-    theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ] # This restricts approximation to decline curves only
+    # This restricts approximation to decline curves only
+    theta.mat <- theta.mat[!is.na(theta.mat[, 3])&theta.mat[, 3]<0, ]
 
     if(nrow(theta.mat) == 0) {
       

@@ -2,12 +2,12 @@
 build status:
 =============
 
-[![Build Status](https://travis-ci.org/ahwbest/dr4pl.svg?branch=master)](https://travis-ci.org/ahwbest/dr4pl)
+[![Build Status](http://travis-ci.org/ahwbest/dr4pl.svg?branch=master)](https://travis-ci.org/ahwbest/dr4pl)
 
 license:
 ========
 
-[![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![Licence](http://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 cran status:
 ============
@@ -17,7 +17,7 @@ cran status:
 release version:
 ================
 
-[![packageversion](https://img.shields.io/badge/GitHub%20Package%20version-0.97-orange.svg?style=flat-square)](commits/master)
+[![packageversion](http://img.shields.io/badge/GitHub%20Package%20version-0.97-orange.svg?style=flat-square)](commits/master)
 
 dr4pl
 -----
