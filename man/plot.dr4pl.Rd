@@ -5,7 +5,8 @@
 \title{Make a plot of a 4PL model curve and data}
 \usage{
 \method{plot}{dr4pl}(x, text.title = "Dose-response plot", text.x = "Dose",
-  text.y = "Response", indices.outlier = NULL, ...)
+  text.y = "Response", indices.outlier = NULL, breaks.x = NULL,
+  breaks.y = NULL, ...)
 }
 \arguments{
 \item{x}{`dr4pl' object whose data and mean response function will be plotted.}
@@ -21,6 +22,10 @@
 
 \item{indices.outlier}{Pass a vector indicating all indices which are outliers in 
 the data.}
+
+\item{breaks.x}{Vector of desired break points for the x-axis}
+
+\item{breaks.y}{Vector of desired break points for the y-axis}
 
 \item{...}{All arguments that can normally be passed to ggplot.}
 }

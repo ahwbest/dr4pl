@@ -7,7 +7,7 @@ all: $(PACKAGEFILE) README.md
 .PHONY: all install
 
 install:
-	R -e 'devtools::install_github("ahwbest/rd4pl")'	
+	R -e 'devtools::install_github("ahwbest/dr4pl")'	
 
 localInstall:
 	R -e 'devtools::install()'
