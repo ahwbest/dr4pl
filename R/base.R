@@ -176,7 +176,7 @@ DerivativeF <- function(theta, x) {
   ### Compute derivatives
   deriv.f.theta.1 <- 1 - 1/(1 + eta)
   deriv.f.theta.2 <- (theta.4 - theta.1)*theta.3/theta.2*eta/(1 + eta)^2
-  deriv.f.theta.3 <- -(theta.4 - theta.1)/theta.3*log(eta)*eta/(1 + eta)^2
+  deriv.f.theta.3 <- -(theta.4 - theta.1)*log(x/theta.2)*eta/(1 + eta)^2
   deriv.f.theta.4 <- 1/(1 + eta)
   
   # Handle the cases when dose values are zeros

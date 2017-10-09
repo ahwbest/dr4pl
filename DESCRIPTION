@@ -1,12 +1,12 @@
 Package: dr4pl
 Type: Package
-Title: Dose Response data analysis using the 4 Parameter Logistic model
-Version: 0.1.0
+Title: Dose Response Data Analysis using the 4 Parameter Logistic Model
+Version: 1.0.0
 Depends: R (>= 2.10)
 Author: Hyowon An
 Maintainer: Hyowon An <ahwbest@gmail.com>
-Description: dr4pl models the relationship between dose levels and responses in a pharmacological experiment using the 4 Parameter Logistic model. dr4pl currently only supports decreasing curves. To deal with a convergence failure problem of nonlinear regression models, this package supports features to detect convergence failure and presents some solutions to a user.
-License: GPLv3
+Description: Models the relationship between dose levels and responses in a pharmacological experiment using the 4 Parameter Logistic model. Currently only decreasing curves are supported. To deal with a convergence failure problem of nonlinear regression models, methods are provided to detect convergence failure as well as suggested solutions.
+License: GPL
 LazyData: TRUE
 URL: https://github.com/ahwbest/dr4pl
 BugReports: https://github.com/ahwbest/dr4pl/issues

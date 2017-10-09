@@ -36,13 +36,13 @@ option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
 option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
 process.}
 
-\item{method.init}{The method of obtaining initial values of the parameters.
+\item{method.init}{Method of obtaining initial values of the parameters.
 If it is NULL, a default "logistic" regression method will be used. Assign
 "Mead" to use Mead's method.}
 
-\item{method.optim}{The method of optimization of the parameters. This method
-name is directly applied to the \code{constrOptim} function provided in the
-"base" package of R.}
+\item{method.optim}{Method of optimization of the loss function specified by
+\code{method.robust}. This function argument is directly passed to the function
+\code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.}
 
 \item{method.robust}{Parameter to select loss function for the robust estimation method to be used to fit a model. 
 - NULL: Sum of squares loss 

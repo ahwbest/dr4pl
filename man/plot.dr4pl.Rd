@@ -2,9 +2,9 @@
 % Please edit documentation in R/auxiliary.R
 \name{plot.dr4pl}
 \alias{plot.dr4pl}
-\title{plot}
+\title{Make a plot of a 4PL model curve and data}
 \usage{
-\method{plot}{dr4pl}(x, text.title = "Dose response plot", text.x = "Dose",
+\method{plot}{dr4pl}(x, text.title = "Dose-response plot", text.x = "Dose",
   text.y = "Response", indices.outlier = NULL, ...)
 }
 \arguments{
@@ -25,9 +25,10 @@ the data.}
 \item{...}{All arguments that can normally be passed to ggplot.}
 }
 \description{
-Default plotting function for a `dr4pl' object. Plot displays 
-  decreasing dr4pl curve as well as measured points. Default points are 
-  blue and size 5.
+This function displays a dose-response curve and data. As a default,
+the x-axis represents dose levels in log 10 scale and the y-axis represents
+responses. The black solid line represents a dose-response curve. The blue filled
+circles represent data points and red triangles represent outliers.
 }
 \examples{
 ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)

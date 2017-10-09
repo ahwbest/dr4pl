@@ -24,27 +24,27 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'   dose-response relation.
 #'
 #' @param  formula Symbolic description of the model to be fit. Either of the
-#'   form 'response ~ dose' or as a data frame with response values in first
-#'   column and dose values in second column.
+#' form 'response ~ dose' or as a data frame with response values in first
+#' column and dose values in second column.
 #' @param data Data frame containing variables in the model.
 #' @param init.parm Vector of initial parameters to be optimized in the model.
 #' @param decline Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-#'   or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
-#'   that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
-#'   option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
-#'   option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
-#'   process.
-#' @param method.init The method of obtaining initial values of the parameters.
-#'   If it is NULL, a default "logistic" regression method will be used. Assign
-#'   "Mead" to use Mead's method.
-#' @param method.optim The method of optimization of the parameters. This method
-#'   name is directly applied to the \code{constrOptim} function provided in the
-#'   "base" package of R.
+#' or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
+#' that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
+#' option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
+#' option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
+#' process.
+#' @param method.init Method of obtaining initial values of the parameters.
+#' If it is NULL, a default "logistic" regression method will be used. Assign
+#' "Mead" to use Mead's method.
+#' @param method.optim Method of optimization of the loss function specified by
+#' \code{method.robust}. This function argument is directly passed to the function
+#' \code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.
 #' @param method.robust Parameter to select loss function for the robust estimation method to be used to fit a model. 
-#'      - NULL: Sum of squares loss 
-#'      - absolute: Absolute deviation loss 
-#'      - Huber: Huber's loss 
-#'      - Tukey: Tukey's biweight loss
+#' - NULL: Sum of squares loss 
+#' - absolute: Absolute deviation loss 
+#' - Huber: Huber's loss 
+#' - Tukey: Tukey's biweight loss
 #' @param ... Further arguments to be passed to \code{constrOptim}.
 #' 
 #' @return A 'dr4pl' object for which "confint", "gof", "print" and "summary"
@@ -67,12 +67,12 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'
 #'   \code{method.robust} chooses a robust estimation method among 4 methods.
 #'   The method of estimation is usually identified by the loss function of the
-#'   method. This package implements 4 loss functions: sum of squares loss,
+#'   method. This package supports 4 types of loss functions: sum-of-squares loss,
 #'   absolute deviation loss, Huber's loss and Tukey's biweight loss. Each of
 #'   loss function is explained in detail in the vignette.
 #'   
 #' @author Hyowon An, \email{ahwbest@gmail.com}
-#' @author Justin T. Landis, 
+#' @author Justin T. Landis, \email{jtlandis314@gmail.com}
 #' @author Aubrey G. Bailey, \email{aubreybailey@gmail.com}
 #' @seealso \code{\link{confint.dr4pl}}, \code{\link{gof.dr4pl}},
 #' \code{\link{print.dr4pl}}, \code{\link{summary.dr4pl}}
@@ -145,6 +145,7 @@ dr4pl.default <- function(dose,
                           ...) {
 
   types.method.init <- c("logistic", "Mead")
+  types.method.optim <- c("Nelder-Mead", "BFGS", "CG", "SANN")
   types.decline <- c("auto", "decline", "growth")
   
   ### Check errors in functions arguments
@@ -164,11 +165,17 @@ dr4pl.default <- function(dose,
     
     stop("The initialization method name should be one of \"logistic\" and \"Mead\".")
   }
+  if(!is.element(method.optim, types.method.optim)) {
+    
+    stop("The optimization method name should be one of \"Nelder-Mead\", \"BFGS\",
+         \"CG\", \"L-BFGS-B\" and \"SANN\".")
+  }
   if(!is.element(decline, types.decline)) {
     
-    stop("The type of the \"decline\" parameter should be one of \"auto\",\"decline\" and \"growth\".")
+    stop("The type of the \"decline\" parameter should be one of \"auto\", \"decline\" and \"growth\".")
   }
 
+  # Fit a 4PL model
   obj.dr4pl <- dr4plEst(dose = dose,
                         response = response,
                         init.parm = init.parm,
@@ -293,22 +300,31 @@ dr4plEst <- function(dose, response,
       
       stop("The IC50 parameter should be positive.")
     }
-        
+    
     # Use given initial parameter estimates
     theta.re.init <- init.parm
     theta.re.init[2] <- log10(init.parm[2])
     
     names(theta.re.init) <- c("Upper limit", "Log10(IC50)", "Slope", "Lower limit")
     
-    # Fit a dose-response model.
-    optim.dr4pl <- optim(par = theta.re.init,
-                         fn = err.fcn,
-                         gr = grad,
-                         method = method.optim,
-                         hessian = TRUE,
-                         x = x,
-                         y = y)
-
+    # Impose a constraint on the slope parameter based on the function argument
+    # `decline`.
+    if(decline == "decline") {
+      
+      constr.mat <- matrix(c(0, 0, -1, 0),
+                           nrow = 1,
+                           ncol = 4)
+    } else if(decline == "growth") {
+      
+      constr.mat <- matrix(c(0, 0, 1, 0),
+                           nrow = 1,
+                           ncol = 4)
+    }
+    
+    constr.vec <- 0
+    
+    
+    
     loss <- optim.dr4pl$value
     hessian <- optim.dr4pl$hessian
     theta.re <- optim.dr4pl$par

@@ -30,7 +30,7 @@ test_that("Error messages are correctly drawn", {
   expect_error(dr4pl(y ~ x,
                      data = data.test,
                      decline = "abc"),
-               "The type of the \"decline\" parameter should be one of \"auto\",\"decline\" and \"growth\".")
+               "The type of the \"decline\" parameter should be one of \"auto\", \"decline\" and \"growth\".")
   data.test$x[1] <- -1
   expect_error(dr4pl(y ~ x,
                      data = data.test),
