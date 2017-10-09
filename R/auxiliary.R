@@ -292,8 +292,11 @@ plot.dr4pl <- function(x,
   a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
   a <- a + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
   a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
-  a <- a + ggplot2::scale_x_log10(breaks = breaks.x)
-  a <- a + ggplot2:: scale_y_continuous(breaks = breaks.y)
+  if(!is.null(breaks.x)) { a <- a + ggplot2::scale_x_log10(breaks = breaks.x)
+  } else { a <- a + ggplot2::scale_x_log10() }
+  if(!is.null(breaks.y)) { a <- a + ggplot2::scale_y_continuous(breaks = breaks.y)
+  } else { a <- a + ggplot2:: scale_y_continuous() }
+  
   a <- a + ggplot2::theme_bw()
   
   # Set parameters for the titles and text / margin(top, right, bottom, left)
