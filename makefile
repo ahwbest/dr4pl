@@ -7,8 +7,7 @@ all: $(PACKAGEFILE) README.md
 .PHONY: all install
 
 install:
-	R -e 'devtools::install_github("sherrillmix/violinPointR")'
-	R -e 'devtools::install_github("eclarke/violin_point")'
+	R -e 'devtools::install_github("ahwbest/rd4pl")'	
 
 localInstall:
 	R -e 'devtools::install()'
