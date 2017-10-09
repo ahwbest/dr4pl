@@ -145,9 +145,9 @@ dr4pl.default <- function(dose,
                           method.robust = NULL,
                           ...) {
 
+  types.decline <- c("auto", "decline", "growth")
   types.method.init <- c("logistic", "Mead")
   types.method.optim <- c("Nelder-Mead", "BFGS", "CG", "SANN")
-  types.decline <- c("auto", "decline", "growth")
   
   ### Check errors in functions arguments
   if(!is.numeric(dose)||!is.numeric(response)) {
