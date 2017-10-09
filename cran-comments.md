@@ -1,5 +1,5 @@
 ---
-title: "CRAN Comends"
+title: "CRAN Coments"
 author: "Justin L"
 date: "9/20/2017"
 output: html_document
