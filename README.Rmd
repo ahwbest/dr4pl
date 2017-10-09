@@ -1,5 +1,3 @@
-<!-- rmarkdown v1 --> 
-
 ---
 output:
   md_document:

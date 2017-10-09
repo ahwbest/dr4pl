@@ -199,6 +199,8 @@ IC <- function(object, inhib.percent) {
 #'   "Response".
 #' @param indices.outlier Pass a vector indicating all indices which are outliers in 
 #'   the data.
+#' @param breaks.x Vector of desired break points for the x-axis
+#' @param breaks.y Vector of desired break points for the y-axis
 #' @param ... All arguments that can normally be passed to ggplot.
 #' @examples
 #' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, data = sample_data_1)
@@ -244,6 +246,8 @@ plot.dr4pl <- function(x,
                        text.x = "Dose",
                        text.y = "Response",
                        indices.outlier = NULL,
+                       breaks.x = NULL,
+                       breaks.y = NULL,
                        ...) {
   
   ### Check whether function arguments are appropriate
@@ -288,7 +292,8 @@ plot.dr4pl <- function(x,
   a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
   a <- a + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
   a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
-  a <- a + ggplot2::scale_x_log10()
+  a <- a + ggplot2::scale_x_log10(breaks = breaks.x)
+  a <- a + ggplot2:: scale_y_continuous(breaks = breaks.y)
   a <- a + ggplot2::theme_bw()
   
   # Set parameters for the titles and text / margin(top, right, bottom, left)
