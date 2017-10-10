@@ -19,6 +19,21 @@ library(drc)
 ```
 
 #error cases
+
+dr4pl is a four parameter regression tool that was designed to provide a converging function in the pressense of outliers. Consider the next four data sets provided by dr4pl.
+
+Lets first consider the data set drc_error_1.
+
+```{r}
+ggplot(drc_error_1, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_1")
+```
+
+As you can see, this data set contains an extreme outlier at one of the dosage levels. These outliers may be a common phenomena with measuring mistakes of some lab instruments.
+If you were to try and produce a four parameter logistic model with drc, you would recieve the following.
+
 ```{r}
 a <- tryCatch({
   drc::drm(Response~Dose, data = drc_error_1, fct = LL.4())
@@ -32,6 +47,8 @@ error = function(err) {
   print(paste(err))
 })
 ```
+
+Instead of removing the extreme outlier, you may try to use dr4pl instead.
 
 ```{r}
 a <-tryCatch({
@@ -48,6 +65,14 @@ error = function(err) {
 plot(a, text.title = "Error plot #1", indices.outlier = c(102))
 ```
 
+Lets next consider the next data set, drc_error_2.
+```{r}
+ggplot(drc_error_2, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_2")
+```
+This data set suffers from a low sample amount. There are also high outliers at two seperate dose levels. Lets try to plot this case with drc.
 ```{r}
 a <- tryCatch({
   drc::drm(Response~Dose, data = drc_error_2, fct = LL.4())
@@ -62,6 +87,7 @@ error = function(err) {
 })
 ```
 
+Lets see what we can plot with dr4pl.
 ```{r}
 a <-tryCatch({
   dr4pl(Response~Dose, data = drc_error_2, method.init = "Mead", method.robust = "Huber" )
@@ -77,7 +103,15 @@ error = function(err) {
 b <- plot(a, breaks.x = c(0.00135, 0.0135, 0.135, 1.35, 13.5), text.title = "Error plot #2", indices.outlier = c(2,8) )
 b
 ```
+Lets next consider the next data set, drc_error_3.
+```{r}
+ggplot(drc_error_3, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_3")
+```
 
+This data set presents multiple outliers at one dosage level. Again these outliers may manifest as measurement issues with lab instruments. Additionally this data set exemplifies the problem we refer to as the *support problem*. The support problem occurs when there is lack of data at either the right or left of the IC50 parameter. Lets try to use drc on this data set.
 ```{r}
 a <- tryCatch({
   drc::drm(Response~Dose, data = drc_error_3, fct = LL.4())
@@ -93,6 +127,7 @@ error = function(err) {
 
 ```
 
+Now lets use dr4pl.
 ```{r}
 a <-tryCatch({
   dr4pl(Response~Dose, data = drc_error_3, method.init = "Mead", method.robust = "absolute" )
@@ -107,7 +142,15 @@ error = function(err) {
 })
 plot(a, indices.outlier = c(90, 101), text.title = "Error plot #3")
 ```
+Lets next consider the next data set, drc_error_4.
+```{r}
+ggplot(drc_error_4, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_4")
+```
 
+This data set has two outliers in the largest dosage level. This data set also exemplifies the *support problem* as well. Lets try to apply drc to this data set.
 ```{r}
 a <- tryCatch({
   drc::drm(Response~Dose, data = drc_error_4, fct = LL.4())
@@ -122,6 +165,7 @@ error = function(err) {
 })
 ```
 
+Now lets use dr4pl.
 ```{r}
 a <-tryCatch({
   dr4pl(Response~Dose, data = drc_error_4, method.init = "Mead", method.robust = "absolute" )
@@ -136,6 +180,12 @@ error = function(err) {
 })
 plot(a, text.title = "Error plot #4", indices.outlier = c(1,100))
 ```
+
+The package drc draws errors with each one of these cases. However dr4pl is able generate a curve despite the outliers in each error case. In each case we were able to modify the title and axis names with *text.title*, *text.x*, or *text.y*. We are also able to bring attention to outlier points by passing a vector of the indices to the *indices.outlier* argument. As seen the the second error case, we may change the x-axis' and y-axis' break points by using *breaks.x* and *breaks.y* respectively.
+
+#General Usage
+
+dr4pl provides several methods and loss functions for the user to obtain the best fit possible. Lets explore some of the possibities.
 
 ```{r}
 a <- dr4pl(Response~Dose, data = sample_data_1,  method.init = "Mead")
