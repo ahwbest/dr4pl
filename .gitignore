@@ -1,5 +1,10 @@
-.Rproj.user
+*.Rproj.user
 .Rhistory
 .RData
+packrat/lib*/
+packrat/src/
+README.html
+*.Rcheck
+.Rproj.user
 .Ruserdata
 /revdep/.cache.rds

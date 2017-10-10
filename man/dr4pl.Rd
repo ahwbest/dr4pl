@@ -6,7 +6,7 @@
 \alias{dr4pl-package}
 \alias{dr4pl.formula}
 \alias{dr4pl.default}
-\title{Fitting the 4 Parameter Logistic (4PL) models to dose-response data.}
+\title{Fitting 4 Parameter Logistic (4PL) models to dose-response data.}
 \usage{
 dr4pl(...)
 
@@ -44,7 +44,8 @@ If it is NULL, a default "logistic" regression method will be used. Assign
 \code{method.robust}. This function argument is directly passed to the function
 \code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.}
 
-\item{method.robust}{Parameter to select loss function for the robust estimation method to be used to fit a model. 
+\item{method.robust}{Parameter to select loss function for the robust estimation 
+method to be used to fit a model. 
 - NULL: Sum of squares loss 
 - absolute: Absolute deviation loss 
 - Huber: Huber's loss 
