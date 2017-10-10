@@ -27,3 +27,6 @@ Perform the goodness-of-fit (gof) test for the 4PL model in which the
   Probability and Mathematical Statistics: Probability and Mathematical
   Statistics. John Wiley & Sons, Inc., New York.
 }
+\references{
+\insertRef{Seber1989}{dr4pl}
+}
