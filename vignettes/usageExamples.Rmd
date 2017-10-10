@@ -221,7 +221,8 @@ b
 Once you produce a curve you feel is representative of your data, you may get the parameters of the curve by using the summary function on the dr4pl variable.
 
 ```{r}
-summary(a)
+b <- summary(a)
+b$coefficients
 ```
 
 It is possible that you are interested in more than just the IC50 variable. Use the IC() function to produce the respective Dose values. 
@@ -233,8 +234,5 @@ values
 
 You may then easily edit your plot further with basic ggplot2 additional controls.
 
-```{r}
-b + geom_vline(xintercept = values, color = c("red", "lightblue", "green", "orange", "purple"))
-```
 
 
