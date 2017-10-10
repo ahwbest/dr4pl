@@ -75,7 +75,7 @@ FindInitialParms <- function(x, y, decline, method.init, method.robust) {
     grid.theta.4 <- y.min + grid.theta.4
     
     # Matrix of initial parameter estimates
-    theta.mat <- matrix(NA, nrow = length(grid)^2, ncol = 4)
+    theta.mat <- matrix(NA, nrow = length(grid.theta.1)^2, ncol = 4)
     i.row <- 1
 
     for(theta.1.init in grid.theta.1) {
