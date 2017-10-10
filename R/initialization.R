@@ -12,7 +12,8 @@
 #' method to be used to fit a model. See \code{\link{dr4pl}} for detailed
 #' explanation.
 #'
-#' @return Initial parameter estimates of a 4PL model in the order of 
+#' @return Initial parameter estimates of a 4PL model in the order of
+#' 'Upper asymptote', 'IC50', 
 #' @export
 FindInitialParms <- function(x, y, decline, method.init, method.robust) {
 
@@ -58,9 +59,17 @@ FindInitialParms <- function(x, y, decline, method.init, method.robust) {
                             ReciprocalYMax = 1/(y.max - y),
                             ReciprocalYMin = 1/(y - y.min))
     data.Hill <- subset(data.Hill, subset = LogX != -Inf)
+    
     # Fit an extended Hill model
     lm.Hill <- lm(Response ~ LogX + ReciprocalYMax + ReciprocalYMin,
                   data = data.Hill)
+    
+    coef.Hill <- coef(lm.Hill)
+    theta.Hill <- coef.Hill
+    theta.Hill[2] <- exp(-coef.Hill[1]/coef.Hill[2])
+    names(theta.Hill) <- c("Upper asymptote", "IC50", "Slope", "Lower asymptote")
+    
+    lm.Hill.simple <- lm(Response ~ LogX, data = data.Hill)
     
     grid.size.theta.1 <- coef(summary(lm.Hill))[3, 2]
     grid.size.theta.4 <- coef(summary(lm.Hill))[4, 2]
@@ -75,7 +84,7 @@ FindInitialParms <- function(x, y, decline, method.init, method.robust) {
     grid.theta.4 <- y.min + grid.theta.4
     
     # Matrix of initial parameter estimates
-    theta.mat <- matrix(NA, nrow = length(grid)^2, ncol = 4)
+    theta.mat <- matrix(NA, nrow = length(grid.theta.1)^2, ncol = 4)
     i.row <- 1
 
     for(theta.1.init in grid.theta.1) {
