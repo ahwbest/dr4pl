@@ -45,7 +45,7 @@ error = function(err) {
   # error handler picks up where error was generated
   print(paste(err))
 })
-plot(a, text.title = "Error plot #1", indices.outlier = 102)
+plot(a, text.title = "Error plot #1", indices.outlier = c(102))
 ```
 
 ```{r}
@@ -106,7 +106,6 @@ error = function(err) {
   print(paste(err))
 })
 plot(a, indices.outlier = c(90, 101), text.title = "Error plot #3")
-summary(a)
 ```
 
 ```{r}
@@ -146,7 +145,6 @@ plot(a, text.title = "Sample plot #1")
 ```{r}
 a <- dr4pl(Response~Dose, data = sample_data_2,  method.init = "Mead")
 plot(a, text.title = "Sample plot #2")
-summary(a)
 ```
 
 ```{r}
