@@ -51,22 +51,36 @@ FindInitialParms <- function(x, y, decline, method.init, method.robust) {
   ### Logistic method
   if(method.init == "logistic") {
     
-    theta.1.4.grid.size <- 0.025*y.range  # This value is the size of the grid
+    # Data frame for an extended Hill model
+    data.Hill <- data.frame(Response = log((y - y.min)/(y.max - y)) + 
+                                       y.max/(y.max - y) + y.min/(y - y.min),
+                            LogX = log(x),
+                            ReciprocalYMax = 1/(y.max - y),
+                            ReciprocalYMin = 1/(y - y.min))
+    data.Hill <- subset(data.Hill, subset = LogX != -Inf)
+    # Fit an extended Hill model
+    lm.Hill <- lm(Response ~ LogX + ReciprocalYMax + ReciprocalYMin,
+                  data = data.Hill)
     
+    grid.size.theta.1 <- coef(summary(lm.Hill))[3, 2]
+    grid.size.theta.4 <- coef(summary(lm.Hill))[4, 2]
+      
     # Grid of values of upper and lower asymptotes
-    grid <- c(-2*theta.1.4.grid.size, -theta.1.4.grid.size, 0, theta.1.4.grid.size,
-              2*theta.1.4.grid.size)
+    grid.theta.1 <- c(-2*grid.size.theta.1, -grid.size.theta.1, 0,
+                      grid.size.theta.1, 2*grid.size.theta.1)
+    grid.theta.4 <- c(-2*grid.size.theta.4, -grid.size.theta.4, 0,
+                      grid.size.theta.4, 2*grid.size.theta.4)
     
-    theta.1.grid <- y.max + grid
-    theta.4.grid <- y.min + grid
+    grid.theta.1 <- y.max + grid.theta.1
+    grid.theta.4 <- y.min + grid.theta.4
     
     # Matrix of initial parameter estimates
     theta.mat <- matrix(NA, nrow = length(grid)^2, ncol = 4)
     i.row <- 1
 
-    for(theta.1.init in theta.1.grid) {
+    for(theta.1.init in grid.theta.1) {
       
-      for(theta.4.init in theta.4.grid) {
+      for(theta.4.init in grid.theta.4) {
         
         data.hill <- data.frame(x = x, y = y)
         data.hill <- subset(data.hill, subset = (data.hill$y<theta.1.init)&

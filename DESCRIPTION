@@ -10,15 +10,14 @@ License: GPL
 LazyData: TRUE
 URL: https://github.com/ahwbest/dr4pl
 BugReports: https://github.com/ahwbest/dr4pl/issues
+RdMacros: Rdpack
 RoxygenNote: 6.0.1
 Imports:
     ggplot2,
-    graphics,
     devtools,
     drc,
-    RColorBrewer,
+    Rdpack,
     testthat,
-    robustbase,
     tensor
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
