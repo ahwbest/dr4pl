@@ -1,5 +1,5 @@
 ---
-title: "CRAN Coments"
+title: "Untitled"
 author: "Justin L"
 date: "9/20/2017"
 output: html_document
@@ -13,7 +13,7 @@ output: html_document
 
 
 ## R CMD check results
-There were no Errors, Warnings, or Notes.
+There was no Erros, Warnings, or Notes.
     
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
