@@ -4,19 +4,26 @@
 \alias{FindInitialParms}
 \title{Find initial values for the 4PL model.}
 \usage{
-FindInitialParms(x, y, method.init, method.robust)
+FindInitialParms(x, y, decline, method.init, method.robust)
 }
 \arguments{
-\item{x}{Dose levels}
+\item{x}{Vector of dose levels}
 
-\item{y}{Responses}
+\item{y}{Vector of responses}
 
-\item{method.init}{Initialization method}
+\item{decline}{Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
+or growth curve \eqn{\theta[3]>0}. See \code{\link{dr4pl}} for detailed 
+explanation.}
 
-\item{method.robust}{Robust fitting method}
+\item{method.init}{Method of obtaining initial values of the parameters. See
+\code{\link{dr4pl}} for detailed explanation.}
+
+\item{method.robust}{Parameter to select loss function for the robust estimation 
+method to be used to fit a model. See \code{\link{dr4pl}} for detailed
+explanation.}
 }
 \value{
-theta.IC50.slope Parameter estimates of the IC50 and slope
+Initial parameter estimates of a 4PL model in the order of
 }
 \description{
 Find initial values for the 4PL model.
