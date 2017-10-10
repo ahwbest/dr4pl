@@ -20,3 +20,5 @@ Imports:
     testthat,
     robustbase,
     tensor
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr

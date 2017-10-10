@@ -15,3 +15,7 @@
 ^ignore_test\.Rmd$
 ^codes$
 ^NEWS\.md$
+^makefile$
+^packrat/
+^\.Rprofile$
+^\.travis\.yml$
