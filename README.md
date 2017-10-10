@@ -2,7 +2,7 @@
 build status:
 =============
 
-[![Build Status](http://travis-ci.org/ahwbest/dr4pl.svg?branch=master)](https://travis-ci.org/ahwbest/dr4pl)
+[![Build Status](http://travis-ci.org/aubreybailey/dr4pl.svg?branch=master)](https://travis-ci.org/ahwbest/dr4pl)
 
 license:
 ========
