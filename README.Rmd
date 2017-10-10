@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 #build status:
 
-[![Build Status](https://travis-ci.org/ahwbest/dr4pl.svg?branch=master)](https://travis-ci.org/aubreybailey/dr4pl)
+[![Build Status](https://travis-ci.org/aubreybailey/dr4pl.svg?branch=master)](https://travis-ci.org/aubreybailey/dr4pl)
 
 #license:
 
