@@ -24,7 +24,7 @@ explanation.}
 }
 \value{
 Initial parameter estimates of a 4PL model in the order of
-'Upper asymptote', 'IC50',
+'Upper asymptote', 'IC50', 'Slope' and 'Lower asymptote'.
 }
 \description{
 Find initial values for the 4PL model.
