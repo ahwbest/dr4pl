@@ -13,7 +13,8 @@
 #' explanation.
 #'
 #' @return Initial parameter estimates of a 4PL model in the order of
-#' 'Upper asymptote', 'IC50', 
+#' 'Upper asymptote', 'IC50', 'Slope' and 'Lower asymptote'.
+#' 
 #' @export
 FindInitialParms <- function(x, y, decline, method.init, method.robust) {
 
@@ -70,10 +71,15 @@ FindInitialParms <- function(x, y, decline, method.init, method.robust) {
     names(theta.Hill) <- c("Upper asymptote", "IC50", "Slope", "Lower asymptote")
     
     lm.Hill.simple <- lm(Response ~ LogX, data = data.Hill)
+    coef.Hill.simple <- coef(lm.Hill.simple)
+    theta.Hill.simple <- c(y.max, exp(-coef.Hill.simple[1]/coef.Hill.simple[2]),
+                           coef.Hill.simple[2], y.min)
+    
+    
     
     grid.size.theta.1 <- coef(summary(lm.Hill))[3, 2]
     grid.size.theta.4 <- coef(summary(lm.Hill))[4, 2]
-      
+    
     # Grid of values of upper and lower asymptotes
     grid.theta.1 <- c(-2*grid.size.theta.1, -grid.size.theta.1, 0,
                       grid.size.theta.1, 2*grid.size.theta.1)
