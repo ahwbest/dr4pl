@@ -1,10 +1,16 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.width = 7)
 
 ## ------------------------------------------------------------------------
 library(dr4pl)
 library(ggplot2)
 library(drc)
+
+## ------------------------------------------------------------------------
+ggplot(drc_error_1, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_1")
 
 ## ------------------------------------------------------------------------
 a <- tryCatch({
@@ -32,6 +38,12 @@ error = function(err) {
   print(paste(err))
 })
 plot(a, text.title = "Error plot #1", indices.outlier = c(102))
+
+## ------------------------------------------------------------------------
+ggplot(drc_error_2, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_2")
 
 ## ------------------------------------------------------------------------
 a <- tryCatch({
@@ -62,6 +74,12 @@ b <- plot(a, breaks.x = c(0.00135, 0.0135, 0.135, 1.35, 13.5), text.title = "Err
 b
 
 ## ------------------------------------------------------------------------
+ggplot(drc_error_3, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_3")
+
+## ------------------------------------------------------------------------
 a <- tryCatch({
   drc::drm(Response~Dose, data = drc_error_3, fct = LL.4())
 }, 
@@ -90,6 +108,12 @@ error = function(err) {
 plot(a, indices.outlier = c(90, 101), text.title = "Error plot #3")
 
 ## ------------------------------------------------------------------------
+ggplot(drc_error_4, aes(x = Dose, y = Response)) +
+  geom_point() +
+  scale_x_log10() +
+  ggtitle("drc_error_4")
+
+## ------------------------------------------------------------------------
 a <- tryCatch({
   drc::drm(Response~Dose, data = drc_error_4, fct = LL.4())
 }, 
@@ -107,54 +131,31 @@ a<-dr4pl(Response~Dose, data = drc_error_4)
 plot(a$robust.plot)
 
 ## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_1,  method.init = "Mead")
-plot(a, text.title = "Sample plot #1")
-
-## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_2,  method.init = "Mead")
-plot(a, text.title = "Sample plot #2")
-
-## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_3, method.init = "Mead")
-plot(a, text.title = "Sample plot #3")
-
-## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_4, method.init = "Mead")
-plot(a, text.title = "Sample plot #4")
-
-## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_5, method.init = "Mead")
-plot(a, text.title = "Sample plot #5")
+a <- dr4pl(Response~Dose, data = sample_data_6)
+plot(a, text.title = "Default Sample data #6")
 
 ## ------------------------------------------------------------------------
 a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "Mead")
-plot(a, text.title = "Sample plot #6")
+plot(a, text.title = "Mead's Method")
 
 ## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_7, method.init = "Mead")
-plot(a, text.title = "Sample plot #7")
+a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "Mead", method.robust = "absolute")
+plot(a, text.title = "Mead's method & absolute")
 
 ## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_8, method.init = "Mead")
-plot(a, text.title = "Sample plot #8")
+a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "Mead", method.robust = "Tukey")
+plot(a, text.title = "Mead's method & Tukey's biweight")
 
 ## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_9, method.init = "Mead")
-plot(a, text.title = "Sample plot #9")
+a <- dr4pl(Response~Dose, data = sample_data_3, method.init = "Mead")
+b <- plot(a, text.title = "Sample data #3")
+b
 
 ## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_10, method.init = "Mead")
-plot(a, text.title = "Sample plot #10")
+b <- summary(a)
+b$coefficients
 
 ## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_11, method.init = "Mead")
-plot(a, text.title = "Sample plot #11")
-
-## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_12, method.init = "Mead")
-plot(a, text.title = "Sample plot #12")
-
-## ------------------------------------------------------------------------
-a <- dr4pl(Response~Dose, data = sample_data_13)
-plot(a, text.title = "Sample plot #13")
+values <- IC(a, c(10, 30, 50, 70, 90))
+values
 
