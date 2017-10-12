@@ -56,8 +56,6 @@ library(drc)
 #>     gaussian, getInitial
 a <- drc::drm(drc_error_1$Response~drc_error_1$Dose, fct = LL.4())
 #> Error in drmOpt(opfct, opdfct1, startVecSc, optMethod, constrained, warnVal, : Convergence failed
-summary(a)
-#> Error in summary(a): object 'a' not found
 plot(a)
 #> Error in plot(a): object 'a' not found
 ```
@@ -66,6 +64,15 @@ plot(a)
 ## basic example code
 ## example requires the dr4pl package to be loaded
 b <- dr4pl(drc_error_1$Response~drc_error_1$Dose, method.robust = "Tukey") #Tukey's Biweight loss function estimates best for this particular data set
+plot(b)
+#> Warning: Transformation introduced infinite values in continuous x-axis
+
+#> Warning: Transformation introduced infinite values in continuous x-axis
+```
+
+![](README-example_solution-1.png)
+
+``` r
 summary(b)
 #> $call
 #> dr4pl.formula(formula = drc_error_1$Response ~ drc_error_1$Dose, 
@@ -80,10 +87,4 @@ summary(b)
 #> 
 #> attr(,"class")
 #> [1] "summary.dr4pl"
-plot(b)
-#> Warning: Transformation introduced infinite values in continuous x-axis
-
-#> Warning: Transformation introduced infinite values in continuous x-axis
 ```
-
-![](README-example_solution-1.png)
