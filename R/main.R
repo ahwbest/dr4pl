@@ -145,7 +145,6 @@ dr4pl.default <- function(dose,
                           method.robust = NULL,
                           ...) {
 
- 
   types.trend <- c("auto", "decreasing", "increasing")
   types.method.init <- c("logistic", "Mead")
   types.method.optim <- c("Nelder-Mead", "BFGS", "CG", "SANN")
@@ -295,7 +294,7 @@ dr4plEst <- function(dose, response,
   n <- length(x)  # Number of observations
   
   # Choose the loss function depending on the robust estimation method
-  err.fcn <- ErrFcn(method.robust)
+  loss.fcn <- ErrFcn(method.robust)
   # Currently only the gradient function for the squared loss is implemented
   grad <- GradientSquaredLossLogIC50
   
@@ -309,52 +308,43 @@ dr4plEst <- function(dose, response,
     }
     
     # Use given initial parameter estimates
-    theta.re.init <- init.parm
-    theta.re.init[2] <- log10(init.parm[2])
+    retheta.init <- init.parm
+    retheta.init[2] <- log10(init.parm[2])
     
-    names(theta.re.init) <- c("Upper limit", "Log10(IC50)", "Slope", "Lower limit")
-    
+    names(retheta.init) <- c("Upper limit", "Log10(IC50)", "Slope", "Lower limit")
+
+    constr.mat <- matrix(c(1, 0, 0, -1), nrow = 1, ncol = 4)
+    constr.vec <- 0
+        
     # Impose a constraint on the slope parameter based on the function argument
     # "trend".
     if(trend == "decreasing") {
       
-      constr.mat <- matrix(c(0, 0, -1, 0), nrow = 1, ncol = 4)
-      constr.vec <- 0
+      constr.mat <- rbind(constr.mat, matrix(c(0, 0, -1, 0), nrow = 1, ncol = 4))
+      constr.vec <- c(constr.vec, 0)
     } else if(trend == "increasing") {
       
-      constr.mat <- matrix(c(0, 0, 1, 0), nrow = 1, ncol = 4)
-      constr.vec <- 0
+      constr.mat <- rbind(constr.mat, matrix(c(0, 0, 1, 0), nrow = 1, ncol = 4))
+      constr.vec <- c(constr.vec, 0)
     }
     
     # Fit a 4PL model to data
-    if(trend == "auto") {
-      
-      optim.dr4pl <- optim(par = theta.re.init,
-                           fn = err.fcn,
-                           gr = GradientSquaredLossLogIC50,
-                           method = method.optim,
-                           hessian = TRUE,
-                           x = x,
-                           y = y)
-    } else {
-      
-      optim.dr4pl <- constrOptim(theta = theta.re.init,
-                                 f = err.fcn,
-                                 grad = GradientSquaredLossLogIC50,
-                                 ui = constr.mat,
-                                 ci = constr.vec,
-                                 method = method.optim,
-                                 hessian = TRUE,
-                                 x = x,
-                                 y = y)
-    }
-    
+    optim.dr4pl <- constrOptim(theta = retheta.init,
+                               f = loss.fcn,
+                               grad = grad,
+                               ui = constr.mat,
+                               ci = constr.vec,
+                               method = method.optim,
+                               hessian = TRUE,
+                               x = x,
+                               y = y)
+
     loss <- optim.dr4pl$value
     hessian <- optim.dr4pl$hessian
-    theta.re <- optim.dr4pl$par
+    retheta <- optim.dr4pl$par
     
-    theta <- theta.re
-    theta[2] <- 10^theta.re[2]
+    theta <- retheta
+    theta[2] <- 10^retheta[2]
     
   ### When initial parameter values are not given.
   } else {
@@ -362,19 +352,20 @@ dr4plEst <- function(dose, response,
     ## Obtain initial parameter estimates.
     theta.init <- FindInitialParms(x, y, trend, method.init, method.robust)
 
-    theta.re.init <- theta.init  # Reparameterized parameters
-    theta.re.init[2] <- log10(theta.init[2])
-    names(theta.re.init)[2] <- paste("Log(", names(theta.init)[2], ")", sep = "")
+    retheta.init <- theta.init  # Reparameterized parameters
+    retheta.init[2] <- log10(theta.init[2])
+    names(retheta.init)[2] <- paste("Log(", names(theta.init)[2], ")", sep = "")
     
-    Hill.bounds <- FindHillBounds(x, y, theta.re.init)
+    Hill.bounds <- FindHillBounds(x, y, retheta.init)
     
-    constr.mat <- matrix(rbind(c(0, 1, 0, 0),
+    constr.mat <- matrix(rbind(c(1, 0, 0, -1),
+                               c(0, 1, 0, 0),
                                c(0, -1, 0, 0),
                                c(0, 0, 1, 0),
                                c(0, 0, -1, 0)),
-                         nrow = 4,
+                         nrow = 5,
                          ncol = 4)
-    constr.vec <- c(Hill.bounds$LogTheta2[1], -Hill.bounds$LogTheta2[2],
+    constr.vec <- c(0, Hill.bounds$LogTheta2[1], -Hill.bounds$LogTheta2[2],
                     Hill.bounds$Theta3[1], -Hill.bounds$Theta3[2])
 
     # Impose a constraint on the slope parameter based on the function argument
@@ -389,15 +380,15 @@ dr4plEst <- function(dose, response,
       constr.vec <- c(constr.vec, 0)
     }
 
-    if(any(constr.mat%*%theta.re.init<constr.vec)) {
+    if(any(constr.mat%*%retheta.init<constr.vec)) {
       
       stop("Initial parameter values are not in the interior of the feasible region.")
     }
 
     # Fit the 4PL model
     tuning.barrier <- 1e-04
-    optim.dr4pl <- constrOptim(theta = theta.re.init,
-                               f = err.fcn,
+    optim.dr4pl <- constrOptim(theta = retheta.init,
+                               f = loss.fcn,
                                grad = grad,
                                ui = constr.mat,
                                ci = constr.vec,
@@ -409,13 +400,13 @@ dr4plEst <- function(dose, response,
     
     loss <- optim.dr4pl$value
     hessian <- optim.dr4pl$hessian
-    theta.re <- optim.dr4pl$par
+    retheta <- optim.dr4pl$par
     
-    theta <- LogToParm(theta.re)
+    theta <- LogToParm(retheta)
   }
   
   ### If boundaries are hit
-  if(any(abs(constr.mat%*%theta.re - constr.vec)<tuning.barrier)) {
+  if(any(abs(constr.mat%*%retheta - constr.vec)<tuning.barrier)) {
     
     convergence <- FALSE
   } 
