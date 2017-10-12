@@ -94,7 +94,7 @@ Lets see what we can plot with dr4pl.
 
 ```{r}
 a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_2, method.init = "Mead", method.robust = "Huber" )
+  dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.init = "Mead", method.robust = "absolute")
 },
 warning = function(war) {
     # warning handler picks up where error was generated
@@ -223,7 +223,7 @@ a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "Mead", method.rob
 plot(a, text.title = "Mead's method & Tukey's biweight")
 ```
 
-Both "absolute" and "Tukey" are less weighted by the largest dosage level which produces a response of zero. However you may notice that Tukey's biweight is far less weighted than the absolute loss function.
+Using "absolute" does not seem to change our plot while using "Tukey" generates a fit that is less weighted by the largest dosage level which produces an outlier response of zero.
 
 Lets look at other uses for this code.
 ```{r}
@@ -247,5 +247,31 @@ values
 
 You may then easily edit your plot further with basic ggplot2 additional controls.
 
+You may use dr4pl on increasing and decreasing curves. Lets see how dr4pl handles the drc data set **chekcweed0**. 
+```{r chickweed0}
+a <- dr4pl(count~time, data = chickweed0)
+plot(a, text.x = "Time", text.y = "Count", text.title = "drc chickweed0 plot", breaks.x = c(25, 100, 175, 250))
+```
 
+You may also force either an increasing or decreasing fit with the parameter *trend*. *trend* is best used when the data set is rather ambigious to whether the fit should increase or decrease. dr4pl's default parameter automizes this and will attempt the best based on the optimization. Let us see how this example plays out with the dr4pl data set drc_error_2.
+
+```{r}
+a <- dr4pl(Response~Dose, data = drc_error_2)
+plot(a, text.title = "Trend is default")
+```
+
+The parameter *trend* helps force the fit to either "increasing" or "decreasing" in the event that you are confident that your response follows that trend. 
+We may choose to force a decreasing curve, with other apporpriate parameters.
+
+```{r}
+a <- dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.init = "Mead", method.robust = "absolute")
+plot(a, text.title = "Trend forced to decrease")
+```
+
+We may also choose to force an increasing curve.
+
+```{r}
+a <- dr4pl(Response~Dose, data = drc_error_2, trend = "increasing")
+plot(a, text.title = "Trend forced to increase")
+```
 
