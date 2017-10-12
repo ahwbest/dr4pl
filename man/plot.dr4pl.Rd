@@ -74,3 +74,6 @@ plot(e,
      text.y = "Count")
 
 }
+\author{
+Hyowon An and Justin T. Landis
+}

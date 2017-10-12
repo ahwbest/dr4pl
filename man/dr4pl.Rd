@@ -11,10 +11,10 @@
 dr4pl(...)
 
 \method{dr4pl}{formula}(formula, data = list(), init.parm = NULL,
-  decline = "auto", method.init = "logistic",
-  method.optim = "Nelder-Mead", method.robust = NULL, ...)
+  trend = "auto", method.init = "logistic", method.optim = "Nelder-Mead",
+  method.robust = NULL, ...)
 
-\method{dr4pl}{default}(dose, response, init.parm = NULL, decline = "auto",
+\method{dr4pl}{default}(dose, response, init.parm = NULL, trend = "auto",
   method.init = "logistic", method.optim = "Nelder-Mead",
   method.robust = NULL, ...)
 }
@@ -29,12 +29,12 @@ column and dose values in second column.}
 
 \item{init.parm}{Vector of initial parameters to be optimized in the model.}
 
-\item{decline}{Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
-that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
-option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
-option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
-process.}
+\item{trend}{Indicator of whether a dose-response curve is a decreasing 
+\eqn{\theta[3]<0} or increasing curve \eqn{\theta[3]>0}. The default is "auto" 
+which indicates that the trend of the curve is automatically determined by
+data. The option "decreasing" will impose a restriction \eqn{\theta[3]<=0} 
+while the option "increasing" will impose a restriction \eqn{\theta[3]>=0} in an 
+optimization process.}
 
 \item{method.init}{Method of obtaining initial values of the parameters.
 If it is NULL, a default "logistic" regression method will be used. Assign

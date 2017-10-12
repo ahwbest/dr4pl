@@ -23,9 +23,7 @@ Perform the goodness-of-fit (gof) test for the 4PL model in which the
   Chi squared distributions with the (n - 4) degrees of freedom where n is the
   number of observations and 4 is the number of parameters in the 4PL model. For
   detailed explanation of the method, please refer to Subsection 2.1.5 of
-  Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-  Probability and Mathematical Statistics: Probability and Mathematical
-  Statistics. John Wiley & Sons, Inc., New York.
+  Seber and Wild (1989).
 }
 \references{
 \insertRef{Seber1989}{dr4pl}

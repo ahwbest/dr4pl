@@ -18,15 +18,16 @@
 #' @details This function computes the confidence intervals of the parameters of the
 #'   4PL model based on the second order approximation to the Hessian matrix of the
 #'   loss function of the model. Please refer to Subsection 5.2.2 of 
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
+#'   Seber and Wild (1989).
 #'   
 #' @examples
 #'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
 #'   parm <- obj.dr4pl$parameters
 #'
 #'   confint(obj.dr4pl, parm = parm, level = 0.95)
+#' 
+#' @references
+#' \insertRef{Seber1989}{dr4pl}
 #' 
 #' @export
 confint.dr4pl <- function(object, parm, level, ...) {
@@ -82,9 +83,7 @@ coef.dr4pl <- function(object, ...) {
 #'   Chi squared distributions with the (n - 4) degrees of freedom where n is the
 #'   number of observations and 4 is the number of parameters in the 4PL model. For
 #'   detailed explanation of the method, please refer to Subsection 2.1.5 of
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
+#'   Seber and Wild (1989).
 #'
 #' @references
 #' \insertRef{Seber1989}{dr4pl}
@@ -242,6 +241,8 @@ IC <- function(object, inhib.percent) {
 #'      text.title = "hpc Decontaminants Plot", 
 #'      text.x = "Concentration", 
 #'      text.y = "Count")
+#' 
+#' @author Hyowon An and Justin T. Landis
 #' 
 #' @export
 plot.dr4pl <- function(x,
