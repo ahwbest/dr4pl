@@ -29,8 +29,8 @@ test_that("Error messages are correctly drawn", {
                "The initialization method name should be one of \"logistic\" and \"Mead\".")
   expect_error(dr4pl(y ~ x,
                      data = data.test,
-                     decline = "abc"),
-               "The type of the \"decline\" parameter should be one of \"auto\", \"decline\" and \"growth\".")
+                     trend = "abc"),
+               "The type of the \"trend\" parameter should be one of \"auto\", \"decreasing\" and \"increasing\".")
   data.test$x[1] <- -1
   expect_error(dr4pl(y ~ x,
                      data = data.test),

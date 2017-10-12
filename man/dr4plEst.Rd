@@ -4,7 +4,7 @@
 \alias{dr4plEst}
 \title{Private function to fit the 4PL model to dose-response data}
 \usage{
-dr4plEst(dose, response, init.parm, decline, method.init, method.optim,
+dr4plEst(dose, response, init.parm, trend, method.init, method.optim,
   method.robust)
 }
 \arguments{
@@ -15,12 +15,12 @@ dr4plEst(dose, response, init.parm, decline, method.init, method.optim,
 \item{init.parm}{Vector of initial parameters of the 4PL model supplied by a
 user.}
 
-\item{decline}{Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
-that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
-option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
-option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
-process.}
+\item{trend}{Indicator of whether a dose-response curve is a decreasing 
+\eqn{\theta[3]<0} or increasing curve \eqn{\theta[3]>0}. The default is "auto" 
+which indicates that the trend of the curve is automatically determined by
+data. The option "decreasing" will impose a restriction \eqn{\theta[3]<=0} 
+while the option "increasing" will impose a restriction \eqn{\theta[3]>=0} in an 
+optimization process.}
 
 \item{method.init}{Method of obtaining initial values of the parameters.
 Should be one of "logistic" for the logistic method or "Mead" for the Mead

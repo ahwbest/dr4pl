@@ -1,4 +1,35 @@
 
+#' Transform parameters of a 4PL model (theta) into re-parameterized parameters
+#' (theta.re)
+#' 
+#' @param theta Parameters of a 4PL model in the dose scale
+#' 
+#' @return Reparameterized parameters of a 4PL model among which the EC50 parameter
+#' is in the log 10 dose scale
+ParmToLog <- function(theta) {
+
+  # Check whether function arguments are 
+    
+  theta.re <- c(theta[1], log10(theta[2]), theta[3], theta[4])
+  
+  return(theta.re)
+}
+
+#' Transform reparameterized parameters (theta.re) back into original parameters 
+#' (theta)
+#' 
+#' @param theta.re Parameters of a 4PL model among which the EC50 parameter is
+#' in the log 10 dose scale
+#' 
+#' @return Parameters of a 4PL model among which the EC50 parameter is in the
+#' dose scale
+LogToParm <- function(theta.re) {
+  
+  theta <- c(theta.re[1], 10^(theta.re[2]), theta.re[3], theta.re[4])
+  
+  return(theta)
+}
+
 #' Compute an estimated mean response
 #'
 #' @param x Dose levels
@@ -245,7 +276,6 @@ DerivativeFLogIC50 <- function(theta.re, x) {
 #' @param y Response
 #'
 #' @return Gradient values of the sum-of-squares loss function.
-
 GradientSquaredLossLogIC50 <- function(theta.re, x, y) {
 
   f <- MeanResponseLogIC50(x, theta.re)  # Mean response values
@@ -319,14 +349,26 @@ Hessian <- function(theta, x, y) {
 
 #' Compute residuals.
 #' 
-#' @param x Doses
-#' @param y Responses
-#' @param theta Parameters
+#' @param theta Parameters of a 4PL model
+#' @param x Vector of doses
+#' @param y Vector of responses
 #' 
-#' @return Residuals
+#' @return Vector of residuals
 Residual <- function(theta, x, y) {
-
-  f <- theta[1] + (theta[4] - theta[1])/(1 + (x/theta[2])^theta[3])
   
-  return(y - f)
+  return(y - MeanResponse(x, theta))
+}
+
+#' Compute residuals with a reparameterized model.
+#' 
+#' @param theta.re Parameters of a 4pl model among which the IC50 parameter is
+#' transformed into a log 10 scale.
+#' @param x Vector of doses
+#' @param y Vector of responses
+#' 
+#' @return Vector of residuals
+ResidualLogIC50 <- function(theta.re, x, y) {
+  
+  
+  return(y - MeanResponseLogIC50(x, theta.re))
 }

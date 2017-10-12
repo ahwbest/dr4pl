@@ -103,18 +103,8 @@ error = function(err) {
 })
 
 ## ------------------------------------------------------------------------
-a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_4, method.init = "Mead", method.robust = "absolute" )
-},
-warning = function(war) {
-    # warning handler picks up where error was generated
-    print(paste(war))
-},
-error = function(err) {
-  # error handler picks up where error was generated
-  print(paste(err))
-})
-plot(a, text.title = "Error plot #4", indices.outlier = c(1,100))
+a<-dr4pl(Response~Dose, data = drc_error_4)
+plot(a$robust.plot)
 
 ## ------------------------------------------------------------------------
 a <- dr4pl(Response~Dose, data = sample_data_1,  method.init = "Mead")
