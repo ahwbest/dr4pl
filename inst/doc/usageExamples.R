@@ -60,7 +60,7 @@ error = function(err) {
 
 ## ------------------------------------------------------------------------
 a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_2, method.init = "Mead", method.robust = "Huber" )
+  dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.init = "Mead", method.robust = "absolute")
 },
 warning = function(war) {
     # warning handler picks up where error was generated
@@ -127,8 +127,18 @@ error = function(err) {
 })
 
 ## ------------------------------------------------------------------------
-a<-dr4pl(Response~Dose, data = drc_error_4)
-plot(a$robust.plot)
+a <-tryCatch({
+  dr4pl(Response~Dose, data = drc_error_4, method.init = "Mead", method.robust = "absolute" )
+},
+warning = function(war) {
+    # warning handler picks up where error was generated
+    print(paste(war))
+},
+error = function(err) {
+  # error handler picks up where error was generated
+  print(paste(err))
+})
+plot(a, text.title = "Error plot #4", indices.outlier = c(1,100))
 
 ## ------------------------------------------------------------------------
 a <- dr4pl(Response~Dose, data = sample_data_6)
@@ -158,4 +168,20 @@ b$coefficients
 ## ------------------------------------------------------------------------
 values <- IC(a, c(10, 30, 50, 70, 90))
 values
+
+## ----chickweed0----------------------------------------------------------
+a <- dr4pl(count~time, data = chickweed0)
+plot(a, text.x = "Time", text.y = "Count", text.title = "drc chickweed0 plot", breaks.x = c(25, 100, 175, 250))
+
+## ------------------------------------------------------------------------
+a <- dr4pl(Response~Dose, data = drc_error_2)
+plot(a, text.title = "Trend is default")
+
+## ------------------------------------------------------------------------
+a <- dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.init = "Mead", method.robust = "absolute")
+plot(a, text.title = "Trend forced to decrease")
+
+## ------------------------------------------------------------------------
+a <- dr4pl(Response~Dose, data = drc_error_2, trend = "increasing")
+plot(a, text.title = "Trend forced to increase")
 
