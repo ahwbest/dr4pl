@@ -52,14 +52,15 @@ This is a basic example which shows you how to solve a common problem. This exam
 library(dr4pl)
 library(drc)
 a <- drc::drm(drc_error_1$Response~drc_error_1$Dose, fct = LL.4())
-summary(a)
 plot(a)
 ```
+
 ```{r example_solution}
 ## basic example code
 ## example requires the dr4pl package to be loaded
 b <- dr4pl(drc_error_1$Response~drc_error_1$Dose, method.robust = "Tukey") #Tukey's Biweight loss function estimates best for this particular data set
-summary(b)
 plot(b)
 ```
-
+```{r}
+summary(b)
+```
