@@ -62,7 +62,7 @@ error = function(err) {
   # error handler picks up where error was generated
   print(paste(err))
 })
-plot(a, text.title = "Error plot #1")
+b <- plot(a, text.title = "Error plot #1")
 ```
 
 Lets next consider the next data set, **drc_error_2**.
@@ -107,6 +107,7 @@ error = function(err) {
 b <- plot(a, breaks.x = c(0.00135, 0.0135, 0.135, 1.35, 13.5), text.title = "Error plot #2")
 b
 ```
+
 
 Lets next consider the next data set, **drc_error_3**.
 
@@ -201,7 +202,7 @@ dr4pl provides several methods and loss functions for the user to obtain the bes
 
 Consider you want to plot the dr4pl data set **sample_data_6**. Lets try and apply the default parameters.
 ```{r}
-a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "logistic")
+a <- dr4pl(Response~Dose, data = sample_data_6)
 plot(a, text.title = "Default Sample data #6")
 ```
 

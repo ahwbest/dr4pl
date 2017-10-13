@@ -3,10 +3,13 @@
 #' 
 #' @docType package
 #' 
-#' @import graphics
-#' @import ggplot2
+#' 
+#' @import graphics 
 #' @import stats
+#' @import ggplot2
 #' @import tensor
+
+
 
 #' @title Fitting 4 Parameter Logistic (4PL) models to dose-response data.
 #' 
