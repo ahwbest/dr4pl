@@ -52,7 +52,7 @@ Instead of removing the extreme outlier, you may try to use dr4pl instead.
 
 ```{r}
 a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_1, method.robust = "Tukey")
+  dr4pl(Response~Dose, data = drc_error_1, method.init = "Mead")
 },
 warning = function(war) {
     # warning handler picks up where error was generated
@@ -62,7 +62,7 @@ error = function(err) {
   # error handler picks up where error was generated
   print(paste(err))
 })
-b <- plot(a, text.title = "Error plot #1")
+plot(a, text.title = "Error plot #1")
 ```
 
 Lets next consider the next data set, **drc_error_2**.
@@ -94,7 +94,7 @@ Lets see what we can plot with dr4pl.
 
 ```{r}
 a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.init = "Mead", method.robust = "absolute")
+  dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.optim = "CG")
 },
 warning = function(war) {
     # warning handler picks up where error was generated
@@ -139,7 +139,7 @@ Now lets use dr4pl.
 
 ```{r}
 a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_3, method.init = "Mead", method.robust = "absolute" )
+  dr4pl(Response~Dose, data = drc_error_3, method.init = "logistic", method.robust = "absolute")
 },
 warning = function(war) {
     # warning handler picks up where error was generated
@@ -181,7 +181,7 @@ Now lets use dr4pl.
 
 ```{r}
 a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_4, method.init = "Mead")
+  dr4pl(Response~Dose, data = drc_error_4, method.init = "logistic")
 },
 warning = function(war) {
     # warning handler picks up where error was generated
@@ -200,31 +200,31 @@ The package drc draws errors with each one of these cases. However dr4pl is able
 
 dr4pl provides several methods and loss functions for the user to obtain the best fit possible. Lets explore some of the possibities.
 
-Consider you want to plot the dr4pl data set **sample_data_6**. Lets try and apply the default parameters.
+Consider you want to plot the dr4pl data set **sample_data_5**. Lets try and apply the default parameters.
 ```{r}
-a <- dr4pl(Response~Dose, data = sample_data_6)
-plot(a, text.title = "Default Sample data #6")
+a <- dr4pl(Response~Dose, data = sample_data_5)
+plot(a, text.title = "Default Sample data #5")
 ```
 
-After producing a plot with the default parameters, you may be confident in producing a better fit with other parameters. This is where the arguments *method.init* and *method.robust* come into play, which you may have noticed that these arguments where used in the error case examples. The default paramter to *method.init* is "Logistic". This uses the logistic method when approximating the theta parameters. The alternative to using the Logistic method is "Mead", which uses a non-logistic method to approximate the theta parameters. Lets see how our plot will change when we use Mead's method.
+After producing a plot with the default parameters, you may be confident in producing a better fit with other parameters. This is where the arguments *method.init* and *method.robust* come into play, which you may have noticed that these arguments where used in the error case examples. The default paramter to *method.init* is "Mead". This uses the Mead's method when approximating the theta parameters. The alternative to using Mead's method is "logistic", which uses a logistic method to approximate the theta parameters. Lets see how our plot will change when we use the logistic method.
 
 ```{r}
-a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "Mead")
-plot(a, text.title = "Mead's Method")
+a <- dr4pl(Response~Dose, data = sample_data_5, method.init = "logistic")
+plot(a, text.title = "Logistic Method")
 ```
 
 Mead's method seems to generate tighter fit with this data set. Now lets talk about *method.robust*. *method.robust* allows the user to choose the loss function used during optimization. The default loss function used is the squared loss function. The user has three other loss functions to select from: "absolute", "Huber", and "Tukey". Lets see how this plot will change when using "absolute" versus "Tukey".
 
 ```{r}
-a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "Mead", method.robust = "absolute")
-plot(a, text.title = "Mead's method & absolute")
+a <- dr4pl(Response~Dose, data = sample_data_5, method.robust = "absolute")
+plot(a, text.title = "Absolute loss function")
 ```
 ```{r}
-a <- dr4pl(Response~Dose, data = sample_data_6, method.init = "Mead", method.robust = "Tukey")
+a <- dr4pl(Response~Dose, data = sample_data_5, method.init = "Mead", method.robust = "Tukey")
 plot(a, text.title = "Mead's method & Tukey's biweight")
 ```
 
-Both "absolute" and "Tukey" generates a fit that is less weighted by the largest dosage level which produces an outlier response of zero.
+When selecting "Tukey" for the argument *method.robust*, the generated fit is less weighted by the largest dosage level which is an outlier response of zero. When selecting "absolute" for the argument *method.robust*, the generated fit is more weignted by the largest dosage level. It may take several attempts to find the best parameters for each data set. 
 
 Lets look at other uses for this code. Consider the following data set **sample_data_3**.
 
@@ -253,7 +253,7 @@ You may then easily edit your plot further with basic ggplot2 additional control
 You may use dr4pl on increasing and decreasing curves. Lets see how dr4pl handles the drc data set **chekcweed0**. 
 
 ```{r chickweed0}
-a <- dr4pl(count~time, data = chickweed0)
+a <- dr4pl(count~time, data = chickweed0, trend = "increasing")
 plot(a, text.x = "Time", text.y = "Count", text.title = "drc chickweed0 plot", breaks.x = c(25, 100, 175, 250))
 ```
 
@@ -268,14 +268,14 @@ If you were to use the summary function, you would see that dr4pl has deemed thi
 We may choose to force a decreasing curve, with other apporpriate parameters.
 
 ```{r}
-a <- dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.init = "Mead", method.robust = "absolute")
+a <- dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.optim = "CG")
 plot(a, text.title = "Trend forced to decrease")
 ```
 
 We may also choose to force an increasing curve.
 
 ```{r}
-a <- dr4pl(Response~Dose, data = drc_error_2, trend = "increasing")
+a <- dr4pl(Response~Dose, data = drc_error_2, trend = "increasing", method.robust = "Tukey", method.optim = "SANN")
 plot(a, text.title = "Trend forced to increase")
 ```
 

@@ -1,4 +1,11 @@
 
+<<<<<<< HEAD
+=======
+
+#' @import Rdpack
+NULL
+
+>>>>>>> 092f5fc00e98726902f0a3a96d0439cf36f5e9cb
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
 #' 
 #' @description Compute the confidence intervals of parameter estimates of a fitted
