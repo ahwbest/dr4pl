@@ -4,14 +4,14 @@
 \alias{FindHillBounds}
 \title{Compute the Hill bounds based on initial parameter estimates and data.}
 \usage{
-FindHillBounds(x, y, theta.re.init, level = 0.99)
+FindHillBounds(x, y, retheta.init, level = 0.9999)
 }
 \arguments{
 \item{x}{Vector of doses.}
 
 \item{y}{Vector of responses.}
 
-\item{theta.re.init}{Parameters of a 4PL model among which the EC50 parameter is
+\item{retheta.init}{Parameters of a 4PL model among which the EC50 parameter is
 in the log 10 dose scale.}
 
 \item{level}{Confidence level to be used in computing the Hill bounds}
@@ -26,12 +26,13 @@ Compute the Hill bounds based on initial parameter estimates and data.
 \details{
 This function computes the Hill bounds based on initial parameter
 estimates and data. It basically computes the confidence intervals of the
-true parameters based on the variance-covariance matrix of the given initial
-parameter estimates. If matrix inversion of the variance-covariance matrix
+true parameters based on the variance-covariance matrix of a given initial
+parameter estimates. The half of a hessian matrix is used as a
+variance-covariance matrix. If matrix inversion of the variance-covariance matrix
 is infeasible, a variation of the method in Wang et al. (2010) is used.
 }
 \references{
-\insertRef{Wang2010}{dr4pl}
+\insertRef{Higham2002}{dr4pl} \insertRef{Wang2010}{dr4pl}
 }
 \seealso{
 \code{FindInitialParms}

@@ -3,18 +3,18 @@
 \name{ParmToLog}
 \alias{ParmToLog}
 \title{Transform parameters of a 4PL model (theta) into re-parameterized parameters
-(theta.re)}
+(retheta).}
 \usage{
 ParmToLog(theta)
 }
 \arguments{
-\item{theta}{Parameters of a 4PL model in the dose scale}
+\item{theta}{Parameters of a 4PL model in the dose scale.}
 }
 \value{
 Reparameterized parameters of a 4PL model among which the EC50 parameter
-is in the log 10 dose scale
+is in the log 10 dose scale.
 }
 \description{
 Transform parameters of a 4PL model (theta) into re-parameterized parameters
-(theta.re)
+(retheta).
 }

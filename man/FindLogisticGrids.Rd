@@ -5,14 +5,14 @@
 \title{Compute the grids on the upper and lower asymptote parameters for the logistic
 method based on initial parameter estimates and data.}
 \usage{
-FindLogisticGrids(x, y, theta.re.init)
+FindLogisticGrids(x, y, retheta.init)
 }
 \arguments{
 \item{x}{Vector of doses.}
 
 \item{y}{Vector of responses.}
 
-\item{theta.re.init}{Parameters of a 4PL model among which the EC50 parameter is
+\item{retheta.init}{Parameters of a 4PL model among which the EC50 parameter is
 in the log 10 dose scale.}
 }
 \value{

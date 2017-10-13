@@ -4,10 +4,10 @@
 \alias{GradientSquaredLossLogIC50}
 \title{Compute gradient values of the sum-of-squares loss function.}
 \usage{
-GradientSquaredLossLogIC50(theta.re, x, y)
+GradientSquaredLossLogIC50(retheta, x, y)
 }
 \arguments{
-\item{theta.re}{Parameters among which the IC50 parameter is logarithmically
+\item{retheta}{Parameters among which the IC50 parameter is logarithmically
 transformed}
 
 \item{x}{Dose}

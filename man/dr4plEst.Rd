@@ -24,7 +24,7 @@ optimization process.}
 
 \item{method.init}{Method of obtaining initial values of the parameters.
 Should be one of "logistic" for the logistic method or "Mead" for the Mead
-method. The default option is the logistic method.}
+method. The default option is the Mead method.}
 
 \item{method.optim}{Method of optimization of the parameters. This argument
 is directly delivered to the \code{constrOptim} function provided in the

@@ -3,7 +3,7 @@
 #' 
 #' @param x Vector of doses.
 #' @param y Vector of responses.
-#' @param theta.re.init Parameters of a 4PL model among which the EC50 parameter is
+#' @param retheta.init Parameters of a 4PL model among which the EC50 parameter is
 #' in the log 10 dose scale.
 #' @param level Confidence level to be used in computing the Hill bounds
 #' 
@@ -12,50 +12,52 @@
 #' 
 #' @details This function computes the Hill bounds based on initial parameter
 #' estimates and data. It basically computes the confidence intervals of the
-#' true parameters based on the variance-covariance matrix of the given initial
-#' parameter estimates. If matrix inversion of the variance-covariance matrix
+#' true parameters based on the variance-covariance matrix of a given initial
+#' parameter estimates. The half of a hessian matrix is used as a
+#' variance-covariance matrix. If matrix inversion of the variance-covariance matrix
 #' is infeasible, a variation of the method in Wang et al. (2010) is used.
 #' 
 #' @author Hyowon An
 #' 
 #' @seealso \code{FindInitialParms}
 #' 
-#' @references
-#' \insertRef{Wang2010}{dr4pl}
+#' @references \insertRef{Higham2002}{dr4pl} \insertRef{Wang2010}{dr4pl}
 #' 
 #' @export
-FindHillBounds <- function(x, y, theta.re.init, level = 0.99) {
+FindHillBounds <- function(x, y, retheta.init, level = 0.9999) {
   
   n <- length(x)  # Number of observations in data
   
   ## Compute confidence intervals of the true parameters.
-  deriv.f <- DerivativeFLogIC50(theta.re.init, x)
-  residuals <- ResidualLogIC50(theta.re.init, x, y)
+  residuals <- ResidualLogIC50(retheta.init, x, y)
+  hessian <- HessianLogIC50(retheta.init, x, y)
+  # Obtain a positie definite approximation
+  hessian.pd <- nearPD(hessian)$mat/2
   
   ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
-  C.hat.inv <- try(solve(t(deriv.f)%*%deriv.f), silent = TRUE)  # Inverse matrix
+  vcov.mat <- try(solve(hessian.pd), silent = TRUE)  # Inverse matrix
   
-  if(inherits(C.hat.inv, "try-error")) {
+  if(inherits(vcov.mat, "try-error")) {
     
     # Cholesky decomposition
-    C.hat.Chol <- try(chol(t(deriv.f)%*%deriv.f, silent = TRUE))
+    vcov.Chol <- try(chol(hessian.pd, silent = TRUE))
     
-    if(inherits(C.hat.Chol, "try-error")) {
+    if(inherits(vcov.Chol, "try-error")) {
       
       # Cholesky decomposition with a diagonal matrix as a lower bound
-      C.hat.Chol <- try(chol(0.99*t(deriv.f)%*%deriv.f + 0.01*diag(dim(deriv.f)[2])))
+      vcov.Chol <- try(chol(0.99*hessian.pd + 0.01*diag(nrow(hessian.pd))))
       
-      if(inherits(C.hat.Chol, "try-error")) {
+      if(inherits(vcov.Chol, "try-error")) {
         
         ind.mat.inv <- FALSE
       } else {
         
-        C.hat.inv <- chol2inv(C.hat.Chol)
+        vcov.mat <- chol2inv(vcov.Chol)
       }
       
     } else {
       
-      C.hat.inv <- chol2inv(C.hat.Chol)
+      vcov.mat <- chol2inv(vcov.Chol)
     }
   }
   
@@ -66,26 +68,26 @@ FindHillBounds <- function(x, y, theta.re.init, level = 0.99) {
     RSS <- sqrt(sum(residuals^2)/(n - 4))  # Residual sum of squares
     
     q.t <- qt(level, df = n - 4)  # Quantile of the t-distribution
-    std.err <- RSS*sqrt(diag(C.hat.inv))  # Standard error
-    ci <- cbind(theta.re.init - q.t*std.err, theta.re.init + q.t*std.err)  # Confidence intervals
+    std.err <- RSS*sqrt(diag(vcov.mat))  # Standard error
+    ci <- cbind(retheta.init - q.t*std.err, retheta.init + q.t*std.err)  # Confidence intervals
     
     # Perform constrained optimization
-    bounds.theta.re.2 <- ci[2, ]
-    bounds.theta.re.3 <- ci[3, ]
+    bounds.retheta.2 <- ci[2, ]
+    bounds.retheta.3 <- ci[3, ]
   ## If the variance-covariance matrix is unobtainable, mimic the method of
   ## Wang et al. (2010).
   } else {
     
     levels.log10.x <- unique(log10(x))  # Levels of log10 doses
     levels.log10.x <- levels.log10.x[levels.log10.x != -Inf]
-    bounds.theta.re.2 <- c(min(levels.log10.x), max(levels.log10.x))
+    bounds.retheta.2 <- c(min(levels.log10.x), max(levels.log10.x))
     
-    range.theta.3 <- c(0.01*theta.re.init[3], 100*theta.re.init[3])
-    bounds.theta.re.3 <- c(min(range.theta.3), max(range.theta.3))
+    range.theta.3 <- c(0.01*retheta.init[3], 100*retheta.init[3])
+    bounds.retheta.3 <- c(min(range.theta.3), max(range.theta.3))
   }
   
-  Hill.bounds <- data.frame(LogTheta2 = bounds.theta.re.2,
-                            Theta3 = bounds.theta.re.3)
+  Hill.bounds <- data.frame(LogTheta2 = bounds.retheta.2,
+                            Theta3 = bounds.retheta.3)
   return(Hill.bounds)
 }
 
@@ -94,7 +96,7 @@ FindHillBounds <- function(x, y, theta.re.init, level = 0.99) {
 #' 
 #' @param x Vector of doses.
 #' @param y Vector of responses.
-#' @param theta.re.init Parameters of a 4PL model among which the EC50 parameter is
+#' @param retheta.init Parameters of a 4PL model among which the EC50 parameter is
 #' in the log 10 dose scale.
 #' 
 #' @return Data frame whose first column represents the grid on the upper asymptote
@@ -115,38 +117,40 @@ FindHillBounds <- function(x, y, theta.re.init, level = 0.99) {
 #' \insertRef{Wang2010}{dr4pl}
 #' 
 #' @export
-FindLogisticGrids <- function(x, y, theta.re.init) {
+FindLogisticGrids <- function(x, y, retheta.init) {
   
   n <- length(x)  # Number of observations in data
   
   ## Compute confidence intervals of the true parameters.
-  deriv.f <- DerivativeFLogIC50(theta.re.init, x)
-  residuals <- ResidualLogIC50(theta.re.init, x, y)
+  residuals <- ResidualLogIC50(retheta.init, x, y)
+  hessian <- HessianLogIC50(retheta.init, x, y)
+  # Obtain a positie definite approximation
+  hessian.pd <- nearPD(hessian)$mat/2
   
   ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
-  C.hat.inv <- try(solve(t(deriv.f)%*%deriv.f), silent = TRUE)  # Inverse matrix
+  vcov.mat <- try(solve(hessian.pd), silent = TRUE)  # Inverse matrix
   
-  if(inherits(C.hat.inv, "try-error")) {
+  if(inherits(vcov.mat, "try-error")) {
     
     # Cholesky decomposition
-    C.hat.Chol <- try(chol(t(deriv.f)%*%deriv.f, silent = TRUE))
+    vcov.Chol <- try(chol(hessian.pd, silent = TRUE))
     
-    if(inherits(C.hat.Chol, "try-error")) {
+    if(inherits(vcov.Chol, "try-error")) {
       
       # Cholesky decomposition with a diagonal matrix as a lower bound
-      C.hat.Chol <- try(chol(0.99*t(deriv.f)%*%deriv.f + 0.01*diag(dim(deriv.f)[2])))
+      vcov.Chol <- try(chol(0.99*hessian.pd + 0.01*diag(nrow(hessian.pd))))
       
-      if(inherits(C.hat.Chol, "try-error")) {
+      if(inherits(vcov.Chol, "try-error")) {
         
         ind.mat.inv <- FALSE
       } else {
         
-        C.hat.inv <- chol2inv(C.hat.Chol)
+        vcov.mat <- chol2inv(vcov.Chol)
       }
       
     } else {
       
-      C.hat.inv <- chol2inv(C.hat.Chol)
+      vcov.mat <- chol2inv(vcov.Chol)
     }
   }
   
@@ -155,7 +159,7 @@ FindLogisticGrids <- function(x, y, theta.re.init) {
   if(ind.mat.inv) {
     
     RSS <- sqrt(sum(residuals^2)/(n - 4))  # Residual sum of squares
-    std.err <- RSS*sqrt(diag(C.hat.inv))  # Standard error
+    std.err <- RSS*sqrt(diag(vcov.mat))  # Standard error
 
     # Sizes of the grids on the upper and lower asymptote parameters
     grid.size.theta.1 <- std.err[1]
@@ -167,8 +171,8 @@ FindLogisticGrids <- function(x, y, theta.re.init) {
     grid.theta.4 <- c(-2*grid.size.theta.4, -grid.size.theta.4, 0,
                       grid.size.theta.4, 2*grid.size.theta.4)
     
-    grid.theta.1 <- theta.re.init[1] + grid.theta.1
-    grid.theta.4 <- theta.re.init[4] + grid.theta.4
+    grid.theta.1 <- retheta.init[1] + grid.theta.1
+    grid.theta.4 <- retheta.init[4] + grid.theta.4
     
   ## If the variance-covariance matrix is unobtainable, use the 5% percentile
   ## of responses.
@@ -180,8 +184,8 @@ FindLogisticGrids <- function(x, y, theta.re.init) {
     grid.size <- 0.05*y.range
     
     grid.theta.1.4 <- c(-2*grid.size, -grid.size, 0, grid.size, 2*grid.size)
-    grid.theta.1 <- theta.re.init[1] + grid.theta.1.4
-    grid.theta.4 <- theta.re.init[4] + grid.theta.1.4
+    grid.theta.1 <- retheta.init[1] + grid.theta.1.4
+    grid.theta.4 <- retheta.init[4] + grid.theta.1.4
   }
 
   logistic.grids <- data.frame(Theta1 = grid.theta.1, Theta4 = grid.theta.4)
@@ -249,11 +253,11 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
     ## Obtain initial parameter estimates using the logistic method
     theta.Hill <- Logistic(x, y, y.max, y.min)
 
-    theta.re.Hill <- theta.Hill
-    theta.re.Hill[2] <- log10(theta.Hill[2])
+    retheta.Hill <- theta.Hill
+    retheta.Hill[2] <- log10(theta.Hill[2])
 
     ## Obtain the logistic grids on the upper and lower asymptote parameters
-    logistic.grids <- FindLogisticGrids(x, y, theta.re.Hill)
+    logistic.grids <- FindLogisticGrids(x, y, retheta.Hill)
     grid.theta.1 <- logistic.grids$Theta1
     grid.theta.4 <- logistic.grids$Theta4
     
@@ -264,6 +268,12 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
     for(theta.1.init in grid.theta.1) {
       
       for(theta.4.init in grid.theta.4) {
+        
+        # The upper asymptote should always be larger than the lower asymptote.
+        if(theta.1.init<=theta.4.init) {
+          
+          next
+        }
         
         theta.logistic <- Logistic(x, y, theta.1.init, theta.4.init)
         
@@ -308,22 +318,21 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
     log.x <- log10(x)
     
     y.lower.bd <- y.min
+    # Subtract the minimum response from responses to obtain positive values
     y.zero.low <- y - y.lower.bd
     
     # The grid on the slope parameter varies according to the trend option
     if(trend == "auto") {
       
-      mu.3.vec <- 10^qnorm(seq(from = 0, to = 1, length.out = n.grid.cells + 2))
-      mu.3.vec <- mu.3.vec[-c(1, n.grid.cells + 2)]
+      mu.3.vec <- 10^qcauchy(seq(from = 0, to = 1, length.out = n.grid.cells + 2))
     } else if(trend == "decreasing") {
       
-      mu.3.vec <- 10^qnorm(seq(from = 0.5, to = 1, length.out = n.grid.cells + 2))
-      mu.3.vec <- mu.3.vec[-c(1, n.grid.cells + 2)]
+      mu.3.vec <- 10^qcauchy(seq(from = 0.5, to = 1, length.out = n.grid.cells + 2))
     } else {
       
-      mu.3.vec <- 10^qnorm(seq(from = 0, to = 0.5, length.out = n.grid.cells + 2))
-      mu.3.vec <- mu.3.vec[-c(1, n.grid.cells + 2)]
+      mu.3.vec <- 10^qcauchy(seq(from = 0, to = 0.5, length.out = n.grid.cells + 2))
     }
+    mu.3.vec <- mu.3.vec[-c(1, n.grid.cells + 2)]
 
     theta.mat <- matrix(0, nrow = length(mu.3.vec), ncol = 4)
     
@@ -385,24 +394,6 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
     }
     
     theta.init <- theta.mat[which.min(losses), ]
-    
-  ### Extended logistic method
-  # } else if(method.init == "extended.logistic") {
-  #   
-  #   # Data frame for an extended Hill model
-  #   data.Hill <- data.frame(Response = log((y - y.min)/(y.max - y)) + 
-  #                             y.max/(y.max - y) + y.min/(y - y.min),
-  #                           LogX = log(x),
-  #                           ReciprocalYMax = 1/(y.max - y),
-  #                           ReciprocalYMin = 1/(y - y.min))
-  #   data.Hill <- subset(data.Hill, subset = LogX != -Inf)
-  #   
-  #   # Fit an extended Hill model
-  #   lm.Hill <- lm(Response ~ LogX + ReciprocalYMax + ReciprocalYMin,
-  #                 data = data.Hill)
-  #   coef.Hill <- coef(lm.Hill)
-  #   theta.Hill <- coef.Hill[c(3, 1, 2, 4)]
-  #   theta.Hill[2] <- exp(-coef.Hill[1]/coef.Hill[2])
   }
 
   if(theta.init[3] <= 0) {

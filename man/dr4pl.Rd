@@ -11,11 +11,11 @@
 dr4pl(...)
 
 \method{dr4pl}{formula}(formula, data = list(), init.parm = NULL,
-  trend = "auto", method.init = "logistic", method.optim = "Nelder-Mead",
+  trend = "auto", method.init = "Mead", method.optim = "Nelder-Mead",
   method.robust = NULL, ...)
 
 \method{dr4pl}{default}(dose, response, init.parm = NULL, trend = "auto",
-  method.init = "logistic", method.optim = "Nelder-Mead",
+  method.init = "Mead", method.optim = "Nelder-Mead",
   method.robust = NULL, ...)
 }
 \arguments{
@@ -37,8 +37,8 @@ while the option "increasing" will impose a restriction \eqn{\theta[3]>=0} in an
 optimization process.}
 
 \item{method.init}{Method of obtaining initial values of the parameters.
-If it is NULL, a default "logistic" regression method will be used. Assign
-"Mead" to use Mead's method.}
+If it is NULL, a default "Mead" method will be used. Assign
+"logistic" to use the logistic method.}
 
 \item{method.optim}{Method of optimization of the loss function specified by
 \code{method.robust}. This function argument is directly passed to the function
