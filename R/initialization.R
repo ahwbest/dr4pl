@@ -7,9 +7,11 @@
 #' 
 #' @param x Vector of doses.
 #' @param y Vector of responses.
-#' @param retheta.init Parameters of a 4PL model among which the EC50 parameter is
-#' in the log 10 dose scale.
-#' @param level Confidence level to be used in computing the Hill bounds
+#' @param retheta.init Parameters of a 4PL model among which the EC50 or IC50
+#' parameter is in the log 10 dose scale.
+#' @param level Confidence level to be used in computing the Hill bounds.
+#' @param use.Hessian Indicator of whether the Hessian matrix (TRUE) or the
+#' gradient vector is used in confidence interval computation.
 #' 
 #' @return Data frame whose first column represents the bounds on the IC50 parameter
 #' in log 10 scale and second column represents the bounds on the slope parameter.
@@ -19,7 +21,8 @@
 #' true parameters based on the variance-covariance matrix of a given initial
 #' parameter estimates. The half of a hessian matrix is used as a
 #' variance-covariance matrix. If matrix inversion of the variance-covariance matrix
-#' is infeasible, a variation of the method in Wang et al. (2010) is used.
+#' is infeasible, a variation of the method in Wang et al. (2010) is used. The
+#' parameters \code{level} and \code{use.Hessian} are only for simulation.
 #' 
 #' @author Hyowon An
 #' 
@@ -28,28 +31,40 @@
 #' @references \insertRef{Higham2002}{dr4pl} \insertRef{Wang2010}{dr4pl}
 #' 
 #' @export
-FindHillBounds <- function(x, y, retheta.init, level = 0.9999) {
+FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = TRUE) {
   
   n <- length(x)  # Number of observations in data
   
   ## Compute confidence intervals of the true parameters.
   residuals <- ResidualLogIC50(retheta.init, x, y)
-  hessian <- HessianLogIC50(retheta.init, x, y)
-  # Obtain a positie definite approximation
-  hessian.pd <- nearPD(hessian)$mat/2
+  
+  ## When the Hessian matrix is used.
+  if(use.Hessian) {
+    
+    Hessian <- HessianLogIC50(retheta.init, x, y)
+    
+    # Obtain a positie definite approximation of the Hessian matrix
+    C.hat <- nearPD(Hessian)$mat/2
+  ## When the gradient vector is used.
+  } else {
+    
+    deriv <- DerivativeFLogIC50(retheta.init, x)
+    
+    C.hat <- t(deriv)%*%deriv
+  }
   
   ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
-  vcov.mat <- try(solve(hessian.pd), silent = TRUE)  # Inverse matrix
+  vcov.mat <- try(solve(C.hat), silent = TRUE)  # Inverse matrix
   
   if(inherits(vcov.mat, "try-error")) {
     
     # Cholesky decomposition
-    vcov.Chol <- try(chol(hessian.pd, silent = TRUE))
+    vcov.Chol <- try(chol(C.hat, silent = TRUE))
     
     if(inherits(vcov.Chol, "try-error")) {
       
       # Cholesky decomposition with a diagonal matrix as a lower bound
-      vcov.Chol <- try(chol(0.99*hessian.pd + 0.01*diag(nrow(hessian.pd))))
+      vcov.Chol <- try(chol(0.99*C.hat + 0.01*diag(nrow(C.hat))))
       
       if(inherits(vcov.Chol, "try-error")) {
         

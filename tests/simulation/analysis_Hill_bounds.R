@@ -103,58 +103,19 @@ for(i in 1:n.simul) {
     x <- rep(levels.dose, each = n.obs.dose)
     y <- MeanResponse(x, theta) + rnorm(length(x), mean = 0, sd = stdev)
     
+    ## Obtain initial parameter estimates.
     theta.init <- FindInitialParms(x, y,
+                                   trend = "auto",
                                    method.init = "Mead",
                                    method.robust = NULL)
-    names(theta.init) <- c("Upper limit", "IC50", "Slope", "Lower limit")
     
-    theta.re.init <- theta.init
-    theta.re.init[2] <- log10(theta.init[2])
-    names(theta.re.init) <- c("Upper limit", "Log(IC50)", "Slope", "Lower limit")
+    retheta.init <- ParmToLog(theta.init)  # Reparameterized parameters
+    Hill.bounds <- FindHillBounds(x, y, retheta.init, use.Hessian = FALSE)
     
-    ### Compute confidence intervals of the true parameters
-    deriv.f <- DerivativeF(theta.init, x)
-    residuals <- Residual(theta.init, x, y)
-    
-    C.hat.inv <- try(solve(t(deriv.f)%*%deriv.f), silent = TRUE)  # Inverse matrix
-    
-    if(inherits(C.hat.inv, "try-error")) {
-      
-      C.hat.Chol <- try(chol(t(deriv.f)%*%deriv.f, silent = TRUE))  # Cholesky decomposition
-      
-      if(inherits(C.hat.Chol, "try-error")) {
-        
-        C.hat.Chol <- try(chol(0.99*t(deriv.f)%*%deriv.f + 0.01*diag(dim(deriv.f)[2])))
-        
-        if(inherits(C.hat.Chol, "try-error")) {
-          
-          C.hat.Chol <- NULL
-        }
-      }
-      
-      if(!is.null(C.hat.Chol)) {
-        
-        C.hat.inv <- chol2inv(C.hat.Chol)
-      } else {
-        
-        C.hat.inv <- NULL# Proceed with the method of Wang et al. (2010)
-      }
-    }
-    
-    s <- sqrt(sum(residuals^2)/(n.obs - 4))
-    
-    q.t <- qt(conf.level, df = n.obs - 4)
-    std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-    ci <- cbind(theta.init - q.t*std.err, theta.init + q.t*std.err)  # Confidence intervals
-    
-    ### Perform constrained optimization
-    bounds.theta.2 <- ci[2, ]
-    bounds.theta.3 <- ci[3, ]
-    
-    result.mat[i, j] <- (theta[2] >= bounds.theta.2[1])&&
-                        (theta[2] <= bounds.theta.2[2])&&
-                        (theta[3] >= bounds.theta.3[1])&&
-                        (theta[3] <= bounds.theta.3[2])
+    result.mat[i, j] <- (log10(theta[2]) >= Hill.bounds$LogTheta2[1])&&
+                        (log10(theta[2]) <= Hill.bounds$LogTheta2[2])&&
+                        (theta[3] >= Hill.bounds$Theta3[1])&&
+                        (theta[3] <= Hill.bounds$Theta3[2])
   }
 }
 

@@ -214,7 +214,7 @@ dr4pl.default <- function(dose,
     # Fit a 4PL model to data
     obj.dr4pl <- dr4plEst(dose = dose,
                           response = response,
-                          init.parm = retheta.fail,
+                          init.parm = LogToParm(retheta.fail),
                           trend = trend,
                           method.init = method.init,
                           method.optim = method.optim,
@@ -357,10 +357,7 @@ dr4plEst <- function(dose, response,
     
     ## Obtain initial parameter estimates.
     theta.init <- FindInitialParms(x, y, trend, method.init, method.robust)
-
-    retheta.init <- theta.init  # Reparameterized parameters
-    retheta.init[2] <- log10(theta.init[2])
-    names(retheta.init)[2] <- paste("Log(", names(theta.init)[2], ")", sep = "")
+    retheta.init <- ParmToLog(theta.init)
     
     Hill.bounds <- FindHillBounds(x, y, retheta.init)
     
