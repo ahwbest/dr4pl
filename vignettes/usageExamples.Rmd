@@ -62,7 +62,7 @@ error = function(err) {
   # error handler picks up where error was generated
   print(paste(err))
 })
-plot(a, text.title = "Error plot #1", indices.outlier = c(102))
+b <- plot(a, text.title = "Error plot #1")
 ```
 
 Lets next consider the next data set, **drc_error_2**.
@@ -104,9 +104,10 @@ error = function(err) {
   # error handler picks up where error was generated
   print(paste(err))
 })
-b <- plot(a, breaks.x = c(0.00135, 0.0135, 0.135, 1.35, 13.5), text.title = "Error plot #2", indices.outlier = c(2,8) )
+b <- plot(a, breaks.x = c(0.00135, 0.0135, 0.135, 1.35, 13.5), text.title = "Error plot #2")
 b
 ```
+
 
 Lets next consider the next data set, **drc_error_3**.
 
@@ -148,7 +149,7 @@ error = function(err) {
   # error handler picks up where error was generated
   print(paste(err))
 })
-plot(a, indices.outlier = c(90, 101), text.title = "Error plot #3")
+plot(a, text.title = "Error plot #3")
 ```
 
 Lets next consider the next data set, **drc_error_4**.
@@ -180,7 +181,7 @@ Now lets use dr4pl.
 
 ```{r}
 a <-tryCatch({
-  dr4pl(Response~Dose, data = drc_error_4, method.init = "Mead", method.robust = "absolute" )
+  dr4pl(Response~Dose, data = drc_error_4, method.init = "Mead")
 },
 warning = function(war) {
     # warning handler picks up where error was generated
@@ -190,7 +191,7 @@ error = function(err) {
   # error handler picks up where error was generated
   print(paste(err))
 })
-plot(a, text.title = "Error plot #4", indices.outlier = c(1,100))
+plot(a, text.title = "Error plot #4")
 ```
 
 The package drc draws errors with each one of these cases. However dr4pl is able generate a curve despite the outliers in each error case. In each case we were able to modify the title and axis names with *text.title*, *text.x*, or *text.y*. We are also able to bring attention to outlier points by passing a vector of the indices to the *indices.outlier* argument. As seen the the second error case, we may change the x-axis' and y-axis' break points by using *breaks.x* and *breaks.y* respectively.

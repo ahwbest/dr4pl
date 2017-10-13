@@ -1,5 +1,9 @@
 
+
+
 #' Compute the Hill bounds based on initial parameter estimates and data.
+#' 
+#' @importFrom Matrix nearPD
 #' 
 #' @param x Vector of doses.
 #' @param y Vector of responses.
