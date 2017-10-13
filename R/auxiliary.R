@@ -1,6 +1,11 @@
 
+<<<<<<< HEAD
 library(Matrix)
 
+=======
+#' @import Rdpack
+NULL
+>>>>>>> aab2a80efdaed6c67a8113a30a3b54ba777664f6
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
 #' 
 #' @description Compute the confidence intervals of parameter estimates of a fitted
@@ -54,7 +59,7 @@ confint.dr4pl <- function(object, parm, level = 0.95, ...) {
       # If matrix inversion is infeasible, use an approximated positve definite
       # Hessian matrix to obtain the variance-covariance matrix.
       ind.mat.inv <- FALSE
-      C.hat.pd <- nearPD(hessian)$mat/2
+      C.hat.pd <- nearPD(C.hat)$mat/2
       vcov.mat <- solve(C.hat.pd)
       
     } else {
