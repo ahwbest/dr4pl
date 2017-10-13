@@ -4,6 +4,7 @@
 \name{dr4pl}
 \alias{dr4pl}
 \alias{dr4pl-package}
+\alias{dr4pl}
 \alias{dr4pl.formula}
 \alias{dr4pl.default}
 \title{Fitting 4 Parameter Logistic (4PL) models to dose-response data.}

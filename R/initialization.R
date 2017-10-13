@@ -1,6 +1,4 @@
 
-
-
 #' Compute the Hill bounds based on initial parameter estimates and data.
 #' 
 #' @importFrom Matrix nearPD
@@ -31,7 +29,7 @@
 #' @references \insertRef{Higham2002}{dr4pl} \insertRef{Wang2010}{dr4pl}
 #' 
 #' @export
-FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = TRUE) {
+FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = FALSE) {
   
   n <- length(x)  # Number of observations in data
   
@@ -117,6 +115,8 @@ FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = TRU
 #' @param y Vector of responses.
 #' @param retheta.init Parameters of a 4PL model among which the EC50 parameter is
 #' in the log 10 dose scale.
+#' @param use.Hessian Indicator of whether the Hessian matrix (TRUE) or the
+#' gradient vector is used in confidence interval computation.
 #' 
 #' @return Data frame whose first column represents the grid on the upper asymptote
 #' parameter and second column represents the grid o the lower asymptote.
@@ -136,28 +136,40 @@ FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = TRU
 #' \insertRef{Wang2010}{dr4pl}
 #' 
 #' @export
-FindLogisticGrids <- function(x, y, retheta.init) {
+FindLogisticGrids <- function(x, y, retheta.init, use.Hessian = FALSE) {
   
   n <- length(x)  # Number of observations in data
   
   ## Compute confidence intervals of the true parameters.
   residuals <- ResidualLogIC50(retheta.init, x, y)
-  hessian <- HessianLogIC50(retheta.init, x, y)
-  # Obtain a positie definite approximation
-  hessian.pd <- nearPD(hessian)$mat/2
+  
+  ## When the Hessian matrix is used.
+  if(use.Hessian) {
+    
+    Hessian <- HessianLogIC50(retheta.init, x, y)
+    
+    # Obtain a positie definite approximation of the Hessian matrix
+    C.hat <- nearPD(Hessian)$mat/2
+    ## When the gradient vector is used.
+  } else {
+    
+    deriv <- DerivativeFLogIC50(retheta.init, x)
+    
+    C.hat <- t(deriv)%*%deriv
+  }
   
   ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
-  vcov.mat <- try(solve(hessian.pd), silent = TRUE)  # Inverse matrix
+  vcov.mat <- try(solve(C.hat), silent = TRUE)  # Inverse matrix
   
   if(inherits(vcov.mat, "try-error")) {
     
     # Cholesky decomposition
-    vcov.Chol <- try(chol(hessian.pd, silent = TRUE))
+    vcov.Chol <- try(chol(C.hat, silent = TRUE))
     
     if(inherits(vcov.Chol, "try-error")) {
       
       # Cholesky decomposition with a diagonal matrix as a lower bound
-      vcov.Chol <- try(chol(0.99*hessian.pd + 0.01*diag(nrow(hessian.pd))))
+      vcov.Chol <- try(chol(0.99*C.hat + 0.01*diag(nrow(C.hat))))
       
       if(inherits(vcov.Chol, "try-error")) {
         
@@ -263,8 +275,8 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
   
   theta.1.4.zero <- 0.001*y.range  # This value will be added to the maximum and minimum
 
-  y.max <- max(y) + theta.1.4.zero
-  y.min <- min(y) - theta.1.4.zero
+  y.max <- max(y) + theta.1.4.zero  # Maximum of responses
+  y.min <- min(y) - theta.1.4.zero  # Minimum of responses
   
   ### Standard logistic method
   if(method.init == "logistic") {
@@ -336,9 +348,8 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
     
     log.x <- log10(x)
     
-    y.lower.bd <- y.min
     # Subtract the minimum response from responses to obtain positive values
-    y.zero.low <- y - y.lower.bd
+    y.positive <- y - y.min
     
     # The grid on the slope parameter varies according to the trend option
     if(trend == "auto") {
@@ -352,22 +363,17 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
       mu.3.vec <- 10^qcauchy(seq(from = 0, to = 0.5, length.out = n.grid.cells + 2))
     }
     mu.3.vec <- mu.3.vec[-c(1, n.grid.cells + 2)]
+    mu.3.vec <- mu.3.vec[mu.3.vec != 1]
 
     theta.mat <- matrix(0, nrow = length(mu.3.vec), ncol = 4)
     
     for(i in 1:length(mu.3.vec)) {
       
-      mu.3 <- mu.3.vec[i]
-      
-      # Mead's method is not applicable when the slope estimate is 1.
-      if(mu.3 == 1) {
-        
-        next
-      }
+      mu.3 <- mu.3.vec[i]  # Current mu.3 value
       
       # Apply Mead's method
-      data.Mead <- data.frame(Y = y.zero.low,
-                              YMuX = y.zero.low*mu.3^log.x,
+      data.Mead <- data.frame(Y = y.positive,
+                              YMuX = y.positive*mu.3^log.x,
                               Response = 1)
       
       if(mu.3 < 1) {
@@ -392,8 +398,8 @@ FindInitialParms <- function(x, y, trend, method.init, method.robust) {
       theta.mat[i, 3] <- -log10(mu.3)
     }
     
-    theta.mat[, 1] <- theta.mat[, 1] + y.lower.bd
-    theta.mat[, 4] <- theta.mat[, 4] + y.lower.bd
+    theta.mat[, 1] <- theta.mat[, 1] + y.min
+    theta.mat[, 4] <- theta.mat[, 4] + y.min
     
     theta.mat <- theta.mat[theta.mat[, 3] != 0, ]
     

@@ -5,7 +5,7 @@
 \title{Compute the grids on the upper and lower asymptote parameters for the logistic
 method based on initial parameter estimates and data.}
 \usage{
-FindLogisticGrids(x, y, retheta.init)
+FindLogisticGrids(x, y, retheta.init, use.Hessian = FALSE)
 }
 \arguments{
 \item{x}{Vector of doses.}
@@ -14,6 +14,9 @@ FindLogisticGrids(x, y, retheta.init)
 
 \item{retheta.init}{Parameters of a 4PL model among which the EC50 parameter is
 in the log 10 dose scale.}
+
+\item{use.Hessian}{Indicator of whether the Hessian matrix (TRUE) or the
+gradient vector is used in confidence interval computation.}
 }
 \value{
 Data frame whose first column represents the grid on the upper asymptote
