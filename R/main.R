@@ -35,8 +35,8 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #' while the option "increasing" will impose a restriction \eqn{\theta[3]>=0} in an 
 #' optimization process.
 #' @param method.init Method of obtaining initial values of the parameters.
-#' If it is NULL, a default "logistic" regression method will be used. Assign
-#' "Mead" to use Mead's method.
+#' If it is NULL, a default "Mead" method will be used. Assign
+#' "logistic" to use the logistic method.
 #' @param method.optim Method of optimization of the loss function specified by
 #' \code{method.robust}. This function argument is directly passed to the function
 #' \code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.
@@ -82,7 +82,7 @@ dr4pl.formula <- function(formula,
                           data = list(),
                           init.parm = NULL,
                           trend = "auto",
-                          method.init = "logistic",
+                          method.init = "Mead",
                           method.optim = "Nelder-Mead",
                           method.robust = NULL,
                           ...) {
@@ -140,7 +140,7 @@ dr4pl.default <- function(dose,
                           response,
                           init.parm = NULL,
                           trend = "auto",
-                          method.init = "logistic",
+                          method.init = "Mead",
                           method.optim = "Nelder-Mead",
                           method.robust = NULL,
                           ...) {
@@ -189,11 +189,10 @@ dr4pl.default <- function(dose,
   class(obj.dr4pl) <- "dr4pl"
   
   ### When convergence failure happens.
-  if(obj.dr4pl$convergence == FALSE) {  
+  if(obj.dr4pl$convergence == FALSE) {
 
-    
-    ### Decide the method of robust estimation which is more robust than the method
-    ### input by a user.
+    ## Decide the method of robust estimation which is more robust than the method
+    ## input by a user.
     if(is.null(method.robust)) {
       
       method.robust.new <- "absolute"
@@ -206,11 +205,13 @@ dr4pl.default <- function(dose,
     }
     
     n <- obj.dr4pl$sample.size  # Number of data points
+    theta.fail <- obj.dr4pl$parameters
+    retheta.fail <- ParmToLog(theta.fail)  # Start from the failure parameters
     
     # Fit a 4PL model to data
-    obj.dr4pl <- dr4plEst(dose = dose, 
+    obj.dr4pl <- dr4plEst(dose = dose,
                           response = response,
-                          init.parm = init.parm,
+                          init.parm = retheta.fail,
                           trend = trend,
                           method.init = method.init,
                           method.optim = method.optim,
@@ -227,7 +228,7 @@ dr4pl.default <- function(dose,
     abs.res.sorted <- sort(abs(residuals), index.return = TRUE)$x
     indices.sorted <- sort(abs(residuals), index.return = TRUE)$ix
     
-    Q <- 0.05  # Refer to Motulsky and Brown (2006)
+    Q <- 0.01  # Refer to Motulsky and Brown (2006)
     alphas <- Q*seq(from = n, to = 1, by = -1)/n
     p.values <- 2*pt(q = abs.res.sorted/scale.robust, df = n - 4, lower.tail = FALSE)
     
@@ -272,7 +273,7 @@ dr4pl.default <- function(dose,
 #' optimization process.
 #' @param method.init Method of obtaining initial values of the parameters.
 #'   Should be one of "logistic" for the logistic method or "Mead" for the Mead
-#'   method. The default option is the logistic method.
+#'   method. The default option is the Mead method.
 #' @param method.optim Method of optimization of the parameters. This argument
 #'   is directly delivered to the \code{constrOptim} function provided in the
 #'   "base" package of R.
@@ -297,6 +298,8 @@ dr4plEst <- function(dose, response,
   loss.fcn <- ErrFcn(method.robust)
   # Currently only the gradient function for the squared loss is implemented
   grad <- GradientSquaredLossLogIC50
+  
+  tuning.barrier <- 1e-04  # Tuning parameter for the log Barrier method
   
   ### When initial parameter estimates are given
   if(!is.null(init.parm)) {
@@ -386,7 +389,6 @@ dr4plEst <- function(dose, response,
     }
 
     # Fit the 4PL model
-    tuning.barrier <- 1e-04
     optim.dr4pl <- constrOptim(theta = retheta.init,
                                f = loss.fcn,
                                grad = grad,

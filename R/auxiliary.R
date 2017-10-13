@@ -30,24 +30,61 @@
 #' \insertRef{Seber1989}{dr4pl}
 #' 
 #' @export
-confint.dr4pl <- function(object, parm, level, ...) {
+confint.dr4pl <- function(object, parm, level = 0.95, ...) {
   
   x <- object$data$Dose
   y <- object$data$Response
-  theta <- object$parameters
-  hessian <- object$hessian
+  retheta <- ParmToLog(object$parameters)
+  C.hat <- HessianLogIC50(retheta, x, y)/2
   
   n <- object$sample.size  # Number of observations in data
-  f <- MeanResponse(x, theta)
+  f <- MeanResponseLogIC50(x, retheta)
   
-  C.hat.inv <- solve(hessian/2)
-  s <- sqrt(sum((y - f)^2)/(n - 4))
+  ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
+  vcov.mat <- try(solve(C.hat), silent = TRUE)  # Inverse matrix
+  
+  if(inherits(vcov.mat, "try-error")) {
+    
+    vcov.Chol <- try(chol(C.hat, silent = TRUE))  # Cholesky decomposition
+    
+    if(inherits(vcov.Chol, "try-error")) {
+      
+      # If matrix inversion is infeasible, use an approximated positve definite
+      # Hessian matrix to obtain the variance-covariance matrix.
+      ind.mat.inv <- FALSE
+      C.hat.pd <- nearPD(hessian)$mat/2
+      vcov.mat <- solve(C.hat.pd)
+      
+    } else {
+      
+      vcov.mat <- chol2inv(vcov.Chol)
+    }
+  }
+  
+  if(!ind.mat.inv) {
+    
+    print("The hessian matrix is singular, so an approximated positive definite
+          hessian matrix is used.")
+  }
+  
+  RSS <- sqrt(sum((y - f)^2)/(n - 4))
   
   q.t <- qt(1 - (1 - level)/2, df = n - 4)
-  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
+  std.err <- RSS*sqrt(diag(vcov.mat))  # Standard error
+  ci.table <- cbind(retheta - q.t*std.err, retheta + q.t*std.err)
+  ci.table[2, ] <- 10^ci.table[2, ]
   
-  return(ci)
+  colnames(ci.table) <- c(paste(100*(1 - level)/2, "%"),
+                          paste(100*(1 - (1 - level)/2), "%"))
+  if(retheta[3]<=0) {
+    
+    row.names(ci.table) <- c("UpperLimit", "IC50", "Slope", "LowerLimit")
+  } else {
+    
+    row.names(ci.table) <- c("UpperLimit", "EC50", "Slope", "LowerLimit")
+  }
+  
+  return(ci.table)
 }
 
 #' @title Obtain coefficients of a 4PL model
@@ -85,8 +122,7 @@ coef.dr4pl <- function(object, ...) {
 #'   detailed explanation of the method, please refer to Subsection 2.1.5 of
 #'   Seber and Wild (1989).
 #'
-#' @references
-#' \insertRef{Seber1989}{dr4pl}
+#' @references \insertRef{Seber1989}{dr4pl}
 #'
 #' @export
 gof.dr4pl <- function(object) {
@@ -355,14 +391,13 @@ print.summary.dr4pl <- function(object, ...) {
 #' @export
 summary.dr4pl <- function(object, ...) {
   
-  TAB <- cbind(Estimate = object$parameters,
-               StdErr = object$std.err,
-               t.value = object$t.value,
-               p.value = object$p.value)
+  ci <- confint(object)
+  
+  TAB <- cbind(Estimate = object$parameters, ci)
   
   res <- list(call = object$call,
               coefficients = TAB)
   
   class(res) <- "summary.dr4pl"
-  res
+  return(res)
 }

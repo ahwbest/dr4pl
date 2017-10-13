@@ -2,20 +2,20 @@
 % Please edit documentation in R/base.R
 \name{LogToParm}
 \alias{LogToParm}
-\title{Transform reparameterized parameters (theta.re) back into original parameters 
+\title{Transform reparameterized parameters (retheta) back into original parameters 
 (theta)}
 \usage{
-LogToParm(theta.re)
+LogToParm(retheta)
 }
 \arguments{
-\item{theta.re}{Parameters of a 4PL model among which the EC50 parameter is
-in the log 10 dose scale}
+\item{retheta}{Parameters of a 4PL model among which the EC50 or IC50 parameter
+is in the log 10 dose scale.}
 }
 \value{
-Parameters of a 4PL model among which the EC50 parameter is in the
-dose scale
+Parameters of a 4PL model among which the EC50 or IC50 parameter is in 
+the dose scale.
 }
 \description{
-Transform reparameterized parameters (theta.re) back into original parameters 
+Transform reparameterized parameters (retheta) back into original parameters 
 (theta)
 }

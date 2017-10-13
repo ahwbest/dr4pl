@@ -4,10 +4,10 @@
 \alias{ResidualLogIC50}
 \title{Compute residuals with a reparameterized model.}
 \usage{
-ResidualLogIC50(theta.re, x, y)
+ResidualLogIC50(retheta, x, y)
 }
 \arguments{
-\item{theta.re}{Parameters of a 4pl model among which the IC50 parameter is
+\item{retheta}{Parameters of a 4pl model among which the IC50 parameter is
 transformed into a log 10 scale.}
 
 \item{x}{Vector of doses}

@@ -1,6 +1,7 @@
 # ----------------------------------------------------------------------------
 ### Load libraries
 #
+library(drc)
 library(gridExtra)
 
 # ----------------------------------------------------------------------------
@@ -19,13 +20,17 @@ data.error.list[[4]] <- drc_error_4
 ### draws an error 
 #
 drm(Response ~ Dose, data = drc_error_1,
-    fct = LL.4())
+    fct = LL.4(),
+    control = drmc(method = "Nelder-Mead"))
 drm(Response ~ Dose, data = drc_error_2,
-    fct = LL.4())
+    fct = LL.4(),
+    control = drmc(method = "Nelder-Mead"))
 drm(Response ~ Dose, data = drc_error_3,
-    fct = LL.4())
+    fct = LL.4(),
+    control = drmc(method = "Nelder-Mead"))
 drm(Response ~ Dose, data = drc_error_4,
-    fct = LL.4())
+    fct = LL.4(),
+    control = drmc(method = "Nelder-Mead"))
 
 nplr(x = drc_error_1$Dose, y = convertToProp(drc_error_1$Response),
      LPweight = 0)

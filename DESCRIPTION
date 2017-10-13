@@ -16,6 +16,7 @@ Imports:
     ggplot2,
     devtools,
     drc,
+    Matrix,
     Rdpack,
     testthat,
     tensor
