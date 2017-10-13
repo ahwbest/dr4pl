@@ -4,12 +4,16 @@
 \alias{plot.dr4pl}
 \title{Make a plot of a 4PL model curve and data}
 \usage{
-\method{plot}{dr4pl}(x, text.title = "Dose-response plot", text.x = "Dose",
-  text.y = "Response", indices.outlier = NULL, breaks.x = NULL,
-  breaks.y = NULL, ...)
+\method{plot}{dr4pl}(x, type.curve = "all",
+  text.title = "Dose-response plot", text.x = "Dose", text.y = "Response",
+  indices.outlier = NULL, breaks.x = NULL, breaks.y = NULL, ...)
 }
 \arguments{
 \item{x}{`dr4pl' object whose data and mean response function will be plotted.}
+
+\item{type.curve}{Indicator of the type of a dose-response curve. "all" indicates
+that data and a curve will be plotted while "data" indicates that only data
+will be plotted.}
 
 \item{text.title}{Character string for the title of a plot with a default set to 
 "Dose response plot".}
@@ -75,5 +79,5 @@ plot(e,
 
 }
 \author{
-Hyowon An and Justin T. Landis
+Hyowon An, Justin T. Landis and Aubrey G. Bailey
 }

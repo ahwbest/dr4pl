@@ -4,17 +4,20 @@
 \alias{FindHillBounds}
 \title{Compute the Hill bounds based on initial parameter estimates and data.}
 \usage{
-FindHillBounds(x, y, retheta.init, level = 0.9999)
+FindHillBounds(x, y, retheta.init, level = 0.9999, use.Hessian = TRUE)
 }
 \arguments{
 \item{x}{Vector of doses.}
 
 \item{y}{Vector of responses.}
 
-\item{retheta.init}{Parameters of a 4PL model among which the EC50 parameter is
-in the log 10 dose scale.}
+\item{retheta.init}{Parameters of a 4PL model among which the EC50 or IC50
+parameter is in the log 10 dose scale.}
 
-\item{level}{Confidence level to be used in computing the Hill bounds}
+\item{level}{Confidence level to be used in computing the Hill bounds.}
+
+\item{use.Hessian}{Indicator of whether the Hessian matrix (TRUE) or the
+gradient vector is used in confidence interval computation.}
 }
 \value{
 Data frame whose first column represents the bounds on the IC50 parameter
@@ -29,7 +32,8 @@ estimates and data. It basically computes the confidence intervals of the
 true parameters based on the variance-covariance matrix of a given initial
 parameter estimates. The half of a hessian matrix is used as a
 variance-covariance matrix. If matrix inversion of the variance-covariance matrix
-is infeasible, a variation of the method in Wang et al. (2010) is used.
+is infeasible, a variation of the method in Wang et al. (2010) is used. The
+parameters \code{level} and \code{use.Hessian} are only for simulation.
 }
 \references{
 \insertRef{Higham2002}{dr4pl} \insertRef{Wang2010}{dr4pl}
