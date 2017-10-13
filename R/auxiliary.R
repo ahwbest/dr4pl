@@ -1,4 +1,6 @@
 
+library(Matrix)
+
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
 #' 
 #' @description Compute the confidence intervals of parameter estimates of a fitted
@@ -229,6 +231,9 @@ IC <- function(object, inhib.percent) {
 #' @name plot.dr4pl
 #' 
 #' @param x `dr4pl' object whose data and mean response function will be plotted.
+#' @param type.curve Indicator of the type of a dose-response curve. "all" indicates
+#' that data and a curve will be plotted while "data" indicates that only data
+#' will be plotted.
 #' @param text.title Character string for the title of a plot with a default set to 
 #'   "Dose response plot".
 #' @param text.x Character string for the x-axis of the plot with a default set to 
@@ -278,10 +283,11 @@ IC <- function(object, inhib.percent) {
 #'      text.x = "Concentration", 
 #'      text.y = "Count")
 #' 
-#' @author Hyowon An and Justin T. Landis
+#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
 #' 
 #' @export
 plot.dr4pl <- function(x,
+                       type.curve = "all",
                        text.title = "Dose-response plot",
                        text.x = "Dose",
                        text.y = "Response",
@@ -317,9 +323,12 @@ plot.dr4pl <- function(x,
   
   a <- ggplot2::ggplot(aes(x = x$data$Dose, y = x$data$Response), data = x$data)
   
-  a <- a + ggplot2::stat_function(fun = MeanResponse,
-                                  args = list(theta = x$parameters),
-                                  size = 1.2)
+  if(type.curve == "all") {
+    
+    a <- a + ggplot2::stat_function(fun = MeanResponse,
+                                    args = list(theta = x$parameters),
+                                    size = 1.2)
+  }
   
   a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec,
                                shape = shape.vec)
@@ -332,10 +341,21 @@ plot.dr4pl <- function(x,
   a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
   a <- a + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
   a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
-  if(!is.null(breaks.x)) { a <- a + ggplot2::scale_x_log10(breaks = breaks.x)
-  } else { a <- a + ggplot2::scale_x_log10() }
-  if(!is.null(breaks.y)) { a <- a + ggplot2::scale_y_continuous(breaks = breaks.y)
-  } else { a <- a + ggplot2:: scale_y_continuous() }
+  
+  if(!is.null(breaks.x)) { 
+    
+    a <- a + ggplot2::scale_x_log10(breaks = breaks.x)
+  } else { 
+    
+    a <- a + ggplot2::scale_x_log10()
+  }
+  if(!is.null(breaks.y)) {
+    
+    a <- a + ggplot2::scale_y_continuous(breaks = breaks.y)
+  } else { 
+    
+    a <- a + ggplot2:: scale_y_continuous()
+  }
   
   a <- a + ggplot2::theme_bw()
   
