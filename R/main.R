@@ -49,6 +49,8 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #' - absolute: Absolute deviation loss 
 #' - Huber: Huber's loss 
 #' - Tukey: Tukey's biweight loss
+#' @param failure.message Indicator of whether a message indicating attainment of
+#' the Hill bounds and possible resolutions will be printed to the console.
 #' @param ... Further arguments to be passed to \code{constrOptim}.
 #' 
 #' @return A 'dr4pl' object for which "confint", "gof", "print" and "summary"
@@ -88,13 +90,14 @@ dr4pl.formula <- function(formula,
                           method.init = "Mead",
                           method.optim = "Nelder-Mead",
                           method.robust = NULL,
+                          failure.message = TRUE,
                           ...) {
   
   mf <- model.frame(formula = formula, data = data)
   dose <- model.matrix(attr(mf, "terms"), data = mf)[, 2]
   response <- model.response(mf)
   
-  est <- dr4pl.default(dose = dose,
+  obj <- dr4pl.default(dose = dose,
                        response = response,
                        init.parm = init.parm,
                        trend = trend,
@@ -103,11 +106,10 @@ dr4pl.formula <- function(formula,
                        method.robust = method.robust,
                        ...)
   
-  est$call <- match.call()
-  est$formula <- formula
-  names(est$parameters) <- c("Upper limit", "IC50", "Slope", "Lower limit")
-  
-  return(est)
+  obj$call <- match.call()
+  obj$formula <- formula
+
+  return(obj)
 }
 
 #' @describeIn dr4pl Used in the default case, supplying a single dose and 
@@ -146,6 +148,7 @@ dr4pl.default <- function(dose,
                           method.init = "Mead",
                           method.optim = "Nelder-Mead",
                           method.robust = NULL,
+                          failure.message = TRUE,
                           ...) {
 
   types.trend <- c("auto", "decreasing", "increasing")
@@ -180,19 +183,33 @@ dr4pl.default <- function(dose,
   }
 
   # Fit a 4PL model
-  obj.dr4pl <- dr4plEst(dose = dose,
-                        response = response,
-                        init.parm = init.parm,
-                        trend = trend,
-                        method.init = method.init,
-                        method.optim = method.optim,
-                        method.robust = method.robust)
+  obj <- dr4plEst(dose = dose,
+                  response = response,
+                  init.parm = init.parm,
+                  trend = trend,
+                  method.init = method.init,
+                  method.optim = method.optim,
+                  method.robust = method.robust)
 
-  obj.dr4pl$call <- match.call()
-  class(obj.dr4pl) <- "dr4pl"
+  obj$call <- match.call()
+  class(obj) <- "dr4pl"
+  
+  # If any robust estimation method is indicated, report outliers to a user.
+  if(!is.null(method.robust)) {
+    
+    theta <- obj$parameters  # Robust parameter estimates
+    residuals <- Residual(theta, dose, response)  # Residuals
+    
+    indices.outlier <- OutlierDetection(residuals)
+    
+    obj$idx.outlier <- indices.outlier
+    obj$robust.plot <- plot(obj, indices.outlier = indices.outlier)
+  }
+  
+  obj.robust <- obj
   
   ### When convergence failure happens.
-  if(obj.dr4pl$convergence == FALSE) {
+  if(obj$convergence == FALSE) {
 
     ## Decide the method of robust estimation which is more robust than the method
     ## input by a user.
@@ -207,52 +224,49 @@ dr4pl.default <- function(dose,
       stop("Convergence failure happened but no resolution could be found.")
     }
     
-    n <- obj.dr4pl$sample.size  # Number of data points
-    theta.fail <- obj.dr4pl$parameters
-    retheta.fail <- ParmToLog(theta.fail)  # Start from the failure parameters
-    
+    n <- obj$sample.size  # Number of data points
+
     # Fit a 4PL model to data
-    obj.dr4pl <- dr4plEst(dose = dose,
-                          response = response,
-                          init.parm = LogToParm(retheta.fail),
-                          trend = trend,
-                          method.init = method.init,
-                          method.optim = method.optim,
-                          method.robust = method.robust.new)
+    obj.robust <- dr4plEst(dose = dose,
+                           response = response,
+                           init.parm = init.parm,
+                           trend = trend,
+                           method.init = method.init,
+                           method.optim = method.optim,
+                           method.robust = method.robust.new)
+
+    obj.robust$call <- match.call()
+    class(obj.robust) <- "dr4pl"
     
-    theta <- obj.dr4pl$parameters
-    residuals <- Residual(theta, dose, response)
+    ## Detect outliers and report them.
+    theta <- obj.robust$parameters  # Robust parameter estimates
+    residuals <- Residual(theta, dose, response)  # Residuals
     
-    # We use the median absolute deviation (mad) as a robust estimator of scale 
-    # instead of the estimator suggested in Motulsky and Brown (2006)
-    # scale.robust <- quantile(abs(residuals), 0.6827)*n/(n - 4)
-    scale.robust <- mad(residuals)  
+    indices.outlier <- OutlierDetection(residuals)
     
-    abs.res.sorted <- sort(abs(residuals), index.return = TRUE)$x
-    indices.sorted <- sort(abs(residuals), index.return = TRUE)$ix
-    
-    Q <- 0.01  # Refer to Motulsky and Brown (2006)
-    alphas <- Q*seq(from = n, to = 1, by = -1)/n
-    p.values <- 2*pt(q = abs.res.sorted/scale.robust, df = n - 4, lower.tail = FALSE)
-    
-    indices.FDR <- which(p.values < alphas)
-    
-    if(length(indices.FDR) == 0) {
+    obj.robust$idx.outlier <- indices.outlier
+    obj.robust$robust.plot <- plot(obj.robust, indices.outlier = indices.outlier)
+
+    ## Print different messages to the console depending on the convergence success
+    ## of a robust fit.
+    if(obj.robust$convergence) {
       
-      indices.outlier <- NULL
+      cat(paste("The Hill bounds have been hit during optimization.\n",
+                "Please refer to \'robust.plot\' variable for diagnosis.\n\n", 
+                sep = ""))
     } else {
       
-      indices.outlier <- indices.sorted[seq(from = min(indices.FDR), to = n, by = 1)]
+      cat(paste("The Hill bounds have been hit during optimization with ",
+                obj$method.robust, " and ", obj.robust$method.robust, " methods.\n",                
+                "Please try other initialization and robust estimation methods.", 
+                sep = ""))
     }
     
-    obj.dr4pl$convergence <- FALSE
-    obj.dr4pl$call <- match.call()
-    class(obj.dr4pl) <- "dr4pl"
-    
-    obj.dr4pl$robust.plot <- plot(obj.dr4pl, indices.outlier = indices.outlier)
+    # We have a robust fit but the original method failed.
+    obj.robust$convergence <- FALSE
   }
   
-  return(obj.dr4pl)
+  return(obj.robust)
 }
 
 #' @title Private function to fit the 4PL model to dose-response data
@@ -285,6 +299,11 @@ dr4pl.default <- function(dose,
 #'      - absolute: Absolute deviation loss 
 #'      - Huber: Huber's loss 
 #'      - Tukey: Tukey's biweight loss
+#' @param failure.message Indicator of whether a message indicating attainment of
+#' the Hill bounds and possible resolutions will be printed to the console.
+#' 
+#' @return List of final parameter estimates, name of robust estimation, loss value
+#' and so on.
 dr4plEst <- function(dose, response,
                      init.parm,
                      trend,
@@ -407,20 +426,26 @@ dr4plEst <- function(dose, response,
     theta <- LogToParm(retheta)
   }
   
-  ### If boundaries are hit
+  ### If the Hill bounds are hit.
   if(any(abs(constr.mat%*%retheta - constr.vec)<tuning.barrier)) {
     
     convergence <- FALSE
   } 
   
+  # Data frame consisting of doses and responses
   data.dr4pl <- data.frame(Dose = dose, Response = response)
   
+  name.robust <- method.robust
+  if(is.null(method.robust)) {
+    
+    name.robust <- "squared"
+  }
+  
   list(convergence = convergence,
-       data = data.dr4pl,
-       dose = x,
-       response = y,
        sample.size = n,
+       data = data.dr4pl,
        parameters = theta,
        loss.value = loss,
-       hessian = hessian)
+       hessian = hessian,
+       method.robust = name.robust)
 }

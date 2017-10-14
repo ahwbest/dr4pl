@@ -48,7 +48,7 @@ FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = FAL
     
     deriv <- DerivativeFLogIC50(retheta.init, x)
     
-    C.hat <- t(deriv)%*%deriv
+    C.hat <- nearPD(t(deriv)%*%deriv)$mat
   }
   
   ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise

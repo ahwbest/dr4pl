@@ -13,11 +13,11 @@ dr4pl(...)
 
 \method{dr4pl}{formula}(formula, data = list(), init.parm = NULL,
   trend = "auto", method.init = "Mead", method.optim = "Nelder-Mead",
-  method.robust = NULL, ...)
+  method.robust = NULL, failure.message = TRUE, ...)
 
 \method{dr4pl}{default}(dose, response, init.parm = NULL, trend = "auto",
   method.init = "Mead", method.optim = "Nelder-Mead",
-  method.robust = NULL, ...)
+  method.robust = NULL, failure.message = TRUE, ...)
 }
 \arguments{
 \item{...}{Further arguments to be passed to \code{constrOptim}.}
@@ -51,6 +51,9 @@ method to be used to fit a model.
 - absolute: Absolute deviation loss 
 - Huber: Huber's loss 
 - Tukey: Tukey's biweight loss}
+
+\item{failure.message}{Indicator of whether a message indicating attainment of
+the Hill bounds and possible resolutions will be printed to the console.}
 
 \item{dose}{Vector of dose levels}
 

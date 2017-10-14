@@ -35,6 +35,13 @@ is directly delivered to the \code{constrOptim} function provided in the
 - absolute: Absolute deviation loss 
 - Huber: Huber's loss 
 - Tukey: Tukey's biweight loss}
+
+\item{failure.message}{Indicator of whether a message indicating attainment of
+the Hill bounds and possible resolutions will be printed to the console.}
+}
+\value{
+List of final parameter estimates, name of robust estimation, loss value
+and so on.
 }
 \description{
 Private function that actually fits the 4PL model to data. If the

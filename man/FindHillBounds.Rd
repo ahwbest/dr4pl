@@ -4,11 +4,7 @@
 \alias{FindHillBounds}
 \title{Compute the Hill bounds based on initial parameter estimates and data.}
 \usage{
-<<<<<<< HEAD
 FindHillBounds(x, y, retheta.init, level = 0.9999, use.Hessian = FALSE)
-=======
-FindHillBounds(x, y, retheta.init, level = 0.9999, use.Hessian = TRUE)
->>>>>>> 092f5fc00e98726902f0a3a96d0439cf36f5e9cb
 }
 \arguments{
 \item{x}{Vector of doses.}
