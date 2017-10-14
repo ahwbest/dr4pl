@@ -299,8 +299,6 @@ dr4pl.default <- function(dose,
 #'      - absolute: Absolute deviation loss 
 #'      - Huber: Huber's loss 
 #'      - Tukey: Tukey's biweight loss
-#' @param failure.message Indicator of whether a message indicating attainment of
-#' the Hill bounds and possible resolutions will be printed to the console.
 #' 
 #' @return List of final parameter estimates, name of robust estimation, loss value
 #' and so on.

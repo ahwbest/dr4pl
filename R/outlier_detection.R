@@ -18,6 +18,8 @@
 #' @export
 OutlierDetection <- function(residuals) {
   
+  n <- length(residuals)  # Number of observations
+  
   # We use the median absolute deviation (mad) as a robust estimator of scale 
   # instead of the estimator suggested in Motulsky and Brown (2006)
   scale.robust <- mad(residuals)  
