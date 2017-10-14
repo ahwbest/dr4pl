@@ -5,8 +5,7 @@
 #' 
 #' @param x Vector of doses.
 #' @param y Vector of responses.
-#' @param retheta.init Parameters of a 4PL model among which the EC50 or IC50
-#' parameter is in the log 10 dose scale.
+#' @param theta Parameters of a 4PL model.
 #' @param level Confidence level to be used in computing the Hill bounds.
 #' @param use.Hessian Indicator of whether the Hessian matrix (TRUE) or the
 #' gradient vector is used in confidence interval computation.
@@ -20,7 +19,7 @@
 #' parameter estimates. The half of a hessian matrix is used as a
 #' variance-covariance matrix. If matrix inversion of the variance-covariance matrix
 #' is infeasible, a variation of the method in Wang et al. (2010) is used. The
-#' parameters \code{level} and \code{use.Hessian} are only for simulation.
+#' parameter \code{level} is only for simulation.
 #' 
 #' @author Hyowon An
 #' 
@@ -29,24 +28,33 @@
 #' @references \insertRef{Higham2002}{dr4pl} \insertRef{Wang2010}{dr4pl}
 #' 
 #' @export
-FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = FALSE) {
+FindHillBounds <- function(x, y, theta,
+                           use.Hessian = TRUE,
+                           level = 0.9999) {
+  
+  # Check whether function arguments are appropriate.
+  if(length(x) != length(y)) {
+    
+    stop("The numbers of dose levels and responses should be the same.")
+  }
   
   n <- length(x)  # Number of observations in data
+  retheta <- ParmToLog(theta)
   
   ## Compute confidence intervals of the true parameters.
-  residuals <- ResidualLogIC50(retheta.init, x, y)
+  residuals <- ResidualLogIC50(retheta, x, y)
   
   ## When the Hessian matrix is used.
   if(use.Hessian) {
     
-    Hessian <- HessianLogIC50(retheta.init, x, y)
+    Hessian <- HessianLogIC50(retheta, x, y)
     
     # Obtain a positie definite approximation of the Hessian matrix
     C.hat <- nearPD(Hessian)$mat/2
   ## When the gradient vector is used.
   } else {
     
-    deriv <- DerivativeFLogIC50(retheta.init, x)
+    deriv <- DerivativeFLogIC50(retheta, x)
     
     C.hat <- nearPD(t(deriv)%*%deriv)$mat
   }
@@ -86,7 +94,7 @@ FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = FAL
     
     q.t <- qt(level, df = n - 4)  # Quantile of the t-distribution
     std.err <- RSS*sqrt(diag(vcov.mat))  # Standard error
-    ci <- cbind(retheta.init - q.t*std.err, retheta.init + q.t*std.err)  # Confidence intervals
+    ci <- cbind(retheta - q.t*std.err, retheta + q.t*std.err)  # Confidence intervals
     
     # Perform constrained optimization
     bounds.retheta.2 <- ci[2, ]
@@ -99,7 +107,7 @@ FindHillBounds <- function(x, y, retheta.init, level = 0.9999, use.Hessian = FAL
     levels.log10.x <- levels.log10.x[levels.log10.x != -Inf]
     bounds.retheta.2 <- c(min(levels.log10.x), max(levels.log10.x))
     
-    range.theta.3 <- c(0.01*retheta.init[3], 100*retheta.init[3])
+    range.theta.3 <- c(0.01*retheta[3], 100*retheta[3])
     bounds.retheta.3 <- c(min(range.theta.3), max(range.theta.3))
   }
   

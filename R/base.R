@@ -191,7 +191,7 @@ ErrFcn <- function(method.robust) {
     }
     if(length(x) != length(y)) {
       
-      stop("The numbers of dose values and response values should be the same.")
+      stop("The numbers of dose levels and responses should be the same.")
     }
 
     n <- length(y)

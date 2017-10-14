@@ -5,7 +5,7 @@
 \title{Private function to fit the 4PL model to dose-response data}
 \usage{
 dr4plEst(dose, response, init.parm, trend, method.init, method.optim,
-  method.robust)
+  method.robust, use.Hessian)
 }
 \arguments{
 \item{dose}{Vector of dose levels}
@@ -30,11 +30,13 @@ method. The default option is the Mead method.}
 is directly delivered to the \code{constrOptim} function provided in the
 "base" package of R.}
 
-\item{method.robust}{Method of robust estimation. Should be one of the followings.
-- NULL: Squares loss 
-- absolute: Absolute deviation loss 
-- Huber: Huber's loss 
-- Tukey: Tukey's biweight loss}
+\item{method.robust}{Parameter to select loss function for the robust estimation 
+method to be used to fit a model. The argument NULL indicates the sum of squares
+loss, "absolute" indicates the absolute deviation loss, "Huber" indicates Huber's
+loss and "Tukey" indicates Tukey's biweight loss.}
+
+\item{use.Hessian}{Indicator of whether the Hessian matrix (TRUE) or the
+gradient vector is used in the Hill bounds.}
 }
 \value{
 List of final parameter estimates, name of robust estimation, loss value

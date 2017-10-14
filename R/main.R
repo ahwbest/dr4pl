@@ -3,7 +3,6 @@
 #' 
 #' @docType package
 #' 
-#' 
 #' @import graphics 
 #' @import stats
 #' @import ggplot2
@@ -44,13 +43,14 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #' \code{method.robust}. This function argument is directly passed to the function
 #' \code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.
 #' @param method.robust Parameter to select loss function for the robust estimation 
-#' method to be used to fit a model. 
-#' - NULL: Sum of squares loss 
-#' - absolute: Absolute deviation loss 
-#' - Huber: Huber's loss 
-#' - Tukey: Tukey's biweight loss
+#' method to be used to fit a model. The argument NULL indicates the sum of squares
+#' loss, "absolute" indicates the absolute deviation loss, "Huber" indicates Huber's
+#' loss and "Tukey" indicates Tukey's biweight loss.
+#' @param use.Hessian Indicator of whether the Hessian matrix (TRUE) or the
+#' gradient vector is used in the Hill bounds.
 #' @param failure.message Indicator of whether a message indicating attainment of
-#' the Hill bounds and possible resolutions will be printed to the console.
+#' the Hill bounds and possible resolutions will be printed to the console (TRUE)
+#' or hidden (FALSE).
 #' @param ... Further arguments to be passed to \code{constrOptim}.
 #' 
 #' @return A 'dr4pl' object for which "confint", "gof", "print" and "summary"
@@ -64,7 +64,7 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #'
 #'   \code{method.init} specifies an initialization method to get initial parameter
 #'   estimates based on data. The currently supported initialization methods are
-#'   'logistic' and 'Mead'. For further details, see the vignette.
+#'   "logistic" and 'Mead'. For further details, see the vignette.
 #'
 #'   \code{method.optim} specifies an optimization method to be used in
 #'   "constrOptim" function. The currently supported optimization techniques
@@ -88,9 +88,10 @@ dr4pl.formula <- function(formula,
                           init.parm = NULL,
                           trend = "auto",
                           method.init = "Mead",
-                          method.optim = "Nelder-Mead",
                           method.robust = NULL,
-                          failure.message = TRUE,
+                          method.optim = "Nelder-Mead",
+                          use.Hessian = FALSE,
+                          failure.message = FALSE,
                           ...) {
   
   mf <- model.frame(formula = formula, data = data)
@@ -102,8 +103,10 @@ dr4pl.formula <- function(formula,
                        init.parm = init.parm,
                        trend = trend,
                        method.init = method.init,
-                       method.optim = method.optim,
                        method.robust = method.robust,
+                       method.optim = method.optim,
+                       use.Hessian = use.Hessian,
+                       failure.message = failure.message,
                        ...)
   
   obj$call <- match.call()
@@ -146,9 +149,10 @@ dr4pl.default <- function(dose,
                           init.parm = NULL,
                           trend = "auto",
                           method.init = "Mead",
-                          method.optim = "Nelder-Mead",
                           method.robust = NULL,
-                          failure.message = TRUE,
+                          method.optim = "Nelder-Mead",
+                          use.Hessian = FALSE,
+                          failure.message = FALSE,
                           ...) {
 
   types.trend <- c("auto", "decreasing", "increasing")
@@ -188,8 +192,9 @@ dr4pl.default <- function(dose,
                   init.parm = init.parm,
                   trend = trend,
                   method.init = method.init,
+                  method.robust = method.robust,
                   method.optim = method.optim,
-                  method.robust = method.robust)
+                  use.Hessian = use.Hessian)
 
   obj$call <- match.call()
   class(obj) <- "dr4pl"
@@ -206,8 +211,8 @@ dr4pl.default <- function(dose,
     obj$robust.plot <- plot(obj, indices.outlier = indices.outlier)
   }
   
-  obj.robust <- obj
-  
+  message.diagnosis <- NULL
+
   ### When convergence failure happens.
   if(obj$convergence == FALSE) {
 
@@ -232,8 +237,9 @@ dr4pl.default <- function(dose,
                            init.parm = init.parm,
                            trend = trend,
                            method.init = method.init,
+                           method.robust = method.robust.new,
                            method.optim = method.optim,
-                           method.robust = method.robust.new)
+                           use.Hessian = use.Hessian)
 
     obj.robust$call <- match.call()
     class(obj.robust) <- "dr4pl"
@@ -251,22 +257,30 @@ dr4pl.default <- function(dose,
     ## of a robust fit.
     if(obj.robust$convergence) {
       
-      cat(paste("The Hill bounds have been hit during optimization.\n",
-                "Please refer to \'robust.plot\' variable for diagnosis.\n\n", 
-                sep = ""))
+      message.diagnosis <- 
+      paste("The Hill bounds have been hit during optimization, but other robust ",
+            "estimation was succesful.\n",
+            "Please refer to \"dr4pl.robust\" variable for diagnosis.\n",
+            sep = "")
     } else {
       
-      cat(paste("The Hill bounds have been hit during optimization with ",
-                obj$method.robust, " and ", obj.robust$method.robust, " methods.\n",                
-                "Please try other initialization and robust estimation methods.", 
-                sep = ""))
+      message.diagnosis <- 
+      paste("The Hill bounds have been hit during optimization with ",
+            obj$method.robust, " and ", obj.robust$method.robust, " methods.\n",                
+            "Please try other initialization and robust estimation methods.\n", 
+            sep = "")
     }
     
-    # We have a robust fit but the original method failed.
-    obj.robust$convergence <- FALSE
+    obj$dr4pl.robust <- obj.robust
+    obj$message.diagnosis <- message.diagnosis
   }
   
-  return(obj.robust)
+  if(failure.message&&!is.null(message.diagnosis)) {
+    
+    cat(message.diagnosis)
+  }
+  
+  return(obj)
 }
 
 #' @title Private function to fit the 4PL model to dose-response data
@@ -289,16 +303,17 @@ dr4pl.default <- function(dose,
 #' while the option "increasing" will impose a restriction \eqn{\theta[3]>=0} in an 
 #' optimization process.
 #' @param method.init Method of obtaining initial values of the parameters.
-#'   Should be one of "logistic" for the logistic method or "Mead" for the Mead
-#'   method. The default option is the Mead method.
+#' Should be one of "logistic" for the logistic method or "Mead" for the Mead
+#' method. The default option is the Mead method.
+#' @param method.robust Parameter to select loss function for the robust estimation 
+#' method to be used to fit a model. The argument NULL indicates the sum of squares
+#' loss, "absolute" indicates the absolute deviation loss, "Huber" indicates Huber's
+#' loss and "Tukey" indicates Tukey's biweight loss.
 #' @param method.optim Method of optimization of the parameters. This argument
-#'   is directly delivered to the \code{constrOptim} function provided in the
-#'   "base" package of R.
-#' @param method.robust Method of robust estimation. Should be one of the followings.
-#'      - NULL: Squares loss 
-#'      - absolute: Absolute deviation loss 
-#'      - Huber: Huber's loss 
-#'      - Tukey: Tukey's biweight loss
+#' is directly delivered to the \code{constrOptim} function provided in the
+#' "base" package of R.
+#' @param use.Hessian Indicator of whether the Hessian matrix (TRUE) or the
+#' gradient vector is used in the Hill bounds.
 #' 
 #' @return List of final parameter estimates, name of robust estimation, loss value
 #' and so on.
@@ -307,7 +322,8 @@ dr4plEst <- function(dose, response,
                      trend,
                      method.init,
                      method.optim,
-                     method.robust) {
+                     method.robust,
+                     use.Hessian) {
   
   convergence <- TRUE
   x <- dose  # Vector of dose values
@@ -338,7 +354,7 @@ dr4plEst <- function(dose, response,
 
     constr.mat <- matrix(c(1, 0, 0, -1), nrow = 1, ncol = 4)
     constr.vec <- 0
-        
+    
     # Impose a constraint on the slope parameter based on the function argument
     # "trend".
     if(trend == "decreasing") {
@@ -376,7 +392,7 @@ dr4plEst <- function(dose, response,
     theta.init <- FindInitialParms(x, y, trend, method.init, method.robust)
     retheta.init <- ParmToLog(theta.init)
     
-    Hill.bounds <- FindHillBounds(x, y, retheta.init)
+    Hill.bounds <- FindHillBounds(x, y, theta.init, use.Hessian)
     
     constr.mat <- matrix(rbind(c(1, 0, 0, -1),
                                c(0, 1, 0, 0),
