@@ -5,7 +5,7 @@
 \title{Private function to fit the 4PL model to dose-response data}
 \usage{
 dr4plEst(dose, response, init.parm, trend, method.init, method.optim,
-  method.robust, use.Hessian)
+  method.robust, use.Hessian, level)
 }
 \arguments{
 \item{dose}{Vector of dose levels}
@@ -37,6 +37,8 @@ loss and "Tukey" indicates Tukey's biweight loss.}
 
 \item{use.Hessian}{Indicator of whether the Hessian matrix (TRUE) or the
 gradient vector is used in the Hill bounds.}
+
+\item{level}{Confidence level to be used in Hill bounds computation.}
 }
 \value{
 List of final parameter estimates, name of robust estimation, loss value

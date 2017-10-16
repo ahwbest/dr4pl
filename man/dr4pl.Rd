@@ -13,12 +13,12 @@ dr4pl(...)
 
 \method{dr4pl}{formula}(formula, data = list(), init.parm = NULL,
   trend = "auto", method.init = "Mead", method.robust = NULL,
-  method.optim = "Nelder-Mead", use.Hessian = FALSE,
+  method.optim = "Nelder-Mead", use.Hessian = FALSE, level = 0.9999,
   failure.message = FALSE, ...)
 
 \method{dr4pl}{default}(dose, response, init.parm = NULL, trend = "auto",
   method.init = "Mead", method.robust = NULL,
-  method.optim = "Nelder-Mead", use.Hessian = FALSE,
+  method.optim = "Nelder-Mead", use.Hessian = FALSE, level = 0.9999,
   failure.message = FALSE, ...)
 }
 \arguments{
@@ -54,6 +54,8 @@ loss and "Tukey" indicates Tukey's biweight loss.}
 
 \item{use.Hessian}{Indicator of whether the Hessian matrix (TRUE) or the
 gradient vector is used in the Hill bounds.}
+
+\item{level}{Confidence level to be used in Hill bounds computation.}
 
 \item{failure.message}{Indicator of whether a message indicating attainment of
 the Hill bounds and possible resolutions will be printed to the console (TRUE)

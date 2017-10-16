@@ -29,7 +29,7 @@
 #' 
 #' @export
 FindHillBounds <- function(x, y, theta,
-                           use.Hessian = TRUE,
+                           use.Hessian = FALSE,
                            level = 0.9999) {
   
   # Check whether function arguments are appropriate.

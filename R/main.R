@@ -9,7 +9,6 @@
 #' @import tensor
 #' @import Rdpack
 NULL
-
 #' @title Fitting 4 Parameter Logistic (4PL) models to dose-response data.
 #' 
 #' @description This function fits a 4PL model to dose-response data. Users can
@@ -48,6 +47,7 @@ dr4pl <- function(...) UseMethod("dr4pl")
 #' loss and "Tukey" indicates Tukey's biweight loss.
 #' @param use.Hessian Indicator of whether the Hessian matrix (TRUE) or the
 #' gradient vector is used in the Hill bounds.
+#' @param level Confidence level to be used in Hill bounds computation.
 #' @param failure.message Indicator of whether a message indicating attainment of
 #' the Hill bounds and possible resolutions will be printed to the console (TRUE)
 #' or hidden (FALSE).
@@ -91,6 +91,7 @@ dr4pl.formula <- function(formula,
                           method.robust = NULL,
                           method.optim = "Nelder-Mead",
                           use.Hessian = FALSE,
+                          level = 0.9999,
                           failure.message = FALSE,
                           ...) {
   
@@ -106,6 +107,7 @@ dr4pl.formula <- function(formula,
                        method.robust = method.robust,
                        method.optim = method.optim,
                        use.Hessian = use.Hessian,
+                       level = level,
                        failure.message = failure.message,
                        ...)
   
@@ -152,6 +154,7 @@ dr4pl.default <- function(dose,
                           method.robust = NULL,
                           method.optim = "Nelder-Mead",
                           use.Hessian = FALSE,
+                          level = 0.9999,
                           failure.message = FALSE,
                           ...) {
 
@@ -194,7 +197,8 @@ dr4pl.default <- function(dose,
                   method.init = method.init,
                   method.robust = method.robust,
                   method.optim = method.optim,
-                  use.Hessian = use.Hessian)
+                  use.Hessian = use.Hessian,
+                  level = level)
 
   obj$call <- match.call()
   class(obj) <- "dr4pl"
@@ -239,7 +243,8 @@ dr4pl.default <- function(dose,
                            method.init = method.init,
                            method.robust = method.robust.new,
                            method.optim = method.optim,
-                           use.Hessian = use.Hessian)
+                           use.Hessian = use.Hessian,
+                           level = level)
 
     obj.robust$call <- match.call()
     class(obj.robust) <- "dr4pl"
@@ -314,6 +319,7 @@ dr4pl.default <- function(dose,
 #' "base" package of R.
 #' @param use.Hessian Indicator of whether the Hessian matrix (TRUE) or the
 #' gradient vector is used in the Hill bounds.
+#' @param level Confidence level to be used in Hill bounds computation.
 #' 
 #' @return List of final parameter estimates, name of robust estimation, loss value
 #' and so on.
@@ -323,7 +329,8 @@ dr4plEst <- function(dose, response,
                      method.init,
                      method.optim,
                      method.robust,
-                     use.Hessian) {
+                     use.Hessian,
+                     level) {
   
   convergence <- TRUE
   x <- dose  # Vector of dose values
@@ -392,7 +399,7 @@ dr4plEst <- function(dose, response,
     theta.init <- FindInitialParms(x, y, trend, method.init, method.robust)
     retheta.init <- ParmToLog(theta.init)
     
-    Hill.bounds <- FindHillBounds(x, y, theta.init, use.Hessian)
+    Hill.bounds <- FindHillBounds(x, y, theta.init, use.Hessian, level)
     
     constr.mat <- matrix(rbind(c(1, 0, 0, -1),
                                c(0, 1, 0, 0),
