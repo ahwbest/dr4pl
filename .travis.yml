@@ -3,3 +3,12 @@
 language: R
 sudo: false
 cache: packages
+
+deploy:
+  provider: releases
+  api_key: "696b11c229aa329daa317bfb1104125d42cca231"
+  file: "dr4pl_1.0.0.tar.gz"
+  skip_cleanup: true
+  on:
+    tags: true
+
