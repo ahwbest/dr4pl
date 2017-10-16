@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 
 ##dr4pl
 
-The package dr4pl (Dose Response 4 Parameter Logisitic model) specializes in applying the 4 Parameter Logistic (4PL) model. The 4PL model has been recognized as a major tool to analyze the relationship between a dose and a response in pharmacological experiments. The package dr4pl is calibrated to only model decreasing curves. The goal of dr4pl is to bring a statistical method which is capable of handeling specific error cases of which other statistical packages produce errors. Examples of Dose Response datasets that will produce errors in other packages may be accessed by name once dr4pl is loaded and these data sets are under the names of drc_error_1, drc_error_2, drc_error_3, and drc_error_4. Along with these error data sets, this package also supplies 13 standard example data sets for the 4PL model under the name sample_data_1, sampel_data_2, etc. The package dr4pl also alows for the user to decide how their theta variable is approximated. The user may choose the default logistic model or use Mead's Method. Additionally, the user may decide between four loss functions to minimize: Squared, Absolute, Huber, or Tukey's biweight. Please attempt each of the loss functions and choose the best fit from plotting the dr4pl object.
+The package dr4pl (Dose Response 4 Parameter Logisitic model) specializes in applying the 4 Parameter Logistic (4PL) model. The 4PL model has been recognized as a major tool to analyze the relationship between a dose and a response in pharmacological experiments. The package dr4pl may be used to model increasing and decreasing curves. The goal of dr4pl is to bring a statistical method which is capable of handeling specific error cases of which other statistical packages produce errors. Examples of Dose Response datasets that will produce errors in other packages may be accessed by name once dr4pl is loaded and these data sets are under the names of drc_error_1, drc_error_2, drc_error_3, and drc_error_4. Along with these error data sets, this package also supplies 13 standard example data sets for the 4PL model under the name sample_data_1, sampel_data_2, etc. The package dr4pl also alows for the user to decide how their theta variable is approximated. The user may choose the default logistic model or use Mead's Method. Additionally, the user may decide between four loss functions to minimize: Squared, Absolute, Huber, or Tukey's biweight. Please attempt each of the loss functions and choose the best fit from plotting the dr4pl object.
 
 ## Installation
 
@@ -52,14 +52,15 @@ This is a basic example which shows you how to solve a common problem. This exam
 library(dr4pl)
 library(drc)
 a <- drc::drm(drc_error_1$Response~drc_error_1$Dose, fct = LL.4())
-summary(a)
 plot(a)
 ```
+
 ```{r example_solution}
 ## basic example code
 ## example requires the dr4pl package to be loaded
 b <- dr4pl(drc_error_1$Response~drc_error_1$Dose, method.robust = "Tukey") #Tukey's Biweight loss function estimates best for this particular data set
-summary(b)
 plot(b)
 ```
-
+```{r}
+summary(b)
+```

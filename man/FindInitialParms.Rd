@@ -2,17 +2,17 @@
 % Please edit documentation in R/initialization.R
 \name{FindInitialParms}
 \alias{FindInitialParms}
-\title{Find initial values for the 4PL model.}
+\title{Find initial parameter estimates for a 4PL model.}
 \usage{
-FindInitialParms(x, y, decline, method.init, method.robust)
+FindInitialParms(x, y, trend, method.init, method.robust)
 }
 \arguments{
 \item{x}{Vector of dose levels}
 
 \item{y}{Vector of responses}
 
-\item{decline}{Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-or growth curve \eqn{\theta[3]>0}. See \code{\link{dr4pl}} for detailed 
+\item{trend}{Indicator of whether the curve is a decreasing \eqn{\theta[3]<0} 
+or increasing curve \eqn{\theta[3]>0}. See \code{\link{dr4pl}} for detailed 
 explanation.}
 
 \item{method.init}{Method of obtaining initial values of the parameters. See
@@ -24,7 +24,8 @@ explanation.}
 }
 \value{
 Initial parameter estimates of a 4PL model in the order of
+'Upper asymptote', 'IC50', 'Slope' and 'Lower asymptote'.
 }
 \description{
-Find initial values for the 4PL model.
+Find initial parameter estimates for a 4PL model.
 }

@@ -4,6 +4,7 @@
 \name{dr4pl}
 \alias{dr4pl}
 \alias{dr4pl-package}
+\alias{dr4pl}
 \alias{dr4pl.formula}
 \alias{dr4pl.default}
 \title{Fitting 4 Parameter Logistic (4PL) models to dose-response data.}
@@ -11,12 +12,14 @@
 dr4pl(...)
 
 \method{dr4pl}{formula}(formula, data = list(), init.parm = NULL,
-  decline = "auto", method.init = "logistic",
-  method.optim = "Nelder-Mead", method.robust = NULL, ...)
+  trend = "auto", method.init = "Mead", method.robust = NULL,
+  method.optim = "Nelder-Mead", use.Hessian = FALSE, level = 0.9999,
+  failure.message = FALSE, ...)
 
-\method{dr4pl}{default}(dose, response, init.parm = NULL, decline = "auto",
-  method.init = "logistic", method.optim = "Nelder-Mead",
-  method.robust = NULL, ...)
+\method{dr4pl}{default}(dose, response, init.parm = NULL, trend = "auto",
+  method.init = "Mead", method.robust = NULL,
+  method.optim = "Nelder-Mead", use.Hessian = FALSE, level = 0.9999,
+  failure.message = FALSE, ...)
 }
 \arguments{
 \item{...}{Further arguments to be passed to \code{constrOptim}.}
@@ -29,27 +32,34 @@ column and dose values in second column.}
 
 \item{init.parm}{Vector of initial parameters to be optimized in the model.}
 
-\item{decline}{Indicator of whether the curve is a decline \eqn{\theta[3]<0} 
-or growth curve \eqn{\theta[3]>0}. The default is "auto" which indicates 
-that no restriction is imposed on the slope parameter \eqn{\theta[3]}. The
-option "decline" will impose a restriction \eqn{\theta[3]<=0} while the
-option "growth" will impose a restriction \eqn{\theta[3]>=0} in an optimization
-process.}
+\item{trend}{Indicator of whether a dose-response curve is a decreasing 
+\eqn{\theta[3]<0} or increasing curve \eqn{\theta[3]>0}. The default is "auto" 
+which indicates that the trend of the curve is automatically determined by
+data. The option "decreasing" will impose a restriction \eqn{\theta[3]<=0} 
+while the option "increasing" will impose a restriction \eqn{\theta[3]>=0} in an 
+optimization process.}
 
 \item{method.init}{Method of obtaining initial values of the parameters.
-If it is NULL, a default "logistic" regression method will be used. Assign
-"Mead" to use Mead's method.}
+If it is NULL, a default "Mead" method will be used. Assign
+"logistic" to use the logistic method.}
+
+\item{method.robust}{Parameter to select loss function for the robust estimation 
+method to be used to fit a model. The argument NULL indicates the sum of squares
+loss, "absolute" indicates the absolute deviation loss, "Huber" indicates Huber's
+loss and "Tukey" indicates Tukey's biweight loss.}
 
 \item{method.optim}{Method of optimization of the loss function specified by
 \code{method.robust}. This function argument is directly passed to the function
 \code{\link[stats]{constrOptim}} which is provided in the \pkg{base} package of R.}
 
-\item{method.robust}{Parameter to select loss function for the robust estimation 
-method to be used to fit a model. 
-- NULL: Sum of squares loss 
-- absolute: Absolute deviation loss 
-- Huber: Huber's loss 
-- Tukey: Tukey's biweight loss}
+\item{use.Hessian}{Indicator of whether the Hessian matrix (TRUE) or the
+gradient vector is used in the Hill bounds.}
+
+\item{level}{Confidence level to be used in Hill bounds computation.}
+
+\item{failure.message}{Indicator of whether a message indicating attainment of
+the Hill bounds and possible resolutions will be printed to the console (TRUE)
+or hidden (FALSE).}
 
 \item{dose}{Vector of dose levels}
 
@@ -76,7 +86,7 @@ This function fits a 4 parameter logistic (4PL) model to dose-response
 
   \code{method.init} specifies an initialization method to get initial parameter
   estimates based on data. The currently supported initialization methods are
-  'logistic' and 'Mead'. For further details, see the vignette.
+  "logistic" and 'Mead'. For further details, see the vignette.
 
   \code{method.optim} specifies an optimization method to be used in
   "constrOptim" function. The currently supported optimization techniques

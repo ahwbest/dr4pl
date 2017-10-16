@@ -18,9 +18,7 @@
 #' @details This function computes the confidence intervals of the parameters of the
 #'   4PL model based on the second order approximation to the Hessian matrix of the
 #'   loss function of the model. Please refer to Subsection 5.2.2 of 
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
+#'   Seber and Wild (1989).
 #'   
 #' @examples
 #'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
@@ -28,25 +26,65 @@
 #'
 #'   confint(obj.dr4pl, parm = parm, level = 0.95)
 #' 
+#' @references
+#' \insertRef{Seber1989}{dr4pl}
+#' 
 #' @export
-confint.dr4pl <- function(object, parm, level, ...) {
+confint.dr4pl <- function(object, parm, level = 0.95, ...) {
   
   x <- object$data$Dose
   y <- object$data$Response
-  theta <- object$parameters
-  hessian <- object$hessian
+  retheta <- ParmToLog(object$parameters)
+  C.hat <- HessianLogIC50(retheta, x, y)/2
   
   n <- object$sample.size  # Number of observations in data
-  f <- MeanResponse(x, theta)
+  f <- MeanResponseLogIC50(x, retheta)
   
-  C.hat.inv <- solve(hessian/2)
-  s <- sqrt(sum((y - f)^2)/(n - 4))
+  ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
+  vcov.mat <- try(solve(C.hat), silent = TRUE)  # Inverse matrix
+  
+  if(inherits(vcov.mat, "try-error")) {
+    
+    vcov.Chol <- try(chol(C.hat, silent = TRUE))  # Cholesky decomposition
+    
+    if(inherits(vcov.Chol, "try-error")) {
+      
+      # If matrix inversion is infeasible, use an approximated positve definite
+      # Hessian matrix to obtain the variance-covariance matrix.
+      ind.mat.inv <- FALSE
+      C.hat.pd <- nearPD(C.hat)$mat/2
+      vcov.mat <- solve(C.hat.pd)
+      
+    } else {
+      
+      vcov.mat <- chol2inv(vcov.Chol)
+    }
+  }
+  
+  if(!ind.mat.inv) {
+    
+    print("The hessian matrix is singular, so an approximated positive definite
+          hessian matrix is used.")
+  }
+  
+  RSS <- sqrt(sum((y - f)^2)/(n - 4))
   
   q.t <- qt(1 - (1 - level)/2, df = n - 4)
-  std.err <- s*sqrt(diag(C.hat.inv))  # Standard error
-  ci <- cbind(theta - q.t*std.err, theta + q.t*std.err)
+  std.err <- RSS*sqrt(diag(vcov.mat))  # Standard error
+  ci.table <- cbind(retheta - q.t*std.err, retheta + q.t*std.err)
+  ci.table[2, ] <- 10^ci.table[2, ]
   
-  return(ci)
+  colnames(ci.table) <- c(paste(100*(1 - level)/2, "%"),
+                          paste(100*(1 - (1 - level)/2), "%"))
+  if(retheta[3]<=0) {
+    
+    row.names(ci.table) <- c("UpperLimit", "IC50", "Slope", "LowerLimit")
+  } else {
+    
+    row.names(ci.table) <- c("UpperLimit", "EC50", "Slope", "LowerLimit")
+  }
+  
+  return(ci.table)
 }
 
 #' @title Obtain coefficients of a 4PL model
@@ -82,12 +120,9 @@ coef.dr4pl <- function(object, ...) {
 #'   Chi squared distributions with the (n - 4) degrees of freedom where n is the
 #'   number of observations and 4 is the number of parameters in the 4PL model. For
 #'   detailed explanation of the method, please refer to Subsection 2.1.5 of
-#'   Seber, G. A. F. and Wild, C. J. (1989). Nonlinear Regression. Wiley Series in
-#'   Probability and Mathematical Statistics: Probability and Mathematical
-#'   Statistics. John Wiley & Sons, Inc., New York.
+#'   Seber and Wild (1989).
 #'
-#' @references
-#' \insertRef{Seber1989}{dr4pl}
+#' @references \insertRef{Seber1989}{dr4pl}
 #'
 #' @export
 gof.dr4pl <- function(object) {
@@ -194,6 +229,9 @@ IC <- function(object, inhib.percent) {
 #' @name plot.dr4pl
 #' 
 #' @param x `dr4pl' object whose data and mean response function will be plotted.
+#' @param type.curve Indicator of the type of a dose-response curve. "all" indicates
+#' that data and a curve will be plotted while "data" indicates that only data
+#' will be plotted.
 #' @param text.title Character string for the title of a plot with a default set to 
 #'   "Dose response plot".
 #' @param text.x Character string for the x-axis of the plot with a default set to 
@@ -243,8 +281,11 @@ IC <- function(object, inhib.percent) {
 #'      text.x = "Concentration", 
 #'      text.y = "Count")
 #' 
+#' @author Hyowon An, Justin T. Landis and Aubrey G. Bailey
+#' 
 #' @export
 plot.dr4pl <- function(x,
+                       type.curve = "all",
                        text.title = "Dose-response plot",
                        text.x = "Dose",
                        text.y = "Response",
@@ -280,9 +321,12 @@ plot.dr4pl <- function(x,
   
   a <- ggplot2::ggplot(aes(x = x$data$Dose, y = x$data$Response), data = x$data)
   
-  a <- a + ggplot2::stat_function(fun = MeanResponse,
-                                  args = list(theta = x$parameters),
-                                  size = 1.2)
+  if(type.curve == "all") {
+    
+    a <- a + ggplot2::stat_function(fun = MeanResponse,
+                                    args = list(theta = x$parameters),
+                                    size = 1.2)
+  }
   
   a <- a + ggplot2::geom_point(size = I(5), alpha = I(0.8), color = color.vec,
                                shape = shape.vec)
@@ -295,10 +339,21 @@ plot.dr4pl <- function(x,
   a <- a + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 16))
   a <- a + ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
   a <- a + ggplot2::theme(panel.grid.major = ggplot2::element_blank())
-  if(!is.null(breaks.x)) { a <- a + ggplot2::scale_x_log10(breaks = breaks.x)
-  } else { a <- a + ggplot2::scale_x_log10() }
-  if(!is.null(breaks.y)) { a <- a + ggplot2::scale_y_continuous(breaks = breaks.y)
-  } else { a <- a + ggplot2:: scale_y_continuous() }
+  
+  if(!is.null(breaks.x)) { 
+    
+    a <- a + ggplot2::scale_x_log10(breaks = breaks.x)
+  } else { 
+    
+    a <- a + ggplot2::scale_x_log10()
+  }
+  if(!is.null(breaks.y)) {
+    
+    a <- a + ggplot2::scale_y_continuous(breaks = breaks.y)
+  } else { 
+    
+    a <- a + ggplot2:: scale_y_continuous()
+  }
   
   a <- a + ggplot2::theme_bw()
   
@@ -354,14 +409,13 @@ print.summary.dr4pl <- function(object, ...) {
 #' @export
 summary.dr4pl <- function(object, ...) {
   
-  TAB <- cbind(Estimate = object$parameters,
-               StdErr = object$std.err,
-               t.value = object$t.value,
-               p.value = object$p.value)
+  ci <- confint(object)
+  
+  TAB <- cbind(Estimate = object$parameters, ci)
   
   res <- list(call = object$call,
               coefficients = TAB)
   
   class(res) <- "summary.dr4pl"
-  res
+  return(res)
 }

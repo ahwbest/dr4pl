@@ -7,14 +7,14 @@
 Residual(theta, x, y)
 }
 \arguments{
-\item{theta}{Parameters}
+\item{theta}{Parameters of a 4PL model}
 
-\item{x}{Doses}
+\item{x}{Vector of doses}
 
-\item{y}{Responses}
+\item{y}{Vector of responses}
 }
 \value{
-Residuals
+Vector of residuals
 }
 \description{
 Compute residuals.

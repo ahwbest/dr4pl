@@ -5,11 +5,11 @@
 \title{Compute the derivative values of the mean response function with respect to
   reparametrized parameters including the log 10 IC50 parameter.}
 \usage{
-DerivativeFLogIC50(theta.re, x)
+DerivativeFLogIC50(retheta, x)
 }
 \arguments{
-\item{theta.re}{Parameters obtained from the original parameters by
-\code{theta.re[2] <- log10(theta[2])}}
+\item{retheta}{Parameters obtained from the original parameters by
+\code{retheta[2] <- log10(theta[2])}}
 
 \item{x}{Dose levels}
 }
