@@ -173,15 +173,15 @@ values
 a <- dr4pl(count~time, data = chickweed0, trend = "increasing")
 plot(a, text.x = "Time", text.y = "Count", text.title = "drc chickweed0 plot", breaks.x = c(25, 100, 175, 250))
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------
 a <- dr4pl(Response~Dose, data = drc_error_2)
 plot(a, text.title = "Trend is default")
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------
 a <- dr4pl(Response~Dose, data = drc_error_2, trend = "decreasing", method.optim = "CG")
 plot(a, text.title = "Trend forced to decrease")
 
-## ------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------
 a <- dr4pl(Response~Dose, data = drc_error_2, trend = "increasing", method.robust = "Tukey", method.optim = "SANN")
 plot(a, text.title = "Trend forced to increase")
 
