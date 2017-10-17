@@ -455,7 +455,7 @@ dr4plEst <- function(dose, response,
   
   # Data frame consisting of doses and responses
   data.dr4pl <- data.frame(Dose = dose, Response = response)
-  
+
   name.robust <- method.robust
   if(is.null(method.robust)) {
     
@@ -463,10 +463,10 @@ dr4plEst <- function(dose, response,
   }
   
   list(convergence = convergence,
-       sample.size = n,
        data = data.dr4pl,
-       parameters = theta,
-       loss.value = loss,
        hessian = hessian,
-       method.robust = name.robust)
+       loss.value = loss,
+       method.robust = name.robust,
+       parameters = theta,
+       sample.size = n)
 }

@@ -55,7 +55,6 @@ LogToParm <- function(retheta) {
 #' @param theta Parameters of the 4PL model
 #'
 #' @return Predicted response values.
-#' @export
 MeanResponse <- function(x, theta) {
 
   ### Check whether function arguments are appropriate
@@ -80,7 +79,6 @@ MeanResponse <- function(x, theta) {
 #'   transformed
 #'
 #' @return Predicted response values.
-#' @export
 MeanResponseLogIC50 <- function(x, retheta) {
   
   ### Check whether function arguments are appropriate
@@ -229,6 +227,11 @@ DerivativeF <- function(theta, x) {
   deriv.f.theta.3 <- -(theta.4 - theta.1)*log(x/theta.2)*eta/(1 + eta)^2
   deriv.f.theta.4 <- 1/(1 + eta)
   
+  deriv.f.theta.1[eta == Inf] <- 1
+  deriv.f.theta.2[eta == Inf] <- 0
+  deriv.f.theta.3[eta == Inf] <- 0
+  deriv.f.theta.4[eta == Inf] <- 0
+  
   # Handle the cases when dose values are zeros
   if(theta.3 > 0) {
     
@@ -310,7 +313,6 @@ GradientSquaredLossLogIC50 <- function(retheta, x, y) {
 #' @param y Response
 #'
 #' @return Hessian matrix of the sum-of-squares loss function.
-#' @export
 Hessian <- function(theta, x, y) {
 
   n <- length(x)  # Number of observations
@@ -349,16 +351,10 @@ Hessian <- function(theta, x, y) {
 
   second.deriv.f <- (second.deriv.f + aperm(second.deriv.f, c(2, 1, 3)))/2
   
-  # Substitue limits for second derivatives when dose levels are zero
-  if(theta.3 <= 0) {
-    
-    second.deriv.f[, , x == 0|eta == Inf] <- 0
-  } else if(theta.3 > 0) {
-    
-    second.deriv.f[, , x == 0|eta == 0] <- 0
-    second.deriv.f[1, 3, x == 0|eta == 0] <- 0
-    second.deriv.f[3, 3, x == 0|eta == 0] <- -(theta.4 - theta.1)/theta.3
-  }
+  # Substitute limits for second derivatives when eta are infinite
+  second.deriv.f[, , eta == 0] <- 0
+  second.deriv.f[3, 3, eta == 0] <- -(theta.4 - theta.1)/theta.3
+  second.deriv.f[, , eta == Inf] <- 0
   
   deriv.f <- DerivativeF(theta, x)
   residuals <- Residual(theta, x, y)
@@ -379,7 +375,6 @@ Hessian <- function(theta, x, y) {
 #'
 #' @return Hessian matrix of the sum-of-squares loss function in terms of
 #' reparameterized parameters.
-#' @export
 HessianLogIC50 <- function(retheta, x, y) {
   
   theta <- LogToParm(retheta)  # Original parameters

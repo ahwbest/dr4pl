@@ -1,8 +1,8 @@
 
 #' @title Fit a 4 parameter logistic (4PL) model to dose-response data.
 #' 
-#' @description Compute the confidence intervals of parameter estimates of a fitted
-#'   model.
+#' @description Compute the approximate confidence intervals of the parameters of a 
+#' 4PL model based on the asymptotic normality of least squares estimators.
 #'   
 #' @name confint.dr4pl
 #'   
@@ -15,27 +15,46 @@
 #'   parameter and each column represents the lower and upper bounds of the
 #'   confidence intervals of the corresponding parameters.
 #'   
-#' @details This function computes the confidence intervals of the parameters of the
-#'   4PL model based on the second order approximation to the Hessian matrix of the
-#'   loss function of the model. Please refer to Subsection 5.2.2 of 
-#'   Seber and Wild (1989).
+#' @details This function computes the approximate confidence intervals of the
+#' true parameters of a 4PL model based on the asymptotic normality of the least
+#' squares estimators in nonlinear regression. The Hessian matrix is used to
+#' obtain the second order approximation to the sum-of-squares loss function.
+#' Please refer to Subsection 5.2.2 of Seber and Wild (1989).
 #'   
 #' @examples
-#'   obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)
-#'   parm <- obj.dr4pl$parameters
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)  # Fit a 4PL model to data
 #'
-#'   confint(obj.dr4pl, parm = parm, level = 0.95)
+#' confint(obj.dr4pl)  # Print conventional 95% confidence intervals
+#' confint(obj.dr4pl, level = 0.99)  # Print 99%confidence intervals
+#' 
+#' theta <- coef(obj.dr4pl)
+#' theta[4] <- 0  # Set the lower asymptote to be zero
+#' confint(obj.dr4pl, parm = theta)  # Use our dr4pl object but different parameter estimates
 #' 
 #' @references
 #' \insertRef{Seber1989}{dr4pl}
 #' 
 #' @export
-confint.dr4pl <- function(object, parm, level = 0.95, ...) {
+confint.dr4pl <- function(object, parm = NULL, level = 0.95, ...) {
   
   x <- object$data$Dose
   y <- object$data$Response
-  retheta <- ParmToLog(object$parameters)
-  C.hat <- HessianLogIC50(retheta, x, y)/2
+  
+  # If parameter estimates are not provided by a user, then proceed with the
+  # estimates stored in the input dr4pl object.
+  if(is.null(parm)) {
+    
+    retheta <- ParmToLog(object$parameters)
+  } else if(length(parm)!=4||parm[2]<=0) {
+    
+    stop("Input parameter estimates should be of length 4 and the IC50 estimate
+         should be nonnegative.")
+  } else {
+    
+    retheta <- ParmToLog(parm)
+  }
+  
+  C.hat <- HessianLogIC50(retheta, x, y)/2  # Estimated variance-covariance matrix
   
   n <- object$sample.size  # Number of observations in data
   f <- MeanResponseLogIC50(x, retheta)
@@ -43,14 +62,15 @@ confint.dr4pl <- function(object, parm, level = 0.95, ...) {
   ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
   vcov.mat <- try(solve(C.hat), silent = TRUE)  # Inverse matrix
   
+  # If matrix inversion is infeasible, proceed with the Cholesky decomposition.
   if(inherits(vcov.mat, "try-error")) {
     
     vcov.Chol <- try(chol(C.hat, silent = TRUE))  # Cholesky decomposition
     
+    # If the Cholesky decomposition is infeasible, use an approximated positve
+    # definite Hessian matrix to obtain the variance-covariance matrix.
     if(inherits(vcov.Chol, "try-error")) {
       
-      # If matrix inversion is infeasible, use an approximated positve definite
-      # Hessian matrix to obtain the variance-covariance matrix.
       ind.mat.inv <- FALSE
       C.hat.pd <- nearPD(C.hat)$mat/2
       vcov.mat <- solve(C.hat.pd)
@@ -94,9 +114,19 @@ confint.dr4pl <- function(object, parm, level = 0.95, ...) {
 #' are returned.
 #' 
 #' @name coef.dr4pl
+#' 
 #' @param object A 'dr4pl' object
 #' @param ... arguments passed to coef
+#' 
 #' @return A vector of parameters
+#' 
+#' @examples
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_2)  # Fit a 4PL model to data
+#' coef(obj.dr4pl)  # Print parameter estimates
+#' 
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_3)  # Fit a 4PL model to data
+#' coef(obj.dr4pl)  # Print parameter estimates
+#' 
 #' @export
 coef.dr4pl <- function(object, ...) {
   
@@ -190,9 +220,12 @@ gof.dr4pl <- function(object) {
 #' @examples 
 #' data.test <- data.frame(x = c(0.0001, 0.001, 0.01, 0.1, 1),
 #'                         y = c(10, 9, 5, 1, 0))
-#' dr4pl.test <- dr4pl(y ~ x,
-#'                     data = data.test)
-#' IC(dr4pl.test, inhib.percent = c(10, 90))
+#' obj.dr4pl <- dr4pl(y ~ x,
+#'                    data = data.test)
+#' IC(obj.dr4pl, inhib.percent = c(10, 90))
+#' 
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_4)  # Fit a 4PL model to data
+#' IC(obj.dr4pl, inhib.percent = c(10, 50, 90))
 #' 
 #' @return IC values at the inhibited percentages provided by the argument 
 #' \code{inhib.percent}
@@ -249,7 +282,6 @@ IC <- function(object, inhib.percent) {
 #' plot(ryegrass.dr4pl)
 #' 
 #' ##Able to further edit plots
-#' library(ggplot2)
 #' ryegrass.dr4pl <- dr4pl::dr4pl(Response ~ Dose, 
 #'                                data = sample_data_1, 
 #'                                text.title = "Sample Data Plot")
@@ -273,7 +305,6 @@ IC <- function(object, inhib.percent) {
 #' 
 #' ##Change the labels of the x and y axis to your need
 #' 
-#' library(drc)  #example requires decontaminants dataset from drc package.
 #' d <- subset(decontaminants, group %in% "hpc")
 #' e <- dr4pl(count~conc, data = d)
 #' plot(e, 
@@ -371,11 +402,14 @@ plot.dr4pl <- function(x,
 #'
 #' @param object a dr4pl object to be printed
 #' @param ... all normally printable arguments
+#' 
 #' @examples
 #' ryegrass.dr4pl <- dr4pl(Response ~ Dose,
-#'                       data = sample_data_1)
-#'
+#'                         data = sample_data_1)
 #' print(ryegrass.dr4pl)
+#' 
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_5)
+#' print(obj.dr4pl)
 print.dr4pl <- function(object, ...) {
   
   cat("Call:\n")
@@ -386,8 +420,16 @@ print.dr4pl <- function(object, ...) {
 }
 
 #' Print the dr4pl object summary to screen.
+#' 
 #' @param object a dr4pl object to be summarized
 #' @param ... all normally printable arguments
+#' 
+#' @examples
+#' ryegrass.dr4pl <- dr4pl(rootl ~ conc, data = ryegrass)
+#' print(summary(ryegrass.dr4pl))
+#' 
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_7)
+#' print(summary(obj.dr4pl))
 print.summary.dr4pl <- function(object, ...) {
   
   cat("Call:\n")
@@ -396,6 +438,92 @@ print.summary.dr4pl <- function(object, ...) {
   
   printCoefmat(object$coefficients, P.values = TRUE, has.Pvalue = TRUE)
 }
+
+
+#' @title Obtain the variance-covariance matrix of the parameter estimators of a
+#' 4PL model. 
+#' 
+#' @description This function obtains the variance-covariance matrix of the parameter
+#' estimators of a 4PL model. The variance-covariance matrix returned by this
+#' function can be used to compute the standard errors and confidence intervals
+#' for statistical inference.
+#'   
+#' @name vcov.dr4pl
+#'   
+#' @param object An object of the dr4pl class
+#' 
+#' @return The variance-covariance matrix of the parameter estimators of a 4PL
+#' model whose columns are in the order of the upper asymptote, IC50, slope and lower
+#' asymptote from left to right and whose rows are in the same order.
+#'   
+#' @details This function obtains the variance-covariance matrix of the parameter
+#' estimators of a 4PL model. The Hessian matrix is used to obtain the second order
+#' approximation to the sum-of-squares loss function, and then the standard errors 
+#' are computed as the square roots of the half of the Hessian matrix. Please refer
+#' to Subsection 5.2.2 of Seber and Wild (1989).
+#'   
+#' @examples
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_1)  # Fit a 4PL model to data
+#' vcov(obj.dr4pl)  # Variance-covariance matrix of the parameters
+#' 
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_2)  # Fit a 4PL model to data
+#' vcov(obj.dr4pl)  # Variance-covariance matrix of the parameters
+#' 
+#' @references
+#' \insertRef{Seber1989}{dr4pl}
+#' 
+#' @export
+vcov.dr4pl <- function(object) {
+  
+  x <- object$data$Dose
+  y <- object$data$Response
+  retheta <- ParmToLog(object$parameters)
+
+  C.hat <- HessianLogIC50(retheta, x, y)/2  # Estimated variance-covariance matrix
+  
+  n <- object$sample.size  # Number of observations in data
+  f <- MeanResponseLogIC50(x, retheta)
+  
+  ind.mat.inv <- TRUE  # TRUE if matrix inversion is successful, FALSE otherwise
+  vcov.mat <- try(solve(C.hat), silent = TRUE)  # Inverse matrix
+  
+  # If matrix inversion is infeasible, proceed with the Cholesky decomposition.
+  if(inherits(vcov.mat, "try-error")) {
+    
+    vcov.Chol <- try(chol(C.hat, silent = TRUE))  # Cholesky decomposition
+    
+    # If the Cholesky decomposition is infeasible, use an approximated positve
+    # definite Hessian matrix to obtain the variance-covariance matrix.
+    if(inherits(vcov.Chol, "try-error")) {
+      
+      ind.mat.inv <- FALSE
+      C.hat.pd <- nearPD(C.hat)$mat/2
+      vcov.mat <- solve(C.hat.pd)
+      
+    } else {
+      
+      vcov.mat <- chol2inv(vcov.Chol)
+    }
+  }
+  
+  if(!ind.mat.inv) {
+    
+    print("The hessian matrix is singular, so an approximated positive definite
+          hessian matrix is used.")
+  }
+  
+  colnames(vcov.mat) <- c("UpperLimit", "IC50", "Slope", "LowerLimit")
+  if(retheta[3]<=0) {
+    
+    row.names(vcov.mat) <- c("UpperLimit", "IC50", "Slope", "LowerLimit")
+  } else {
+    
+    row.names(vcov.mat) <- c("UpperLimit", "EC50", "Slope", "LowerLimit")
+  }
+  
+  return(vcov.mat)
+}
+
 
 #' @title summary
 #'
@@ -406,12 +534,24 @@ print.summary.dr4pl <- function(object, ...) {
 #' @param object a dr4pl object to be summarized
 #' @param ... all normal summary arguments
 #' 
+#' @examples
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_5)  # Fit a 4PL model to data
+#' summary(obj.dr4pl)
+#' 
+#' obj.dr4pl <- dr4pl(Response ~ Dose, data = sample_data_6)  # Fit a 4PL model to data
+#' summary(obj.dr4pl)
+#' 
 #' @export
 summary.dr4pl <- function(object, ...) {
   
+  std.err <- sqrt(diag(vcov(object)))
+  t.stats <- coef(object)/std.err
   ci <- confint(object)
   
-  TAB <- cbind(Estimate = object$parameters, ci)
+  TAB <- data.frame(Estimate = object$parameters,
+               StdErr = std.err,
+               t.value = t.stats,
+               p.value = 2*pt(-abs(t.stats), df = object$sample.size - 4))
   
   res <- list(call = object$call,
               coefficients = TAB)
